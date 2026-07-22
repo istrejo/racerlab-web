@@ -1,0 +1,61 @@
+schema: spec-driven
+
+context: |
+  Application: RacerLab Web, an Angular 22 private workshop operations frontend.
+  Architecture: standalone Angular components with lazy feature routes, core infrastructure, and shared UI.
+  API boundary: typed REST services use API_URL; backend OpenAPI/Swagger is the contract authority.
+  UI: Tailwind CSS; accessible, keyboard-operable UI meeting WCAG AA and AXE checks.
+  State/forms: signals and Signal Forms where practical; Reactive Forms when needed.
+  TypeScript: strict project conventions with no implicit returns and isolated modules.
+
+strict_tdd: true
+
+testing:
+  runner:
+    framework: Vitest 4
+    command: npm test
+    angular_builder: "@angular/build:unit-test"
+  layers:
+    unit: available
+    integration: unavailable
+    e2e: unavailable
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: false
+      command: ""
+    type_checker:
+      available: true
+      command: npm run build
+    formatter:
+      available: true
+      command: npx prettier --check .
+
+rules:
+  proposal:
+    - State user and workshop-operations outcomes, API contract dependencies, and explicit non-goals.
+    - Include a rollback plan for risky UI, routing, or API-integration changes.
+  specs:
+    - Use RFC 2119 terms and Given/When/Then scenarios.
+    - Keep backend business rules and data writes out of the frontend specification.
+    - Treat backend Swagger/OpenAPI as the request, response, enum, and error contract authority.
+  design:
+    - Preserve standalone components, signals, lazy feature routes, and the core/shared/features boundaries.
+    - Document accessibility, keyboard, focus-management, and error-state behavior.
+  tasks:
+    - Group tasks by phase and keep each task independently verifiable.
+    - Include focused Vitest coverage for critical components, forms, services, guards, and interceptors.
+  apply:
+    guidelines:
+      - Follow existing Angular 22, strict TypeScript, Tailwind, and accessibility conventions.
+      - Use API_URL-backed typed services; never access Supabase directly for business operations.
+    tdd: true
+    test_command: npm test
+  verify:
+    test_command: npm test
+    build_command: npm run build
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive delta specifications.
