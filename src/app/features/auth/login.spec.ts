@@ -97,16 +97,14 @@ describe('LoginComponent', () => {
     expect(navigateByUrl).toHaveBeenCalledWith('/workshops/new');
   });
 
-  it('shows a visible workshop creation action on the login screen', () => {
+  it('shows a visible signup action on the login screen', () => {
     const fixture = TestBed.createComponent(LoginComponent);
     fixture.detectChanges();
 
     const links = Array.from(
       fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLAnchorElement>,
     );
-    const link = links.find((candidate) =>
-      candidate.textContent?.includes('Crear un workshop'),
-    );
+    const link = links.find((candidate) => candidate.textContent?.includes('Crear cuenta'));
 
     expect(link).toBeDefined();
   });

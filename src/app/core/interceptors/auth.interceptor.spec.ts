@@ -41,6 +41,14 @@ describe('authInterceptor', () => {
     request.flush({ accessToken: 'refreshed-token', tokenType: 'Bearer' });
   });
 
+  it('does not attach a bearer token to public signup', () => {
+    TestBed.inject(HttpClient).post('https://api.racerlab.test/api/auth/signup', {}).subscribe();
+
+    const request = http.expectOne('https://api.racerlab.test/api/auth/signup');
+    expect(request.request.headers.has('Authorization')).toBe(false);
+    request.flush({ accessToken: 'signup-token', tokenType: 'Bearer' });
+  });
+
   it('attaches a bearer token to the protected password-change endpoint', () => {
     TestBed.inject(HttpClient)
       .post('https://api.racerlab.test/api/auth/change-password', {})

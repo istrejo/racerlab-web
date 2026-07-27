@@ -8,6 +8,12 @@ export type LoginRequest = {
   password: string;
 };
 
+export type SignupRequest = {
+  name: string;
+  email: string;
+  password: string;
+};
+
 export type UserRole =
   'OWNER' | 'ADMIN' | 'MANAGER' | 'ADVISOR' | 'TECHNICIAN' | 'INVENTORY_MANAGER';
 
@@ -49,6 +55,17 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<void> {
     return this.http
       .post<AuthTokenResponse>(`${this.apiUrl}/auth/login`, credentials, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((response) => this.storeAccessToken(response)),
+        map(() => undefined),
+      );
+  }
+
+  signup(identity: SignupRequest): Observable<void> {
+    return this.http
+      .post<AuthTokenResponse>(`${this.apiUrl}/auth/signup`, identity, {
         withCredentials: true,
       })
       .pipe(

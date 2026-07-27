@@ -7,6 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const apiUrl = inject(API_URL);
   const accessToken = inject(AuthService).getAccessToken();
   const isPublicAuthRequest = [
+    `${apiUrl}/auth/signup`,
     `${apiUrl}/auth/login`,
     `${apiUrl}/auth/refresh`,
     `${apiUrl}/auth/logout`,

@@ -71,8 +71,4 @@ export class LoginComponent {
 
     return '/dashboard';
   }
-
-  test(): void {
-    console.log('test');
-  }
 }

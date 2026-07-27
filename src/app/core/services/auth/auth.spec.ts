@@ -52,6 +52,34 @@ describe('AuthService', () => {
     expect(auth.getAccessToken()).toBe('access-token');
   });
 
+  it('creates an identity, stores its neutral session and omits password confirmation', () => {
+    auth
+      .signup({
+        name: 'Juan Pérez',
+        email: 'juan@example.com',
+        password: 'password123',
+      })
+      .subscribe();
+
+    const request = http.expectOne('https://api.racerlab.test/api/auth/signup');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({
+      name: 'Juan Pérez',
+      email: 'juan@example.com',
+      password: 'password123',
+    });
+    request.flush({
+      ...response,
+      activeWorkshop: null,
+      requiresWorkshopSelection: true,
+    });
+
+    expect(auth.isAuthenticated()).toBe(true);
+    expect(auth.hasActiveWorkshop()).toBe(false);
+    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/new');
+  });
+
   it('restores an access token from the refresh cookie', async () => {
     const restoration = auth.restoreSession();
     const request = http.expectOne('https://api.racerlab.test/api/auth/refresh');
