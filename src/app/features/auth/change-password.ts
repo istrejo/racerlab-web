@@ -1,0 +1,129 @@
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '@core/services/auth/auth';
+
+@Component({
+  selector: 'app-change-password',
+  imports: [ReactiveFormsModule],
+  template: `
+    <main class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-8 text-slate-900">
+      <section
+        class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10"
+        aria-labelledby="change-password-title"
+      >
+        <p class="text-sm font-semibold text-[#F97316]">Primer acceso</p>
+        <h1 id="change-password-title" class="mt-2 text-2xl font-bold">Creá tu contraseña</h1>
+        <p class="mt-2 text-sm text-slate-600">
+          La clave temporal debe reemplazarse antes de usar Racer Lab.
+        </p>
+
+        @if (serverError()) {
+          <p
+            class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+            role="alert"
+          >
+            {{ serverError() }}
+          </p>
+        }
+
+        <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div>
+            <label class="mb-2 block text-sm font-semibold" for="current-password">
+              Contraseña temporal
+            </label>
+            <input
+              class="h-11 w-full rounded-lg border border-slate-300 px-3 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+              autocomplete="current-password"
+              formControlName="currentPassword"
+              id="current-password"
+              type="password"
+            />
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-semibold" for="new-password">
+              Nueva contraseña
+            </label>
+            <input
+              class="h-11 w-full rounded-lg border border-slate-300 px-3 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+              aria-describedby="password-help"
+              autocomplete="new-password"
+              formControlName="newPassword"
+              id="new-password"
+              type="password"
+            />
+            <p id="password-help" class="mt-2 text-xs text-slate-500">
+              Debe tener entre 8 y 128 caracteres y ser distinta de la clave temporal.
+            </p>
+          </div>
+          <div>
+            <label class="mb-2 block text-sm font-semibold" for="confirm-password">
+              Confirmar nueva contraseña
+            </label>
+            <input
+              class="h-11 w-full rounded-lg border border-slate-300 px-3 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+              autocomplete="new-password"
+              formControlName="confirmation"
+              id="confirm-password"
+              type="password"
+            />
+          </div>
+
+          @if (form.touched && !passwordsMatch()) {
+            <p class="text-sm text-red-700" role="alert">Las contraseñas nuevas no coinciden.</p>
+          }
+
+          <button
+            class="h-11 w-full rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
+            [disabled]="pending()"
+            type="submit"
+          >
+            {{ pending() ? 'Guardando...' : 'Guardar contraseña y continuar' }}
+          </button>
+        </form>
+      </section>
+    </main>
+  `,
+})
+export class ChangePasswordComponent {
+  private readonly auth = inject(AuthService);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
+
+  readonly pending = signal(false);
+  readonly serverError = signal<string | null>(null);
+  readonly form = this.formBuilder.nonNullable.group({
+    currentPassword: [
+      '',
+      [Validators.required, Validators.minLength(8), Validators.maxLength(128)],
+    ],
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
+    confirmation: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
+  });
+
+  passwordsMatch(): boolean {
+    return this.form.controls.newPassword.value === this.form.controls.confirmation.value;
+  }
+
+  submit(): void {
+    this.serverError.set(null);
+    this.form.markAllAsTouched();
+
+    if (this.form.invalid || !this.passwordsMatch()) {
+      return;
+    }
+
+    const { currentPassword, newPassword } = this.form.getRawValue();
+    this.pending.set(true);
+    this.auth.changePassword(currentPassword, newPassword).subscribe({
+      next: () => void this.router.navigateByUrl(this.auth.defaultAuthenticatedRoute()),
+      error: () => {
+        this.pending.set(false);
+        this.serverError.set(
+          'No pudimos cambiar la contraseña. Revisá la clave temporal e intentá nuevamente.',
+        );
+      },
+      complete: () => this.pending.set(false),
+    });
+  }
+}

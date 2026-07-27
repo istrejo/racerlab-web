@@ -10,18 +10,35 @@ import { authGuard } from './auth-guard';
 
 describe('authGuard', () => {
   let accessToken: string | null | undefined;
+  let requiresPasswordChange: boolean;
 
   beforeEach(() => {
     accessToken = null;
+    requiresPasswordChange = false;
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         {
           provide: AuthService,
-          useValue: { getAccessToken: () => accessToken },
+          useValue: {
+            getAccessToken: () => accessToken,
+            requiresPasswordChange: () => requiresPasswordChange,
+          },
         },
       ],
     });
+  });
+
+  it('redirects a temporary-password session to the required change screen', () => {
+    accessToken = 'access-token';
+    requiresPasswordChange = true;
+
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, { url: '/dashboard' } as RouterStateSnapshot),
+    );
+
+    expect(result).toBeInstanceOf(UrlTree);
+    expect((result as UrlTree).toString()).toBe('/change-password');
   });
 
   it('allows authenticated visitors', () => {

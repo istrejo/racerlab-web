@@ -6,9 +6,13 @@ import { AuthService } from '@core/services/auth/auth';
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const apiUrl = inject(API_URL);
   const accessToken = inject(AuthService).getAccessToken();
-  const isAuthRequest = request.url.startsWith(`${apiUrl}/auth/`);
+  const isPublicAuthRequest = [
+    `${apiUrl}/auth/login`,
+    `${apiUrl}/auth/refresh`,
+    `${apiUrl}/auth/logout`,
+  ].includes(request.url);
 
-  if (!accessToken?.trim() || !request.url.startsWith(apiUrl) || isAuthRequest) {
+  if (!accessToken?.trim() || !request.url.startsWith(apiUrl) || isPublicAuthRequest) {
     return next(request);
   }
 

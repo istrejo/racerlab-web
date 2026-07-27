@@ -8,6 +8,18 @@ import { AuthService } from './auth';
 describe('AuthService', () => {
   let auth: AuthService;
   let http: HttpTestingController;
+  const response = {
+    accessToken: 'access-token',
+    tokenType: 'Bearer' as const,
+    activeWorkshop: {
+      workshopId: 'workshop-id',
+      membershipId: 'membership-id',
+      name: 'Racer Lab',
+      role: 'OWNER' as const,
+    },
+    requiresWorkshopSelection: false,
+    requiresPasswordChange: false,
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -34,7 +46,7 @@ describe('AuthService', () => {
       email: 'advisor@racerlab.test',
       password: 'password123',
     });
-    request.flush({ accessToken: 'access-token', tokenType: 'Bearer' });
+    request.flush(response);
 
     expect(auth.isAuthenticated()).toBe(true);
     expect(auth.getAccessToken()).toBe('access-token');
@@ -45,7 +57,7 @@ describe('AuthService', () => {
     const request = http.expectOne('https://api.racerlab.test/api/auth/refresh');
 
     expect(request.request.withCredentials).toBe(true);
-    request.flush({ accessToken: 'refreshed-token', tokenType: 'Bearer' });
+    request.flush({ ...response, accessToken: 'refreshed-token' });
     await restoration;
 
     expect(auth.getAccessToken()).toBe('refreshed-token');
@@ -55,10 +67,7 @@ describe('AuthService', () => {
     vi.useFakeTimers();
     try {
       auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
-      http.expectOne('https://api.racerlab.test/api/auth/login').flush({
-        accessToken: 'access-token',
-        tokenType: 'Bearer',
-      });
+      http.expectOne('https://api.racerlab.test/api/auth/login').flush(response);
 
       const restoration = auth.restoreSession();
       http.expectOne('https://api.racerlab.test/api/auth/refresh');
@@ -75,6 +84,8 @@ describe('AuthService', () => {
   it('fails closed when the auth response has no usable access token', () => {
     auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
     http.expectOne('https://api.racerlab.test/api/auth/login').flush({
+      ...response,
+      accessToken: undefined,
       tokenType: 'Bearer',
     });
 
@@ -84,10 +95,7 @@ describe('AuthService', () => {
 
   it('clears the in-memory access token after logout', () => {
     auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
-    http.expectOne('https://api.racerlab.test/api/auth/login').flush({
-      accessToken: 'access-token',
-      tokenType: 'Bearer',
-    });
+    http.expectOne('https://api.racerlab.test/api/auth/login').flush(response);
 
     auth.logout().subscribe();
     const request = http.expectOne('https://api.racerlab.test/api/auth/logout');
@@ -95,5 +103,58 @@ describe('AuthService', () => {
     request.flush(null, { status: 204, statusText: 'No Content' });
 
     expect(auth.isAuthenticated()).toBe(false);
+  });
+
+  it('keeps the live workshop, role and forced password state', () => {
+    auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
+    http.expectOne('https://api.racerlab.test/api/auth/login').flush({
+      ...response,
+      requiresPasswordChange: true,
+    });
+
+    expect(auth.activeWorkshop()?.name).toBe('Racer Lab');
+    expect(auth.role()).toBe('OWNER');
+    expect(auth.canManageUsers()).toBe(true);
+    expect(auth.requiresPasswordChange()).toBe(true);
+  });
+
+  it('clears the forced flag after changing the password', () => {
+    auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
+    http.expectOne('https://api.racerlab.test/api/auth/login').flush({
+      ...response,
+      requiresPasswordChange: true,
+    });
+
+    auth.changePassword('temporary-password', 'new-password').subscribe();
+    const request = http.expectOne('https://api.racerlab.test/api/auth/change-password');
+    expect(request.request.body).toEqual({
+      currentPassword: 'temporary-password',
+      newPassword: 'new-password',
+    });
+    request.flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(auth.requiresPasswordChange()).toBe(false);
+  });
+
+  it('routes authenticated sessions without an active workshop to onboarding', () => {
+    auth.applyTokenResponse({
+      ...response,
+      activeWorkshop: null,
+      requiresWorkshopSelection: true,
+    });
+
+    expect(auth.hasActiveWorkshop()).toBe(false);
+    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/new');
+  });
+
+  it('prioritizes the mandatory password change before workshop onboarding', () => {
+    auth.applyTokenResponse({
+      ...response,
+      activeWorkshop: null,
+      requiresWorkshopSelection: true,
+      requiresPasswordChange: true,
+    });
+
+    expect(auth.defaultAuthenticatedRoute()).toBe('/change-password');
   });
 });

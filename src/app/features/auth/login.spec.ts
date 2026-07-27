@@ -9,14 +9,22 @@ import { LoginComponent } from './login';
 describe('LoginComponent', () => {
   const login = vi.fn();
   const navigateByUrl = vi.fn(() => Promise.resolve(true));
+  let defaultAuthenticatedRoute: string;
 
   beforeEach(async () => {
     login.mockReset();
+    defaultAuthenticatedRoute = '/dashboard';
     navigateByUrl.mockClear();
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
-        { provide: AuthService, useValue: { login } },
+        {
+          provide: AuthService,
+          useValue: {
+            login,
+            defaultAuthenticatedRoute: () => defaultAuthenticatedRoute,
+          },
+        },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: ActivatedRoute,
@@ -63,7 +71,43 @@ describe('LoginComponent', () => {
 
     expect(component.pending()).toBe(false);
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
-      'could not sign you in',
+      'No pudimos iniciar sesión',
     );
+  });
+
+  it('redirects a temporary-password login to the mandatory change screen', () => {
+    defaultAuthenticatedRoute = '/change-password';
+    login.mockReturnValue(of(undefined));
+    const component = TestBed.createComponent(LoginComponent).componentInstance;
+    component.form.setValue({ email: 'advisor@racerlab.test', password: 'password123' });
+
+    component.submit();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/change-password');
+  });
+
+  it('redirects a login without workshop context to workshop creation', () => {
+    defaultAuthenticatedRoute = '/workshops/new';
+    login.mockReturnValue(of(undefined));
+    const component = TestBed.createComponent(LoginComponent).componentInstance;
+    component.form.setValue({ email: 'owner@racerlab.test', password: 'password123' });
+
+    component.submit();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/workshops/new');
+  });
+
+  it('shows a visible workshop creation action on the login screen', () => {
+    const fixture = TestBed.createComponent(LoginComponent);
+    fixture.detectChanges();
+
+    const links = Array.from(
+      fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLAnchorElement>,
+    );
+    const link = links.find((candidate) =>
+      candidate.textContent?.includes('Crear un workshop'),
+    );
+
+    expect(link).toBeDefined();
   });
 });

@@ -1,0 +1,113 @@
+<main class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-8 text-slate-900">
+  <section class="w-full max-w-md" aria-labelledby="login-title">
+    <div class="mb-6 flex items-center justify-center gap-2" aria-label="Racer Lab">
+      <svg aria-hidden="true" class="size-8 text-[#004AC6]" viewBox="0 0 32 32" fill="none">
+        <path
+          d="M5 19.5h22l-2.4-7.2a3 3 0 0 0-2.85-2.05h-11.5a3 3 0 0 0-2.85 2.05L5 19.5Z"
+          fill="currentColor"
+        />
+        <path
+          d="M7.5 19.5v2.25A2.25 2.25 0 0 0 9.75 24h1.5a2.25 2.25 0 0 0 2.25-2.25V19.5m5.25 0v2.25A2.25 2.25 0 0 0 21 24h1.5a2.25 2.25 0 0 0 2.25-2.25V19.5"
+          stroke="white"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <circle cx="10.5" cy="18.25" r="1.25" fill="white" />
+        <circle cx="21.5" cy="18.25" r="1.25" fill="white" />
+      </svg>
+      <span class="font-[Manrope,ui-sans-serif] text-2xl font-bold tracking-tight">Racer Lab</span>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+      <header class="mb-6 text-center">
+        <h1 id="login-title" class="font-[Manrope,ui-sans-serif] text-xl font-semibold">
+          Iniciar sesión
+        </h1>
+        <p class="mt-1 text-sm text-slate-600">Accedé al panel de tu taller</p>
+      </header>
+
+      @if (serverError()) {
+        <div
+          class="mb-6 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          role="alert"
+        >
+          {{ serverError() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="space-y-5">
+          <div>
+            <label class="mb-2 block text-sm font-semibold" for="email">Correo electrónico</label>
+            <input
+              class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 disabled:bg-slate-100"
+              [attr.aria-describedby]="emailError() ? 'email-error' : null"
+              [attr.aria-invalid]="emailError()"
+              autocomplete="email"
+              formControlName="email"
+              id="email"
+              inputmode="email"
+              placeholder="mechanic@racerlab.com"
+              type="email"
+            />
+            @if (emailError()) {
+              <p class="mt-2 text-sm text-red-700" id="email-error">
+                Ingresá un correo electrónico válido.
+              </p>
+            }
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-semibold" for="password">Contraseña</label>
+            <div class="relative">
+              <input
+                class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 disabled:bg-slate-100"
+                [attr.aria-describedby]="passwordError() ? 'password-error' : null"
+                [attr.aria-invalid]="passwordError()"
+                autocomplete="current-password"
+                formControlName="password"
+                id="password"
+                placeholder="Ingresá tu contraseña"
+                [type]="showPassword() ? 'text' : 'password'"
+              />
+              <button
+                class="absolute inset-y-0 right-0 px-3 text-sm font-semibold text-[#004AC6] underline decoration-transparent underline-offset-2 hover:decoration-current focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6]"
+                (click)="togglePassword()"
+                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                type="button"
+              >
+                {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+              </button>
+            </div>
+            @if (passwordError()) {
+              <p class="mt-2 text-sm text-red-700" id="password-error">
+                La contraseña debe tener al menos 8 caracteres.
+              </p>
+            }
+          </div>
+
+          <button
+            class="flex h-11 w-full items-center justify-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
+            [disabled]="pending()"
+            type="submit"
+          >
+            {{ pending() ? 'Ingresando...' : 'Ingresar' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-6 border-t border-slate-200 pt-5 text-center">
+        <p class="text-sm text-slate-600">¿Querés registrar un nuevo taller?</p>
+        <a
+          class="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-[#004AC6] px-4 text-sm font-semibold text-[#004AC6] transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2"
+          [routerLink]="['/workshops/new']"
+          (click)="test()"
+        >
+        </a>
+        <p class="mt-3 text-xs text-slate-500">
+          Primero iniciá sesión con tu usuario y después completarás los datos del taller.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
