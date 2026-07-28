@@ -1,0 +1,24 @@
+<aside class="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col bg-slate-950 px-3 py-6 text-slate-300 lg:flex">
+  <div class="px-3">
+    <p class="font-[Manrope,ui-sans-serif] text-xl font-bold tracking-tight text-white">Racer Lab</p>
+    <p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Workshop management</p>
+  </div>
+
+  <button class="mt-9 flex h-10 items-center justify-center gap-2 rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-blue-900" disabled title="Service orders are not available yet" type="button"><span aria-hidden="true" class="text-lg leading-none">+</span>New service</button>
+
+  <nav class="mt-7" aria-label="Main navigation">
+    <ul class="space-y-1 text-sm font-semibold">
+      <li><a ariaCurrentWhenActive="page" class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" routerLink="/dashboard" routerLinkActive="bg-slate-800 text-white" [routerLinkActiveOptions]="{ exact: true }"><svg aria-hidden="true" class="size-4"><use href="#icon-dashboard" /></svg>Dashboard</a></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-orders" /></svg>Orders</span></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-users" /></svg>Customers</span></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-vehicle" /></svg>Vehicles</span></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-quotes" /></svg>Quotes</span></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-parts" /></svg>Inventory</span></li>
+      <li><span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"><svg aria-hidden="true" class="size-4"><use href="#icon-settings" /></svg>Technicians</span></li>
+    </ul>
+  </nav>
+
+  @if (auth.canManageUsers()) {
+    <a ariaCurrentWhenActive="page" class="mt-auto flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" routerLink="/settings/users" routerLinkActive="bg-slate-800 text-white"><svg aria-hidden="true" class="size-4"><use href="#icon-settings" /></svg>Settings</a>
+  }
+</aside>

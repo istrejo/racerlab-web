@@ -8,24 +8,18 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/login').then((component) => component.LoginComponent),
+      import('./features/auth/login/login').then((component) => component.LoginComponent),
   },
   {
     path: 'signup',
     loadComponent: () =>
-      import('./features/auth/signup').then((component) => component.SignupComponent),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard, workshopGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard').then((component) => component.DashboardComponent),
+      import('./features/auth/signup/signup').then((component) => component.SignupComponent),
   },
   {
     path: 'workshops/new',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/workshops/workshop-new').then(
+      import('./features/workshops/workshop-new/workshop-new').then(
         (component) => component.WorkshopNewComponent,
       ),
   },
@@ -33,31 +27,48 @@ export const routes: Routes = [
     path: 'change-password',
     canActivate: [passwordChangeGuard],
     loadComponent: () =>
-      import('./features/auth/change-password').then(
+      import('./features/auth/change-password/change-password').then(
         (component) => component.ChangePasswordComponent,
       ),
   },
   {
-    path: 'settings/users',
-    canActivate: [authGuard, workshopGuard, adminGuard],
+    path: '',
+    canActivateChild: [authGuard, workshopGuard],
     loadComponent: () =>
-      import('./features/settings/users/user-list').then(
-        (component) => component.UserListComponent,
-      ),
-  },
-  {
-    path: 'settings/users/new',
-    canActivate: [authGuard, workshopGuard, adminGuard],
-    loadComponent: () =>
-      import('./features/settings/users/user-new').then((component) => component.UserNewComponent),
-  },
-  {
-    path: 'settings/users/:id/edit',
-    canActivate: [authGuard, workshopGuard, adminGuard],
-    loadComponent: () =>
-      import('./features/settings/users/user-edit').then(
-        (component) => component.UserEditComponent,
-      ),
+      import('./layout/layout').then((component) => component.LayoutComponent),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard/dashboard').then(
+            (component) => component.DashboardComponent,
+          ),
+      },
+      {
+        path: 'settings/users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/settings/users/user-list/user-list').then(
+            (component) => component.UserListComponent,
+          ),
+      },
+      {
+        path: 'settings/users/new',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/settings/users/user-new/user-new').then(
+            (component) => component.UserNewComponent,
+          ),
+      },
+      {
+        path: 'settings/users/:id/edit',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/settings/users/user-edit/user-edit').then(
+            (component) => component.UserEditComponent,
+          ),
+      },
+    ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 
 @Component({
@@ -11,7 +11,6 @@ import { AuthService } from '@core/services/auth/auth';
 export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly pending = signal(false);
@@ -46,12 +45,7 @@ export class LoginComponent {
 
     this.pending.set(true);
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () =>
-        void this.router.navigateByUrl(
-          this.auth.defaultAuthenticatedRoute() === '/dashboard'
-            ? this.returnUrl()
-            : this.auth.defaultAuthenticatedRoute(),
-        ),
+      next: () => void this.router.navigateByUrl(this.auth.defaultAuthenticatedRoute()),
       error: () => {
         this.pending.set(false);
         this.serverError.set(
@@ -60,15 +54,5 @@ export class LoginComponent {
       },
       complete: () => this.pending.set(false),
     });
-  }
-
-  private returnUrl(): string {
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-
-    if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) {
-      return returnUrl;
-    }
-
-    return '/dashboard';
   }
 }
