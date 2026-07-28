@@ -9,4 +9,12 @@ describe('application routes', () => {
     expect(signupRoute?.canActivate).toBeUndefined();
     expect(workshopRoute?.canActivate).toContain(authGuard);
   });
+
+  it('groups application routes inside the authenticated layout', () => {
+    const applicationRoute = routes.find((route) => route.path === '' && route.children);
+
+    expect(applicationRoute?.canActivateChild).toContain(authGuard);
+    expect(applicationRoute?.children?.map((route) => route.path)).toContain('dashboard');
+    expect(applicationRoute?.children?.map((route) => route.path)).toContain('settings/users');
+  });
 });

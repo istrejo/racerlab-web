@@ -1,0 +1,37 @@
+<article
+  class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+  [class.border-l-4]="metric().tone !== 'primary'"
+  [class.border-l-[#F97316]]="metric().tone === 'warning'"
+  [class.border-l-red-600]="metric().tone === 'danger'"
+>
+  <div class="flex items-start justify-between gap-3">
+    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+      {{ metric().label }}
+    </p>
+    <span
+      class="flex size-8 items-center justify-center rounded-lg"
+      [class.bg-blue-50]="metric().tone === 'primary'"
+      [class.text-[#004AC6]]="metric().tone === 'primary'"
+      [class.bg-orange-50]="metric().tone === 'warning'"
+      [class.text-[#C2410C]]="metric().tone === 'warning'"
+      [class.bg-red-50]="metric().tone === 'danger'"
+      [class.text-red-700]="metric().tone === 'danger'"
+      ><svg aria-hidden="true" class="size-4"><use [attr.href]="'#icon-' + metric().icon" /></svg
+    ></span>
+  </div>
+  <div class="mt-5 flex items-end gap-2">
+    <p class="font-[Manrope,ui-sans-serif] text-3xl font-bold leading-none">{{ metric().value }}</p>
+    @if (metric().trend) {
+      <p class="text-xs font-semibold text-emerald-700">{{ metric().trend }}</p>
+    }
+    @if (metric().detail) {
+      <p
+        class="text-xs font-medium"
+        [class.text-red-700]="metric().tone === 'danger'"
+        [class.text-slate-500]="metric().tone !== 'danger'"
+      >
+        {{ metric().detail }}
+      </p>
+    }
+  </div>
+</article>

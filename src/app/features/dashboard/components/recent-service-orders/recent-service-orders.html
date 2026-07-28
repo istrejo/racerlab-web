@@ -1,0 +1,58 @@
+<article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <header class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+    <div>
+      <h2 class="font-[Manrope,ui-sans-serif] text-lg font-bold">Recent service orders</h2>
+      <p class="mt-1 text-sm text-slate-500">Current workflow in the workshop</p>
+    </div>
+    <button
+      class="text-sm font-semibold text-[#004AC6] disabled:cursor-not-allowed disabled:text-blue-300"
+      disabled
+      type="button"
+    >
+      View all
+    </button>
+  </header>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[720px] text-left text-sm">
+      <caption class="sr-only">
+        Recent service orders and their current workflow status
+      </caption>
+      <thead
+        class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"
+      >
+        <tr>
+          <th class="px-5 py-3" scope="col">Order</th>
+          <th class="px-5 py-3" scope="col">Customer / vehicle</th>
+          <th class="px-5 py-3" scope="col">Service</th>
+          <th class="px-5 py-3" scope="col">Status</th>
+          <th class="px-5 py-3" scope="col">Technician</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (order of orders(); track order.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-5 py-4 font-semibold">{{ order.id }}</td>
+            <td class="px-5 py-4">
+              <p class="font-semibold">{{ order.customer }}</p>
+              <p class="mt-0.5 text-xs text-slate-500">{{ order.vehicle }}</p>
+            </td>
+            <td class="px-5 py-4 text-slate-700">{{ order.service }}</td>
+            <td class="px-5 py-4">
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                [class.bg-blue-50]="order.status === 'Reception'"
+                [class.text-[#004AC6]]="order.status === 'Reception'"
+                [class.bg-orange-50]="order.status === 'In repair'"
+                [class.text-[#C2410C]]="order.status === 'In repair'"
+                [class.bg-emerald-50]="order.status === 'Ready'"
+                [class.text-emerald-700]="order.status === 'Ready'"
+                >{{ order.status }}</span
+              >
+            </td>
+            <td class="px-5 py-4 text-slate-600">{{ order.technician }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</article>
