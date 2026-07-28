@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 
@@ -9,4 +9,6 @@ import { AuthService } from '@core/services/auth/auth';
 })
 export class AppNavigationComponent {
   readonly auth = inject(AuthService);
+  readonly mobileNavigationOpen = input(false);
+  readonly mobileNavigationDismissed = output<void>();
 }
