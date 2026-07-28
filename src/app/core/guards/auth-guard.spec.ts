@@ -51,13 +51,13 @@ describe('authGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirects anonymous visitors to login with their requested route', () => {
+  it('redirects anonymous visitors to login without query parameters', () => {
     const result = TestBed.runInInjectionContext(() =>
       authGuard({} as ActivatedRouteSnapshot, { url: '/dashboard' } as RouterStateSnapshot),
     );
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect((result as UrlTree).toString()).toBe('/login?returnUrl=%2Fdashboard');
+    expect((result as UrlTree).toString()).toBe('/login');
   });
 
   it('redirects visitors with a blank access token to login', () => {

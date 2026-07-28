@@ -1,4 +1,3 @@
-import { convertToParamMap } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -25,13 +24,8 @@ describe('LoginComponent', () => {
             defaultAuthenticatedRoute: () => defaultAuthenticatedRoute,
           },
         },
+        { provide: ActivatedRoute, useValue: {} },
         { provide: Router, useValue: { navigateByUrl } },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { queryParamMap: convertToParamMap({ returnUrl: 'https://invalid.test' }) },
-          },
-        },
       ],
     }).compileComponents();
   });
@@ -47,7 +41,7 @@ describe('LoginComponent', () => {
     expect(fixture.nativeElement.querySelector('#password-error')).not.toBeNull();
   });
 
-  it('submits valid credentials and redirects only to the protected dashboard route', () => {
+  it('submits valid credentials and redirects to the default authenticated route', () => {
     login.mockReturnValue(of(undefined));
     const fixture = TestBed.createComponent(LoginComponent);
     const component = fixture.componentInstance;
