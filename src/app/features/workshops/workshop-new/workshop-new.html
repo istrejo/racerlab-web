@@ -1,0 +1,78 @@
+<main class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-8 text-slate-900">
+  <section
+    class="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10"
+    aria-labelledby="workshop-title"
+  >
+    <p class="text-sm font-semibold text-[#F97316]">
+      {{ auth.hasActiveWorkshop() ? 'Nuevo taller' : 'Configuración inicial' }}
+    </p>
+    <h1 id="workshop-title" class="mt-2 text-2xl font-bold">
+      {{ auth.hasActiveWorkshop() ? 'Crear otro workshop' : 'Creá tu workshop' }}
+    </h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Al crearlo vas a quedar registrado como propietario y el taller se seleccionará
+      automáticamente.
+    </p>
+
+    @if (serverError()) {
+      <p
+        class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+        role="alert"
+      >
+        {{ serverError() }}
+      </p>
+    }
+
+    <form class="mt-6 space-y-6" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div>
+        <label class="mb-2 block text-sm font-semibold" for="workshop-name">
+          Nombre del taller
+        </label>
+        <input
+          class="h-11 w-full rounded-lg border border-slate-300 px-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+          [attr.aria-describedby]="nameError() ? 'workshop-name-error' : 'workshop-name-help'"
+          [attr.aria-invalid]="nameError()"
+          autocomplete="organization"
+          formControlName="name"
+          id="workshop-name"
+          maxlength="120"
+          placeholder="Ej. Racer Lab Central"
+        />
+        <p id="workshop-name-help" class="mt-2 text-xs text-slate-500">
+          Podrás modificarlo más adelante desde la configuración.
+        </p>
+        @if (nameError()) {
+          <p id="workshop-name-error" class="mt-2 text-sm text-red-700">
+            Ingresá un nombre de hasta 120 caracteres.
+          </p>
+        }
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-5">
+        @if (auth.hasActiveWorkshop()) {
+          <a
+            class="flex h-11 items-center px-4 text-sm font-semibold text-slate-700"
+            routerLink="/dashboard"
+          >
+            Cancelar
+          </a>
+        } @else {
+          <button
+            class="h-11 px-4 text-sm font-semibold text-slate-700"
+            (click)="logout()"
+            type="button"
+          >
+            Cerrar sesión
+          </button>
+        }
+        <button
+          class="h-11 rounded-lg bg-[#004AC6] px-5 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
+          [disabled]="pending()"
+          type="submit"
+        >
+          {{ pending() ? 'Creando...' : 'Crear taller' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
