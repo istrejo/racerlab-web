@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { of } from 'rxjs';
 import { API_URL } from '@shared/utils/api-url.token';
 import { AuthService, AuthTokenResponse } from '../auth/auth';
 import { WorkshopsService } from './workshops';
@@ -13,6 +14,7 @@ describe('WorkshopsService', () => {
 
   beforeEach(() => {
     applyTokenResponse.mockReset();
+    applyTokenResponse.mockReturnValue(of(undefined));
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),

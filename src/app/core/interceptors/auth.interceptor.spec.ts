@@ -59,6 +59,14 @@ describe('authInterceptor', () => {
     request.flush(null);
   });
 
+  it('attaches a bearer token to the session bootstrap endpoint', () => {
+    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/auth/me').subscribe();
+
+    const request = http.expectOne('https://api.racerlab.test/api/auth/me');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
+    request.flush({ user: {}, activeWorkshop: null, requiresPasswordChange: false });
+  });
+
   it('does not attach a bearer token when the session token is blank', () => {
     accessToken = ' ';
     TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();

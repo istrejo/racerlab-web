@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { AuthService, AuthTokenResponse } from '../auth/auth';
 
 export type CreateWorkshopRequest = {
@@ -17,6 +17,8 @@ export class WorkshopsService {
   create(request: CreateWorkshopRequest): Observable<AuthTokenResponse> {
     return this.http
       .post<AuthTokenResponse>(`${this.apiUrl}/workshops`, request)
-      .pipe(tap((response) => this.auth.applyTokenResponse(response)));
+      .pipe(
+        switchMap((response) => this.auth.applyTokenResponse(response).pipe(map(() => response))),
+      );
   }
 }
