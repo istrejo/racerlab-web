@@ -15,7 +15,13 @@ describe('SignupComponent', () => {
     navigateByUrl.mockClear();
     await TestBed.configureTestingModule({
       imports: [SignupComponent],
-      providers: [provideRouter([]), { provide: AuthService, useValue: { signup } }],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: { signup, defaultAuthenticatedRoute: () => '/workshops/select' },
+        },
+      ],
     }).compileComponents();
     vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockImplementation(navigateByUrl);
   });
@@ -50,7 +56,7 @@ describe('SignupComponent', () => {
     ).toContain('deben coincidir');
   });
 
-  it('creates the identity without sending confirmation and opens workshop onboarding', () => {
+  it('creates the identity without sending confirmation and opens workshop selection', () => {
     signup.mockReturnValue(of(undefined));
     const component = TestBed.createComponent(SignupComponent).componentInstance;
     component.form.setValue({
@@ -67,7 +73,7 @@ describe('SignupComponent', () => {
       email: 'juan@example.com',
       password: 'password123',
     });
-    expect(navigateByUrl).toHaveBeenCalledWith('/workshops/new');
+    expect(navigateByUrl).toHaveBeenCalledWith('/workshops/select');
     expect(component.pending()).toBe(false);
   });
 

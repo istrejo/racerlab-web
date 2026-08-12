@@ -71,7 +71,7 @@ export class SignupComponent {
         password,
       })
       .subscribe({
-        next: () => void this.router.navigateByUrl('/workshops/new'),
+        next: () => void this.router.navigateByUrl(this.auth.defaultAuthenticatedRoute()),
         error: (error: HttpErrorResponse) => {
           this.pending.set(false);
           this.serverError.set(

@@ -163,7 +163,7 @@ export class AuthService {
       return '/change-password';
     }
 
-    return this.hasActiveWorkshop() ? '/dashboard' : '/workshops/new';
+    return this.hasActiveWorkshop() ? '/dashboard' : '/workshops/select';
   }
 
   getAccessToken(): string | null {

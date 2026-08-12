@@ -5,5 +5,5 @@ import { AuthService } from '../services/auth/auth';
 export const workshopGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
 
-  return auth.hasActiveWorkshop() ? true : inject(Router).createUrlTree(['/workshops/new']);
+  return auth.hasActiveWorkshop() ? true : inject(Router).createUrlTree(['/workshops/select']);
 };

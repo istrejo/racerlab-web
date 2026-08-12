@@ -16,6 +16,14 @@ export const routes: Routes = [
       import('./features/auth/signup/signup').then((component) => component.SignupComponent),
   },
   {
+    path: 'workshops/select',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/workshops/workshop-select/workshop-select').then(
+        (component) => component.WorkshopSelectComponent,
+      ),
+  },
+  {
     path: 'workshops/new',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -34,8 +42,7 @@ export const routes: Routes = [
   {
     path: '',
     canActivateChild: [authGuard, workshopGuard],
-    loadComponent: () =>
-      import('./layout/layout').then((component) => component.LayoutComponent),
+    loadComponent: () => import('./layout/layout').then((component) => component.LayoutComponent),
     children: [
       {
         path: 'dashboard',

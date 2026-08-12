@@ -34,12 +34,12 @@ describe('workshopGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirects a neutral session to workshop creation', () => {
+  it('redirects a neutral session to workshop selection', () => {
     const result = TestBed.runInInjectionContext(() =>
       workshopGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect((result as UrlTree).toString()).toBe('/workshops/new');
+    expect((result as UrlTree).toString()).toBe('/workshops/select');
   });
 });
