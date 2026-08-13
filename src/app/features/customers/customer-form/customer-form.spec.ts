@@ -43,6 +43,7 @@ describe('CustomerFormComponent', () => {
 
   it('does not submit invalid or pending forms', () => {
     const emit = vi.spyOn(component.submitted, 'emit');
+    component.form.controls.fullName.setValue('   ');
     component.submit();
     fixture.componentRef.setInput('pending', true);
     component.form.controls.fullName.setValue('Ada');

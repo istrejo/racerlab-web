@@ -15,6 +15,10 @@ function trimmedEmail(control: AbstractControl): ValidationErrors | null {
   return value ? Validators.email({ value } as AbstractControl) : null;
 }
 
+function trimmedRequired(control: AbstractControl): ValidationErrors | null {
+  return String(control.value ?? '').trim() ? null : { required: true };
+}
+
 @Component({
   selector: 'app-customer-form',
   imports: [ReactiveFormsModule, RouterLink],
@@ -42,7 +46,7 @@ export class CustomerFormComponent {
   readonly form = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(120)],
+      validators: [trimmedRequired, Validators.maxLength(120)],
     }),
     phone: new FormControl('', { nonNullable: true, validators: Validators.maxLength(32) }),
     whatsapp: new FormControl('', { nonNullable: true, validators: Validators.maxLength(32) }),
