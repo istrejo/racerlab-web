@@ -9,12 +9,10 @@ import { WorkshopNewComponent } from './workshop-new';
 describe('WorkshopNewComponent', () => {
   const create = vi.fn();
   const logout = vi.fn();
-  const navigateByUrl = vi.fn(() => Promise.resolve(true));
 
   beforeEach(async () => {
     create.mockReset();
     logout.mockReset();
-    navigateByUrl.mockClear();
     await TestBed.configureTestingModule({
       imports: [WorkshopNewComponent],
       providers: [
@@ -23,11 +21,11 @@ describe('WorkshopNewComponent', () => {
           provide: AuthService,
           useValue: {
             hasActiveWorkshop: () => false,
+            defaultAuthenticatedRoute: () => '/dashboard',
             logout,
           },
         },
         { provide: WorkshopsService, useValue: { create } },
-        { provide: Router, useValue: { navigateByUrl } },
       ],
     }).compileComponents();
   });
@@ -43,6 +41,7 @@ describe('WorkshopNewComponent', () => {
   });
 
   it('creates, selects and opens the workshop dashboard', () => {
+    const navigateByUrl = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
     create.mockReturnValue(of({}));
     const component = TestBed.createComponent(WorkshopNewComponent).componentInstance;
     component.form.controls.name.setValue('  Racer Lab Norte  ');

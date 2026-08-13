@@ -1,1 +1,55 @@
-<router-outlet />
+@if (auth.sessionState() === 'restoring') {
+  <main
+    aria-busy="true"
+    aria-live="polite"
+    class="grid min-h-dvh place-items-center bg-slate-50 px-6 text-slate-950"
+  >
+    <div class="text-center">
+      <div
+        aria-hidden="true"
+        class="mx-auto mb-5 size-12 animate-spin rounded-full border-4 border-blue-100 border-t-[#004AC6]"
+      ></div>
+      <p class="font-[Manrope,ui-sans-serif] text-xl font-bold">Racer Lab</p>
+      <p class="mt-2 text-sm text-slate-500">Recuperando tu sesión…</p>
+    </div>
+  </main>
+} @else if (auth.sessionExpired() || auth.sessionClosed()) {
+  <main aria-hidden="true" class="min-h-dvh bg-slate-50"></main>
+} @else {
+  <router-outlet />
+}
+
+@if (auth.sessionExpired() || auth.sessionClosed()) {
+  <div
+    aria-labelledby="session-expired-title"
+    aria-modal="true"
+    class="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 p-4"
+    role="dialog"
+  >
+    <section class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div
+        aria-hidden="true"
+        class="mb-4 grid size-11 place-items-center rounded-full bg-amber-100 text-xl text-amber-700"
+      >
+        !
+      </div>
+      <h2 class="text-xl font-bold text-slate-950" id="session-expired-title">
+        {{ auth.sessionExpired() ? 'Tu sesión expiró' : 'Tu sesión fue cerrada' }}
+      </h2>
+      <p class="mt-2 text-sm leading-6 text-slate-600">
+        {{
+          auth.sessionExpired()
+            ? 'Por seguridad, debes iniciar sesión nuevamente para continuar.'
+            : 'La sesión se cerró en otra pestaña. Inicia sesión nuevamente para continuar.'
+        }}
+      </p>
+      <button
+        class="mt-6 w-full rounded-xl bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2"
+        type="button"
+        (click)="returnToLogin()"
+      >
+        Volver al inicio de sesión
+      </button>
+    </section>
+  </div>
+}

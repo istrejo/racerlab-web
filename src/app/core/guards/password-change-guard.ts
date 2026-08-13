@@ -6,9 +6,7 @@ export const passwordChangeGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!auth.getAccessToken()?.trim()) {
-    return router.createUrlTree(['/login']);
-  }
-
-  return auth.requiresPasswordChange() ? true : router.createUrlTree(['/dashboard']);
+  return auth.requiresPasswordChange()
+    ? true
+    : router.createUrlTree([auth.defaultAuthenticatedRoute()]);
 };

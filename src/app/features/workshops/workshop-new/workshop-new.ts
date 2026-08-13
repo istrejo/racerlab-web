@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
+import { authenticatedDestination, sanitizeReturnUrl } from '@core/services/auth/auth-navigation';
 import { WorkshopsService } from '@core/services/workshops/workshops';
 
 @Component({
@@ -13,6 +14,7 @@ export class WorkshopNewComponent {
   readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly workshops = inject(WorkshopsService);
 
   readonly pending = signal(false);
@@ -37,7 +39,13 @@ export class WorkshopNewComponent {
 
     this.pending.set(true);
     this.workshops.create({ name: this.form.controls.name.value.trim() }).subscribe({
-      next: () => void this.router.navigateByUrl('/dashboard'),
+      next: () =>
+        void this.router.navigateByUrl(
+          authenticatedDestination(
+            this.auth,
+            sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+          ),
+        ),
       error: () => {
         this.pending.set(false);
         this.serverError.set('No pudimos crear el taller. Intentá nuevamente.');

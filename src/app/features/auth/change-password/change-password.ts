@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
+import { authenticatedDestination, sanitizeReturnUrl } from '@core/services/auth/auth-navigation';
 
 @Component({
   selector: 'app-change-password',
@@ -12,6 +13,7 @@ export class ChangePasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly pending = signal(false);
   readonly serverError = signal<string | null>(null);
@@ -39,7 +41,13 @@ export class ChangePasswordComponent {
     const { currentPassword, newPassword } = this.form.getRawValue();
     this.pending.set(true);
     this.auth.changePassword(currentPassword, newPassword).subscribe({
-      next: () => void this.router.navigateByUrl(this.auth.defaultAuthenticatedRoute()),
+      next: () =>
+        void this.router.navigateByUrl(
+          authenticatedDestination(
+            this.auth,
+            sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+          ),
+        ),
       error: () => {
         this.pending.set(false);
         this.serverError.set(
