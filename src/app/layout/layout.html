@@ -16,7 +16,58 @@
       <div class="ml-auto flex items-center gap-2 sm:gap-3">
         <button class="hidden h-9 rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-blue-900 sm:block" disabled title="Service orders are not available yet" type="button">New order</button>
         <div class="hidden text-right sm:block"><p class="text-sm font-semibold">{{ workshopName() }}</p><p class="text-xs font-medium text-slate-500">{{ workshopRole() }}</p></div>
-        <button class="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2" (click)="logout()" title="Sign out" type="button">{{ workshopInitial() }}</button>
+        <div class="relative" data-user-menu>
+          <button
+            #userMenuTrigger
+            aria-controls="user-menu"
+            aria-haspopup="true"
+            aria-label="Abrir menú de usuario"
+            [attr.aria-expanded]="userMenuOpen()"
+            class="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+            [disabled]="logoutPending()"
+            (click)="toggleUserMenu()"
+            type="button"
+          >
+            {{ userInitial() }}
+          </button>
+
+          @if (userMenuOpen()) {
+            <div
+              aria-labelledby="user-menu-name"
+              class="absolute right-0 top-12 z-20 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+              id="user-menu"
+            >
+              <div class="border-b border-slate-200 px-4 py-3">
+                <p class="truncate text-sm font-semibold text-slate-950" id="user-menu-name">
+                  {{ userName() }}
+                </p>
+                @if (userEmail()) {
+                  <p class="mt-0.5 truncate text-xs text-slate-500">{{ userEmail() }}</p>
+                }
+              </div>
+              <div class="p-2">
+                <button
+                  aria-live="polite"
+                  [attr.aria-busy]="logoutPending()"
+                  class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-red-700 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 disabled:cursor-wait disabled:text-red-400"
+                  data-action="logout"
+                  [disabled]="logoutPending()"
+                  (click)="logout()"
+                  type="button"
+                >
+                  @if (logoutPending()) {
+                    <span
+                      aria-hidden="true"
+                      class="size-4 shrink-0 animate-spin rounded-full border-2 border-red-200 border-t-red-700"
+                      data-loading="logout"
+                    ></span>
+                  }
+                  <span>{{ logoutPending() ? 'Cerrando sesión…' : 'Cerrar sesión' }}</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     </div>
   </header>

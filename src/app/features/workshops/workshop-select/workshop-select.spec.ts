@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import { WorkshopsService, WorkshopSummary } from '@core/services/workshops/workshops';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkshopSelectComponent } from './workshop-select';
 
@@ -57,6 +57,34 @@ describe('WorkshopSelectComponent', () => {
     );
     expect(button?.textContent).toContain('Racer Lab Central');
     expect(button?.getAttribute('aria-current')).toBe('true');
+  });
+
+  it('shows an accessible loading indicator while workshops are requested', () => {
+    const loadingRequest = new Subject<WorkshopSummary[]>();
+    list.mockReturnValueOnce(loadingRequest.asObservable());
+
+    fixture.detectChanges();
+
+    const fixtureElement: HTMLElement = fixture.nativeElement;
+    const loadingIndicator = fixtureElement.querySelector<HTMLElement>(
+      '[data-loading="workshops"]',
+    );
+    expect(loadingIndicator?.getAttribute('role')).toBe('status');
+    expect(loadingIndicator?.textContent).toContain('Cargando tus talleres');
+
+    loadingRequest.next([
+      {
+        id: 'current-id',
+        name: 'Racer Lab Central',
+        ownerUserId: 'owner-id',
+        membershipId: 'membership-id',
+        role: 'OWNER',
+      },
+    ]);
+    loadingRequest.complete();
+    fixture.detectChanges();
+
+    expect(fixtureElement.querySelector('[data-loading="workshops"]')).toBeNull();
   });
 
   it('selects another workshop and returns to the dashboard', () => {
