@@ -1,88 +1,49 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {
-  catchError,
-  finalize,
-  firstValueFrom,
-  map,
-  Observable,
-  of,
-  switchMap,
-  tap,
-  timeout,
-} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
+import { map, Observable, tap } from 'rxjs';
+import { AuthSessionService } from '../session/session';
+import type {
+  AuthTokenResponse,
+  LoginRequest,
+  RefreshFailureKind,
+  SessionRestoreResult,
+  SignupRequest,
+} from '../../model/auth.interface';
 
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type SignupRequest = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-export type UserRole =
-  'OWNER' | 'ADMIN' | 'MANAGER' | 'ADVISOR' | 'TECHNICIAN' | 'INVENTORY_MANAGER';
-
-export type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-export type WorkshopProfile = {
-  displayName: string;
-  phone: string | null;
-  address: string | null;
-};
-
-export type ActiveWorkshop = {
-  workshopId: string;
-  membershipId: string;
-  name: string;
-  role: UserRole;
-  profile?: WorkshopProfile;
-};
-
-export type AuthTokenResponse = {
-  accessToken: string;
-  tokenType: 'Bearer';
-  activeWorkshop: ActiveWorkshop | null;
-  requiresWorkshopSelection: boolean;
-  requiresPasswordChange: boolean;
-};
-
-export type AuthSessionBootstrap = {
-  user: AuthUser;
-  activeWorkshop: ActiveWorkshop | null;
-  requiresPasswordChange: boolean;
-};
-
-export type SessionBootstrapState = 'idle' | 'loading' | 'ready' | 'error';
-
-const SESSION_RESTORE_TIMEOUT_MS = 5_000;
+export { AuthRefreshError, AuthRefreshSupersededError } from '../../model/auth.interface';
+export type {
+  ActiveWorkshop,
+  AuthSessionBootstrap,
+  AuthTokenResponse,
+  AuthUser,
+  LoginRequest,
+  ProfileState,
+  RefreshFailureKind,
+  SessionRestoreResult,
+  SessionState,
+  SignupRequest,
+  UserRole,
+  WorkshopProfile,
+} from '../../model/auth.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = inject(API_URL);
-  private readonly accessToken = signal<string | null>(null);
-  private readonly userState = signal<AuthUser | null>(null);
-  private readonly activeWorkshopState = signal<ActiveWorkshop | null>(null);
-  private readonly requiresPasswordChangeState = signal(false);
-  private readonly bootstrapState = signal<SessionBootstrapState>('idle');
+  private readonly session = inject(AuthSessionService);
 
-  readonly isAuthenticated = computed(() => this.hasAccessToken(this.accessToken()));
-  readonly user = this.userState.asReadonly();
-  readonly activeWorkshop = this.activeWorkshopState.asReadonly();
-  readonly profile = computed(() => this.activeWorkshopState()?.profile ?? null);
-  readonly hasActiveWorkshop = computed(() => this.activeWorkshopState() !== null);
-  readonly role = computed(() => this.activeWorkshopState()?.role ?? null);
-  readonly requiresPasswordChange = this.requiresPasswordChangeState.asReadonly();
-  readonly sessionBootstrapState = this.bootstrapState.asReadonly();
+  readonly isAuthenticated = this.session.isAuthenticated;
+  readonly user = this.session.user;
+  readonly activeWorkshop = this.session.activeWorkshop;
+  readonly profile = this.session.profile;
+  readonly hasActiveWorkshop = this.session.hasActiveWorkshop;
+  readonly role = this.session.role;
+  readonly requiresPasswordChange = this.session.requiresPasswordChange;
+  readonly sessionState = this.session.sessionState;
+  readonly profileState = this.session.profileState;
+  readonly sessionExpired = this.session.sessionExpired;
+  readonly sessionClosed = this.session.sessionClosed;
   readonly canManageUsers = computed(() => {
     const role = this.role();
     return role === 'ADMIN' || role === 'OWNER';
@@ -111,7 +72,10 @@ export class AuthService {
       .post<AuthTokenResponse>(`${this.apiUrl}/auth/login`, credentials, {
         withCredentials: true,
       })
-      .pipe(switchMap((response) => this.applyTokenResponse(response)));
+      .pipe(
+        tap((response) => this.session.startSession(response)),
+        map(() => undefined),
+      );
   }
 
   signup(identity: SignupRequest): Observable<void> {
@@ -119,61 +83,40 @@ export class AuthService {
       .post<AuthTokenResponse>(`${this.apiUrl}/auth/signup`, identity, {
         withCredentials: true,
       })
-      .pipe(switchMap((response) => this.applyTokenResponse(response)));
+      .pipe(
+        tap((response) => this.session.startSession(response)),
+        map(() => undefined),
+      );
   }
 
-  async restoreSession(): Promise<void> {
-    await firstValueFrom(
-      this.http
-        .post<AuthTokenResponse>(`${this.apiUrl}/auth/refresh`, {}, { withCredentials: true })
-        .pipe(
-          timeout(SESSION_RESTORE_TIMEOUT_MS),
-          switchMap((response) => this.applyTokenResponse(response)),
-          catchError(() => {
-            this.clearSession();
-            return of(undefined);
-          }),
-        ),
-    );
+  ensureSession(forceRefresh = false): Observable<SessionRestoreResult> {
+    return this.session.ensureSession(forceRefresh);
+  }
+
+  probeSession(): Observable<SessionRestoreResult> {
+    return this.session.probeSession();
+  }
+
+  refreshAccessToken(staleAccessToken?: string): Observable<string> {
+    return this.session.refreshAccessToken(staleAccessToken);
+  }
+
+  loadCurrentUser(): Observable<void> {
+    return this.session.loadCurrentUser();
   }
 
   logout(): Observable<void> {
-    return this.http
-      .post<void>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true })
-      .pipe(finalize(() => this.clearSession()));
+    return this.session.logout();
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
     return this.http
       .post<void>(`${this.apiUrl}/auth/change-password`, { currentPassword, newPassword })
-      .pipe(tap(() => this.requiresPasswordChangeState.set(false)));
+      .pipe(tap(() => this.session.markPasswordChanged()));
   }
 
   applyTokenResponse(response: AuthTokenResponse): Observable<void> {
-    this.storeAccessToken(response);
-    return this.isAuthenticated() ? this.bootstrapSession() : of(undefined);
-  }
-
-  bootstrapSession(): Observable<void> {
-    this.bootstrapState.set('loading');
-
-    return this.http.get<AuthSessionBootstrap>(`${this.apiUrl}/auth/me`).pipe(
-      tap((response) => {
-        this.userState.set(response.user);
-        this.activeWorkshopState.set(response.activeWorkshop);
-        this.requiresPasswordChangeState.set(response.requiresPasswordChange);
-        this.bootstrapState.set('ready');
-      }),
-      map(() => undefined),
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          this.clearSession();
-        } else {
-          this.bootstrapState.set('error');
-        }
-        return of(undefined);
-      }),
-    );
+    return this.session.applyTokenResponse(response);
   }
 
   defaultAuthenticatedRoute(): string {
@@ -185,30 +128,22 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    const accessToken = this.accessToken();
-    return this.hasAccessToken(accessToken) ? accessToken : null;
+    return this.session.getAccessToken();
   }
 
-  private storeAccessToken(response: AuthTokenResponse): void {
-    if (!this.hasAccessToken(response?.accessToken)) {
-      this.clearSession();
-      return;
-    }
-
-    this.accessToken.set(response.accessToken);
-    this.activeWorkshopState.set(response.activeWorkshop);
-    this.requiresPasswordChangeState.set(response.requiresPasswordChange);
+  hasValidAccessToken(): boolean {
+    return this.session.hasValidAccessToken();
   }
 
-  private clearSession(): void {
-    this.accessToken.set(null);
-    this.userState.set(null);
-    this.activeWorkshopState.set(null);
-    this.requiresPasswordChangeState.set(false);
-    this.bootstrapState.set('idle');
+  needsRefresh(windowMs?: number): boolean {
+    return this.session.needsRefresh(windowMs);
   }
 
-  private hasAccessToken(accessToken: string | null | undefined): accessToken is string {
-    return typeof accessToken === 'string' && accessToken.trim().length > 0;
+  handleRefreshFailure(error: unknown): RefreshFailureKind {
+    return this.session.handleRefreshFailure(error);
+  }
+
+  dismissSessionExpired(): void {
+    this.session.dismissSessionExpired();
   }
 }

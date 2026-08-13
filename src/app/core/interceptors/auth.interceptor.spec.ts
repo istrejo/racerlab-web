@@ -1,22 +1,57 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { API_URL } from '../../shared/utils/api-url.token';
+import {
+  AuthRefreshError,
+  AuthRefreshSupersededError,
+  AuthService,
+} from '@core/services/auth/auth';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { authInterceptor } from './auth.interceptor';
-import { AuthService } from '@core/services/auth/auth';
 
 describe('authInterceptor', () => {
   let http: HttpTestingController;
   let accessToken: string | null;
+  let refreshNeeded: boolean;
+  let sessionExpired: boolean;
+  const refreshAccessToken = vi.fn();
+  const handleRefreshFailure = vi.fn();
+  const navigate = vi.fn(() => Promise.resolve(true));
 
   beforeEach(() => {
     accessToken = 'access-token';
+    refreshNeeded = false;
+    sessionExpired = false;
+    refreshAccessToken.mockReset();
+    refreshAccessToken.mockReturnValue(of('refreshed-token'));
+    handleRefreshFailure.mockReset();
+    handleRefreshFailure.mockReturnValue('invalid');
+    navigate.mockClear();
+
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
         { provide: API_URL, useValue: 'https://api.racerlab.test/api' },
-        { provide: AuthService, useValue: { getAccessToken: () => accessToken } },
+        {
+          provide: AuthService,
+          useValue: {
+            getAccessToken: () => accessToken,
+            needsRefresh: () => refreshNeeded,
+            refreshAccessToken,
+            handleRefreshFailure,
+            sessionExpired: () => sessionExpired,
+          },
+        },
+        { provide: Router, useValue: { url: '/customers', navigate } },
       ],
     });
 
@@ -25,54 +60,123 @@ describe('authInterceptor', () => {
 
   afterEach(() => http.verify());
 
-  it('adds a bearer token to protected API requests', () => {
+  it('adds the current bearer token to protected API requests', () => {
     TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
 
     const request = http.expectOne('https://api.racerlab.test/api/customers');
     expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
+    expect(refreshAccessToken).not.toHaveBeenCalled();
     request.flush([]);
   });
 
-  it('does not attach a bearer token to auth endpoints', () => {
-    TestBed.inject(HttpClient).post('https://api.racerlab.test/api/auth/refresh', {}).subscribe();
+  it.each(['refresh', 'login', 'signup', 'logout'])(
+    'does not attach a bearer token or refresh recursively for auth/%s',
+    (endpoint) => {
+      TestBed.inject(HttpClient)
+        .post(`https://api.racerlab.test/api/auth/${endpoint}`, {})
+        .subscribe();
 
-    const request = http.expectOne('https://api.racerlab.test/api/auth/refresh');
-    expect(request.request.headers.has('Authorization')).toBe(false);
-    request.flush({ accessToken: 'refreshed-token', tokenType: 'Bearer' });
+      const request = http.expectOne(`https://api.racerlab.test/api/auth/${endpoint}`);
+      expect(request.request.headers.has('Authorization')).toBe(false);
+      expect(refreshAccessToken).not.toHaveBeenCalled();
+      request.flush({});
+    },
+  );
+
+  it('refreshes preventively before sending a request with an expiring token', () => {
+    refreshNeeded = true;
+    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
+
+    expect(refreshAccessToken).toHaveBeenCalledWith('access-token');
+    const request = http.expectOne('https://api.racerlab.test/api/customers');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
+    request.flush([]);
   });
 
-  it('does not attach a bearer token to public signup', () => {
-    TestBed.inject(HttpClient).post('https://api.racerlab.test/api/auth/signup', {}).subscribe();
+  it('uses the refresh cookie when a protected request has no in-memory token', () => {
+    accessToken = null;
+    refreshNeeded = true;
+    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
 
-    const request = http.expectOne('https://api.racerlab.test/api/auth/signup');
-    expect(request.request.headers.has('Authorization')).toBe(false);
-    request.flush({ accessToken: 'signup-token', tokenType: 'Bearer' });
+    expect(refreshAccessToken).toHaveBeenCalledWith(undefined);
+    const request = http.expectOne('https://api.racerlab.test/api/customers');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
+    request.flush([]);
   });
 
-  it('attaches a bearer token to the protected password-change endpoint', () => {
+  it('refreshes and retries a protected request once after a 401', () => {
+    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
+    http
+      .expectOne('https://api.racerlab.test/api/customers')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(refreshAccessToken).toHaveBeenCalledWith('access-token');
+    const retry = http.expectOne('https://api.racerlab.test/api/customers');
+    expect(retry.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
+    retry.flush([]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not loop when the retried request is also unauthorized', () => {
+    let receivedError: HttpErrorResponse | undefined;
     TestBed.inject(HttpClient)
-      .post('https://api.racerlab.test/api/auth/change-password', {})
-      .subscribe();
+      .get('https://api.racerlab.test/api/customers')
+      .subscribe({ error: (error) => (receivedError = error) });
+    http
+      .expectOne('https://api.racerlab.test/api/customers')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    http
+      .expectOne('https://api.racerlab.test/api/customers')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
 
-    const request = http.expectOne('https://api.racerlab.test/api/auth/change-password');
-    expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
-    request.flush(null);
+    expect(refreshAccessToken).toHaveBeenCalledTimes(1);
+    expect(handleRefreshFailure).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '/customers' },
+    });
+    expect(receivedError?.status).toBe(401);
   });
 
-  it('attaches a bearer token to the session bootstrap endpoint', () => {
-    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/auth/me').subscribe();
+  it('returns to login when preventive refresh is temporarily unavailable', () => {
+    refreshNeeded = true;
+    const unavailable = new AuthRefreshError('unavailable');
+    refreshAccessToken.mockReturnValue(throwError(() => unavailable));
+    handleRefreshFailure.mockReturnValue('unavailable');
 
-    const request = http.expectOne('https://api.racerlab.test/api/auth/me');
-    expect(request.request.headers.get('Authorization')).toBe('Bearer access-token');
-    request.flush({ user: {}, activeWorkshop: null, requiresPasswordChange: false });
+    TestBed.inject(HttpClient)
+      .get('https://api.racerlab.test/api/customers')
+      .subscribe({ error: () => undefined });
+
+    http.expectNone('https://api.racerlab.test/api/customers');
+    expect(navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: { returnUrl: '/customers' },
+    });
   });
 
-  it('does not attach a bearer token when the session token is blank', () => {
-    accessToken = ' ';
-    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
+  it('does not replace the first navigation when expiration is already handled', () => {
+    sessionExpired = true;
+    refreshNeeded = true;
+    refreshAccessToken.mockReturnValue(throwError(() => new AuthRefreshError('invalid')));
 
-    const request = http.expectOne('https://api.racerlab.test/api/customers');
-    expect(request.request.headers.has('Authorization')).toBe(false);
-    request.flush([]);
+    TestBed.inject(HttpClient)
+      .get('https://api.racerlab.test/api/customers')
+      .subscribe({ error: () => undefined });
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('aborts an obsolete request without expiring the newer session', () => {
+    refreshNeeded = true;
+    refreshAccessToken.mockReturnValue(
+      throwError(() => new AuthRefreshSupersededError()),
+    );
+
+    TestBed.inject(HttpClient)
+      .post('https://api.racerlab.test/api/customers', { name: 'Old context' })
+      .subscribe({ error: () => undefined });
+
+    http.expectNone('https://api.racerlab.test/api/customers');
+    expect(handleRefreshFailure).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 });

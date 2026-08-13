@@ -5,7 +5,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '../services/auth/auth';
+import { AuthService } from '@core/services/auth/auth';
 import { customerReadGuard } from './customer-read-guard';
 
 describe('customerReadGuard', () => {

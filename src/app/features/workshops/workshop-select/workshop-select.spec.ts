@@ -27,6 +27,7 @@ describe('WorkshopSelectComponent', () => {
           useValue: {
             activeWorkshop: () => currentWorkshop,
             hasActiveWorkshop: () => true,
+            defaultAuthenticatedRoute: () => '/dashboard',
           },
         },
         {

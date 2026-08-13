@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '@core/services/auth/auth';
@@ -25,6 +25,10 @@ describe('ChangePasswordComponent', () => {
           },
         },
         { provide: Router, useValue: { navigateByUrl } },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: convertToParamMap({}) } },
+        },
       ],
     }).compileComponents();
   });

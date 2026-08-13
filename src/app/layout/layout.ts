@@ -23,6 +23,9 @@ export class LayoutComponent {
   readonly userName = computed(() => this.auth.user()?.name ?? 'Usuario');
   readonly userEmail = computed(() => this.auth.user()?.email ?? '');
   readonly userInitial = computed(() => this.userName().trim().slice(0, 1).toUpperCase() || '?');
+  readonly profileLoading = computed(
+    () => this.auth.profileState() === 'loading' && this.auth.user() === null,
+  );
   readonly mobileNavigationOpen = signal(false);
   readonly userMenuOpen = signal(false);
   readonly logoutPending = signal(false);
@@ -36,7 +39,7 @@ export class LayoutComponent {
   }
 
   toggleUserMenu(): void {
-    if (this.logoutPending()) {
+    if (this.logoutPending() || this.profileLoading()) {
       return;
     }
 

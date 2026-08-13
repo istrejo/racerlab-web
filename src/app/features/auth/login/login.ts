@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
+import { authenticatedDestination } from '@core/services/auth/auth-navigation';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,7 @@ import { AuthService } from '@core/services/auth/auth';
 export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly pending = signal(false);
@@ -45,7 +47,10 @@ export class LoginComponent {
 
     this.pending.set(true);
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => void this.router.navigateByUrl(this.auth.defaultAuthenticatedRoute()),
+      next: () =>
+        void this.router.navigateByUrl(
+          authenticatedDestination(this.auth, this.route.snapshot.queryParamMap.get('returnUrl')),
+        ),
       error: () => {
         this.pending.set(false);
         this.serverError.set(

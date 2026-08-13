@@ -32,6 +32,7 @@ describe('LayoutComponent', () => {
               role: 'OWNER',
             }),
             user: signal({ id: 'user-1', name: 'Ada Lovelace', email: 'ada@racerlab.test' }),
+            profileState: signal('ready'),
             canManageUsers: () => false,
             canReadCustomers,
             logout,

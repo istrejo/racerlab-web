@@ -9,10 +9,12 @@ describe('LoginComponent', () => {
   const login = vi.fn();
   const navigateByUrl = vi.fn(() => Promise.resolve(true));
   let defaultAuthenticatedRoute: string;
+  let returnUrl: string | null;
 
   beforeEach(async () => {
     login.mockReset();
     defaultAuthenticatedRoute = '/dashboard';
+    returnUrl = null;
     navigateByUrl.mockClear();
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
@@ -24,7 +26,10 @@ describe('LoginComponent', () => {
             defaultAuthenticatedRoute: () => defaultAuthenticatedRoute,
           },
         },
-        { provide: ActivatedRoute, useValue: {} },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: () => returnUrl } } },
+        },
         { provide: Router, useValue: { navigateByUrl } },
       ],
     }).compileComponents();
@@ -78,6 +83,28 @@ describe('LoginComponent', () => {
     component.submit();
 
     expect(navigateByUrl).toHaveBeenCalledWith('/change-password');
+  });
+
+  it('returns to a safe private route after login', () => {
+    returnUrl = '/customers/42?tab=vehicles';
+    login.mockReturnValue(of(undefined));
+    const component = TestBed.createComponent(LoginComponent).componentInstance;
+    component.form.setValue({ email: 'advisor@racerlab.test', password: 'password123' });
+
+    component.submit();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/customers/42?tab=vehicles');
+  });
+
+  it('ignores external return URLs', () => {
+    returnUrl = '//malicious.example/path';
+    login.mockReturnValue(of(undefined));
+    const component = TestBed.createComponent(LoginComponent).componentInstance;
+    component.form.setValue({ email: 'advisor@racerlab.test', password: 'password123' });
+
+    component.submit();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/dashboard');
   });
 
   it('redirects a login without workshop context to workshop creation', () => {
