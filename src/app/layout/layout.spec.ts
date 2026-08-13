@@ -11,10 +11,12 @@ describe('LayoutComponent', () => {
   let component: LayoutComponent;
   let fixture: ComponentFixture<LayoutComponent>;
   const logout = vi.fn(() => of(undefined));
+  const canReadCustomers = signal(true);
 
   beforeEach(async () => {
     logout.mockReset();
     logout.mockReturnValue(of(undefined));
+    canReadCustomers.set(true);
 
     await TestBed.configureTestingModule({
       imports: [LayoutComponent],
@@ -31,6 +33,7 @@ describe('LayoutComponent', () => {
             }),
             user: signal({ id: 'user-1', name: 'Ada Lovelace', email: 'ada@racerlab.test' }),
             canManageUsers: () => false,
+            canReadCustomers,
             logout,
           },
         },
@@ -46,11 +49,22 @@ describe('LayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows customer navigation only when the active role can read customers', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Customers');
+
+    canReadCustomers.set(false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Customers');
+  });
+
   it('renders an accessible collapsed navigation toggle', () => {
     fixture.detectChanges();
 
     const fixtureElement: HTMLElement = fixture.nativeElement;
-    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>('button[aria-controls="application-navigation"]');
+    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>(
+      'button[aria-controls="application-navigation"]',
+    );
     const navigation = fixtureElement.querySelector<HTMLElement>('#application-navigation');
 
     expect(navigationToggle?.getAttribute('aria-label')).toBe('Toggle navigation');
@@ -62,7 +76,9 @@ describe('LayoutComponent', () => {
     fixture.detectChanges();
 
     const fixtureElement: HTMLElement = fixture.nativeElement;
-    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>('button[aria-controls="application-navigation"]');
+    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>(
+      'button[aria-controls="application-navigation"]',
+    );
     const navigation = fixtureElement.querySelector<HTMLElement>('#application-navigation');
 
     navigationToggle?.click();
@@ -77,8 +93,12 @@ describe('LayoutComponent', () => {
     fixture.detectChanges();
 
     const fixtureElement: HTMLElement = fixture.nativeElement;
-    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>('button[aria-controls="application-navigation"]');
-    const navigationBackdrop = fixtureElement.querySelector<HTMLButtonElement>('button[aria-label="Close navigation"]');
+    const navigationToggle = fixtureElement.querySelector<HTMLButtonElement>(
+      'button[aria-controls="application-navigation"]',
+    );
+    const navigationBackdrop = fixtureElement.querySelector<HTMLButtonElement>(
+      'button[aria-label="Close navigation"]',
+    );
     const navigation = fixtureElement.querySelector<HTMLElement>('#application-navigation');
 
     navigationToggle?.click();
@@ -108,9 +128,7 @@ describe('LayoutComponent', () => {
 
     expect(profileTrigger?.getAttribute('aria-expanded')).toBe('true');
     expect(fixtureElement.querySelector('#user-menu')?.textContent).toContain('Ada Lovelace');
-    expect(fixtureElement.querySelector('#user-menu')?.textContent).toContain(
-      'ada@racerlab.test',
-    );
+    expect(fixtureElement.querySelector('#user-menu')?.textContent).toContain('ada@racerlab.test');
     expect(logout).not.toHaveBeenCalled();
   });
 
@@ -163,9 +181,7 @@ describe('LayoutComponent', () => {
     fixtureElement.querySelector<HTMLButtonElement>('[data-action="logout"]')?.click();
     fixture.detectChanges();
 
-    const logoutAction = fixtureElement.querySelector<HTMLButtonElement>(
-      '[data-action="logout"]',
-    );
+    const logoutAction = fixtureElement.querySelector<HTMLButtonElement>('[data-action="logout"]');
     expect(fixtureElement.querySelector('#user-menu')).not.toBeNull();
     expect(logoutAction?.disabled).toBe(true);
     expect(logoutAction?.textContent).toContain('Cerrando sesión');

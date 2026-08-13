@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from '@core/guards/admin-guard';
 import { authGuard } from '@core/guards/auth-guard';
+import { customerReadGuard } from '@core/guards/customer-read-guard';
+import { customerWriteGuard } from '@core/guards/customer-write-guard';
 import { passwordChangeGuard } from '@core/guards/password-change-guard';
 import { workshopGuard } from '@core/guards/workshop-guard';
 
@@ -49,6 +51,38 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard/dashboard').then(
             (component) => component.DashboardComponent,
+          ),
+      },
+      {
+        path: 'customers',
+        canActivate: [customerReadGuard],
+        loadComponent: () =>
+          import('./features/customers/customer-list/customer-list').then(
+            (component) => component.CustomerListComponent,
+          ),
+      },
+      {
+        path: 'customers/new',
+        canActivate: [customerWriteGuard],
+        loadComponent: () =>
+          import('./features/customers/customer-new/customer-new').then(
+            (component) => component.CustomerNewComponent,
+          ),
+      },
+      {
+        path: 'customers/:id/edit',
+        canActivate: [customerWriteGuard],
+        loadComponent: () =>
+          import('./features/customers/customer-edit/customer-edit').then(
+            (component) => component.CustomerEditComponent,
+          ),
+      },
+      {
+        path: 'customers/:id',
+        canActivate: [customerReadGuard],
+        loadComponent: () =>
+          import('./features/customers/customer-detail/customer-detail').then(
+            (component) => component.CustomerDetailComponent,
           ),
       },
       {

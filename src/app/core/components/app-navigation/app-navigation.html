@@ -52,9 +52,16 @@
         >
       </li>
       <li>
-        <span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"
-          ><svg aria-hidden="true" class="size-4"><use href="#icon-users" /></svg>Customers</span
-        >
+        @if (auth.canReadCustomers()) {
+          <a
+            ariaCurrentWhenActive="page"
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400 hover:bg-slate-800 hover:text-white"
+            routerLink="/customers"
+            routerLinkActive="bg-slate-800 text-white"
+            (click)="mobileNavigationDismissed.emit()"
+            ><svg aria-hidden="true" class="size-4"><use href="#icon-users" /></svg>Customers</a
+          >
+        }
       </li>
       <li>
         <span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"

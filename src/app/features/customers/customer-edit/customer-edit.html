@@ -1,0 +1,33 @@
+<main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+  <section class="mx-auto max-w-3xl">
+    <a
+      class="text-sm font-semibold text-[#004AC6] hover:underline"
+      [routerLink]="['/customers', customer()?.id]"
+      >← Volver al cliente</a
+    >
+    <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <p class="text-sm font-semibold text-[#F97316]">Clientes</p>
+      <h1 class="mt-2 text-2xl font-bold">Editar cliente</h1>
+      @if (error()) {
+        <p
+          class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+          role="alert"
+        >
+          {{ error() }}
+        </p>
+      }
+      @if (loading()) {
+        <p class="mt-6" aria-live="polite">Cargando cliente...</p>
+      } @else if (customer(); as current) {
+        <div class="mt-6">
+          <app-customer-form
+            [customer]="current"
+            [pending]="pending()"
+            [cancelHref]="'/customers/' + current.id"
+            (submitted)="save($event)"
+          />
+        </div>
+      }
+    </div>
+  </section>
+</main>
