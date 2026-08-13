@@ -52,4 +52,44 @@ describe('WorkshopsService', () => {
 
     expect(applyTokenResponse).toHaveBeenCalledWith(response);
   });
+
+  it('lists active workshop memberships', () => {
+    service.list().subscribe((workshops) => expect(workshops[0]?.name).toBe('Racer Lab Norte'));
+
+    const request = http.expectOne('https://api.racerlab.test/api/workshops');
+    expect(request.request.method).toBe('GET');
+    request.flush([
+      {
+        id: 'workshop-id',
+        name: 'Racer Lab Norte',
+        ownerUserId: 'owner-id',
+        membershipId: 'membership-id',
+        role: 'OWNER',
+      },
+    ]);
+  });
+
+  it('selects a workshop and installs the returned session', () => {
+    const response: AuthTokenResponse = {
+      accessToken: 'selected-token',
+      tokenType: 'Bearer',
+      activeWorkshop: {
+        workshopId: 'workshop-id',
+        membershipId: 'membership-id',
+        name: 'Racer Lab Norte',
+        role: 'OWNER',
+      },
+      requiresWorkshopSelection: false,
+      requiresPasswordChange: false,
+    };
+
+    service.select('workshop-id').subscribe();
+
+    const request = http.expectOne('https://api.racerlab.test/api/auth/select-workshop');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ workshopId: 'workshop-id' });
+    request.flush(response);
+
+    expect(applyTokenResponse).toHaveBeenCalledWith(response);
+  });
 });

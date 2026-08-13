@@ -96,7 +96,7 @@ describe('AuthService', () => {
 
     expect(auth.isAuthenticated()).toBe(true);
     expect(auth.hasActiveWorkshop()).toBe(false);
-    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/new');
+    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/select');
   });
 
   it('restores an access token from the refresh cookie', async () => {
@@ -212,7 +212,7 @@ describe('AuthService', () => {
     expect(auth.sessionBootstrapState()).toBe('error');
   });
 
-  it('routes authenticated sessions without an active workshop to onboarding', () => {
+  it('routes authenticated sessions without an active workshop to selection', () => {
     auth.applyTokenResponse({
       ...response,
       activeWorkshop: null,
@@ -220,7 +220,7 @@ describe('AuthService', () => {
     });
 
     expect(auth.hasActiveWorkshop()).toBe(false);
-    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/new');
+    expect(auth.defaultAuthenticatedRoute()).toBe('/workshops/select');
   });
 
   it('prioritizes the mandatory password change before workshop onboarding', () => {

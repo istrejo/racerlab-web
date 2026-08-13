@@ -1,0 +1,77 @@
+<main class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-8 text-slate-950">
+  <section
+    class="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10"
+    aria-labelledby="workshop-select-title"
+  >
+    <p class="text-sm font-semibold text-[#F97316]">Contexto de trabajo</p>
+    <h1 id="workshop-select-title" class="mt-2 text-2xl font-bold">Elegí un taller</h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Seleccioná dónde querés trabajar. Podrás cambiarlo nuevamente desde la navegación.
+    </p>
+
+    @if (error()) {
+      <div
+        class="mt-5 flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+        role="alert"
+      >
+        <span>{{ error() }}</span>
+        <button
+          class="font-semibold underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          (click)="load()"
+          type="button"
+        >
+          Reintentar
+        </button>
+      </div>
+    }
+
+    @if (loading()) {
+      <p class="mt-8 text-sm text-slate-600" role="status">Cargando talleres...</p>
+    } @else if (workshops().length > 0) {
+      <ul class="mt-6 space-y-3" aria-label="Talleres disponibles">
+        @for (workshop of workshops(); track workshop.membershipId) {
+          <li>
+            <button
+              class="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 text-left hover:border-blue-500 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] disabled:cursor-wait disabled:opacity-60"
+              [attr.aria-current]="
+                workshop.id === auth.activeWorkshop()?.workshopId ? 'true' : null
+              "
+              [disabled]="selectingId() !== null"
+              (click)="select(workshop)"
+              type="button"
+            >
+              <span
+                ><span class="block font-semibold">{{ workshop.name }}</span
+                ><span class="mt-1 block text-xs text-slate-500">{{ workshop.role }}</span></span
+              >
+              <span class="text-sm font-semibold text-blue-700">
+                {{
+                  workshop.id === auth.activeWorkshop()?.workshopId
+                    ? 'Actual'
+                    : selectingId() === workshop.id
+                      ? 'Cambiando...'
+                      : 'Seleccionar'
+                }}
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="mt-7 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-5">
+      @if (auth.hasActiveWorkshop()) {
+        <a
+          class="flex h-11 items-center px-3 text-sm font-semibold text-slate-700"
+          routerLink="/dashboard"
+          >Volver</a
+        >
+      }
+      <a
+        class="flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2"
+        routerLink="/workshops/new"
+        >Crear taller</a
+      >
+    </div>
+  </section>
+</main>
