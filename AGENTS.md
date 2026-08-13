@@ -45,8 +45,10 @@ Use `src/app/core` for cross-cutting infrastructure, `src/app/shared` for reusab
 
 - Give every guard under a `guards` directory its own named subdirectory. Keep each guard and its focused tests together, for example `guards/auth/auth-guard.ts` and `guards/auth/auth-guard.spec.ts`.
 - Keep module-level types and interfaces in that module's `model` directory. Do not declare reusable API, domain, or service-contract types inside components, guards, interceptors, or service implementation files.
-- Keep service classes focused on one responsibility. Orchestration services such as `AuthService` must delegate access-token parsing and state to a token service, and session restoration, refresh coordination, profile state, logout, and cross-tab synchronization to a session service.
-- Preserve a small facade when many components depend on a service contract; move implementation details behind focused services instead of spreading session logic across consumers.
+- Keep service classes focused on one responsibility. `AuthService` may orchestrate the small client-side authentication state, while `services/token/token.ts` only stores the in-memory access token.
+- Treat the backend as the session authority. The frontend must not parse JWT expiry, persist access tokens, coordinate sessions with Web Locks or BroadcastChannel, or implement refresh-token replay rules.
+- Use refresh only when the in-memory access token is missing or after a protected request returns `401`. Share one in-flight refresh per tab and retry the failed request at most once.
+- Apply the complete login, signup, refresh, and workshop-selection response directly; do not follow those responses with an automatic `/auth/me` request.
 
 ## Angular Rules
 

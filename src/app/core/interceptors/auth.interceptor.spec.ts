@@ -8,11 +8,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { API_URL } from '../../shared/utils/api-url.token';
-import {
-  AuthRefreshError,
-  AuthRefreshSupersededError,
-  AuthService,
-} from '@core/services/auth/auth';
+import { AuthRefreshError, AuthService } from '@core/services/auth/auth';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { authInterceptor } from './auth.interceptor';
@@ -20,7 +16,6 @@ import { authInterceptor } from './auth.interceptor';
 describe('authInterceptor', () => {
   let http: HttpTestingController;
   let accessToken: string | null;
-  let refreshNeeded: boolean;
   let sessionExpired: boolean;
   const refreshAccessToken = vi.fn();
   const handleRefreshFailure = vi.fn();
@@ -28,7 +23,6 @@ describe('authInterceptor', () => {
 
   beforeEach(() => {
     accessToken = 'access-token';
-    refreshNeeded = false;
     sessionExpired = false;
     refreshAccessToken.mockReset();
     refreshAccessToken.mockReturnValue(of('refreshed-token'));
@@ -45,7 +39,6 @@ describe('authInterceptor', () => {
           provide: AuthService,
           useValue: {
             getAccessToken: () => accessToken,
-            needsRefresh: () => refreshNeeded,
             refreshAccessToken,
             handleRefreshFailure,
             sessionExpired: () => sessionExpired,
@@ -83,22 +76,11 @@ describe('authInterceptor', () => {
     },
   );
 
-  it('refreshes preventively before sending a request with an expiring token', () => {
-    refreshNeeded = true;
-    TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
-
-    expect(refreshAccessToken).toHaveBeenCalledWith('access-token');
-    const request = http.expectOne('https://api.racerlab.test/api/customers');
-    expect(request.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
-    request.flush([]);
-  });
-
   it('uses the refresh cookie when a protected request has no in-memory token', () => {
     accessToken = null;
-    refreshNeeded = true;
     TestBed.inject(HttpClient).get('https://api.racerlab.test/api/customers').subscribe();
 
-    expect(refreshAccessToken).toHaveBeenCalledWith(undefined);
+    expect(refreshAccessToken).toHaveBeenCalledWith();
     const request = http.expectOne('https://api.racerlab.test/api/customers');
     expect(request.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
     request.flush([]);
@@ -114,6 +96,20 @@ describe('authInterceptor', () => {
     const retry = http.expectOne('https://api.racerlab.test/api/customers');
     expect(retry.request.headers.get('Authorization')).toBe('Bearer refreshed-token');
     retry.flush([]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not refresh or redirect after a forbidden response', () => {
+    let receivedError: HttpErrorResponse | undefined;
+    TestBed.inject(HttpClient)
+      .get('https://api.racerlab.test/api/customers')
+      .subscribe({ error: (error) => (receivedError = error) });
+    http
+      .expectOne('https://api.racerlab.test/api/customers')
+      .flush(null, { status: 403, statusText: 'Forbidden' });
+
+    expect(receivedError?.status).toBe(403);
+    expect(refreshAccessToken).not.toHaveBeenCalled();
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -137,8 +133,8 @@ describe('authInterceptor', () => {
     expect(receivedError?.status).toBe(401);
   });
 
-  it('returns to login when preventive refresh is temporarily unavailable', () => {
-    refreshNeeded = true;
+  it('returns to login when restoration from a missing token is unavailable', () => {
+    accessToken = null;
     const unavailable = new AuthRefreshError('unavailable');
     refreshAccessToken.mockReturnValue(throwError(() => unavailable));
     handleRefreshFailure.mockReturnValue('unavailable');
@@ -155,7 +151,7 @@ describe('authInterceptor', () => {
 
   it('does not replace the first navigation when expiration is already handled', () => {
     sessionExpired = true;
-    refreshNeeded = true;
+    accessToken = null;
     refreshAccessToken.mockReturnValue(throwError(() => new AuthRefreshError('invalid')));
 
     TestBed.inject(HttpClient)
@@ -165,18 +161,4 @@ describe('authInterceptor', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('aborts an obsolete request without expiring the newer session', () => {
-    refreshNeeded = true;
-    refreshAccessToken.mockReturnValue(
-      throwError(() => new AuthRefreshSupersededError()),
-    );
-
-    TestBed.inject(HttpClient)
-      .post('https://api.racerlab.test/api/customers', { name: 'Old context' })
-      .subscribe({ error: () => undefined });
-
-    http.expectNone('https://api.racerlab.test/api/customers');
-    expect(handleRefreshFailure).not.toHaveBeenCalled();
-    expect(navigate).not.toHaveBeenCalled();
-  });
 });

@@ -33,6 +33,7 @@ describe('WorkshopsService', () => {
     const response: AuthTokenResponse = {
       accessToken: 'workshop-token',
       tokenType: 'Bearer',
+      user: { id: 'user-id', name: 'Ada', email: 'ada@example.com' },
       activeWorkshop: {
         workshopId: 'workshop-id',
         membershipId: 'membership-id',
@@ -73,6 +74,7 @@ describe('WorkshopsService', () => {
     const response: AuthTokenResponse = {
       accessToken: 'selected-token',
       tokenType: 'Bearer',
+      user: { id: 'user-id', name: 'Ada', email: 'ada@example.com' },
       activeWorkshop: {
         workshopId: 'workshop-id',
         membershipId: 'membership-id',

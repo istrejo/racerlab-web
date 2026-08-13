@@ -1,17 +1,37 @@
-import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
-import { map, Observable, tap } from 'rxjs';
-import { AuthSessionService } from '../session/session';
-import type {
+import {
+  catchError,
+  defer,
+  finalize,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  tap,
+  throwError,
+  timeout,
+  TimeoutError,
+} from 'rxjs';
+import { AuthTokenService } from '../token/token';
+import {
+  AuthRefreshError,
+  AuthSessionBootstrap,
   AuthTokenResponse,
+  AuthUser,
+  ActiveWorkshop,
   LoginRequest,
+  ProfileState,
   RefreshFailureKind,
   SessionRestoreResult,
+  SessionState,
   SignupRequest,
 } from '../../model/auth.interface';
 
-export { AuthRefreshError, AuthRefreshSupersededError } from '../../model/auth.interface';
+const AUTH_REQUEST_TIMEOUT_MS = 5_000;
+
+export { AuthRefreshError } from '../../model/auth.interface';
 export type {
   ActiveWorkshop,
   AuthSessionBootstrap,
@@ -31,19 +51,28 @@ export type {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = inject(API_URL);
-  private readonly session = inject(AuthSessionService);
+  private readonly tokenService = inject(AuthTokenService);
+  private readonly userState = signal<AuthUser | null>(null);
+  private readonly activeWorkshopState = signal<ActiveWorkshop | null>(null);
+  private readonly requiresPasswordChangeState = signal(false);
+  private readonly sessionStateValue = signal<SessionState>('idle');
+  private readonly profileStateValue = signal<ProfileState>('idle');
+  private readonly sessionExpiredState = signal(false);
+  private readonly sessionClosedState = signal(false);
+  private refreshInFlight$: Observable<string> | null = null;
+  private restoreInFlight$: Observable<SessionRestoreResult> | null = null;
 
-  readonly isAuthenticated = this.session.isAuthenticated;
-  readonly user = this.session.user;
-  readonly activeWorkshop = this.session.activeWorkshop;
-  readonly profile = this.session.profile;
-  readonly hasActiveWorkshop = this.session.hasActiveWorkshop;
-  readonly role = this.session.role;
-  readonly requiresPasswordChange = this.session.requiresPasswordChange;
-  readonly sessionState = this.session.sessionState;
-  readonly profileState = this.session.profileState;
-  readonly sessionExpired = this.session.sessionExpired;
-  readonly sessionClosed = this.session.sessionClosed;
+  readonly isAuthenticated = computed(() => this.tokenService.hasAccessToken());
+  readonly user = this.userState.asReadonly();
+  readonly activeWorkshop = this.activeWorkshopState.asReadonly();
+  readonly profile = computed(() => this.activeWorkshopState()?.profile ?? null);
+  readonly hasActiveWorkshop = computed(() => this.activeWorkshopState() !== null);
+  readonly role = computed(() => this.activeWorkshopState()?.role ?? null);
+  readonly requiresPasswordChange = this.requiresPasswordChangeState.asReadonly();
+  readonly sessionState = this.sessionStateValue.asReadonly();
+  readonly profileState = this.profileStateValue.asReadonly();
+  readonly sessionExpired = this.sessionExpiredState.asReadonly();
+  readonly sessionClosed = this.sessionClosedState.asReadonly();
   readonly canManageUsers = computed(() => {
     const role = this.role();
     return role === 'ADMIN' || role === 'OWNER';
@@ -68,55 +97,100 @@ export class AuthService {
   });
 
   login(credentials: LoginRequest): Observable<void> {
-    return this.http
-      .post<AuthTokenResponse>(`${this.apiUrl}/auth/login`, credentials, {
-        withCredentials: true,
-      })
-      .pipe(
-        tap((response) => this.session.startSession(response)),
-        map(() => undefined),
-      );
+    return this.requestSession('/auth/login', credentials);
   }
 
   signup(identity: SignupRequest): Observable<void> {
-    return this.http
-      .post<AuthTokenResponse>(`${this.apiUrl}/auth/signup`, identity, {
-        withCredentials: true,
-      })
-      .pipe(
-        tap((response) => this.session.startSession(response)),
-        map(() => undefined),
-      );
+    return this.requestSession('/auth/signup', identity);
   }
 
   ensureSession(forceRefresh = false): Observable<SessionRestoreResult> {
-    return this.session.ensureSession(forceRefresh);
+    if (!forceRefresh && this.hasValidAccessToken()) {
+      this.sessionStateValue.set('authenticated');
+      return of('authenticated');
+    }
+
+    return this.restoreSession();
   }
 
   probeSession(): Observable<SessionRestoreResult> {
-    return this.session.probeSession();
+    if (this.hasValidAccessToken()) {
+      return of('authenticated');
+    }
+
+    return this.restoreSession();
   }
 
   refreshAccessToken(staleAccessToken?: string): Observable<string> {
-    return this.session.refreshAccessToken(staleAccessToken);
+    const currentToken = this.getAccessToken();
+    if (staleAccessToken && currentToken && currentToken !== staleAccessToken) {
+      return of(currentToken);
+    }
+
+    if (this.refreshInFlight$) {
+      return this.refreshInFlight$;
+    }
+
+    const refresh$ = this.http
+      .post<AuthTokenResponse>(`${this.apiUrl}/auth/refresh`, {}, { withCredentials: true })
+      .pipe(
+        timeout(AUTH_REQUEST_TIMEOUT_MS),
+        tap((response) => this.acceptTokenResponse(response)),
+        map((response) => response.accessToken),
+        catchError((error: unknown) =>
+          throwError(() =>
+            error instanceof AuthRefreshError
+              ? error
+              : new AuthRefreshError(this.classifyRefreshFailure(error), { cause: error }),
+          ),
+        ),
+        finalize(() => {
+          if (this.refreshInFlight$ === refresh$) {
+            this.refreshInFlight$ = null;
+          }
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+
+    this.refreshInFlight$ = refresh$;
+    return refresh$;
   }
 
   loadCurrentUser(): Observable<void> {
-    return this.session.loadCurrentUser();
+    this.profileStateValue.set('loading');
+    return this.http.get<AuthSessionBootstrap>(`${this.apiUrl}/auth/me`).pipe(
+      tap((response) => {
+        this.userState.set(response.user);
+        this.activeWorkshopState.set(response.activeWorkshop);
+        this.requiresPasswordChangeState.set(response.requiresPasswordChange);
+        this.profileStateValue.set('ready');
+      }),
+      map(() => undefined),
+      catchError((error: unknown) => {
+        this.profileStateValue.set('error');
+        return throwError(() => error);
+      }),
+    );
   }
 
   logout(): Observable<void> {
-    return this.session.logout();
+    this.sessionExpiredState.set(false);
+    this.sessionClosedState.set(false);
+    this.clearSession();
+    return defer(() =>
+      this.http.post<void>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true }),
+    ).pipe(finalize(() => this.clearSession()));
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
     return this.http
       .post<void>(`${this.apiUrl}/auth/change-password`, { currentPassword, newPassword })
-      .pipe(tap(() => this.session.markPasswordChanged()));
+      .pipe(tap(() => this.requiresPasswordChangeState.set(false)));
   }
 
   applyTokenResponse(response: AuthTokenResponse): Observable<void> {
-    return this.session.applyTokenResponse(response);
+    this.acceptTokenResponse(response);
+    return of(undefined);
   }
 
   defaultAuthenticatedRoute(): string {
@@ -128,22 +202,96 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    return this.session.getAccessToken();
+    return this.tokenService.getAccessToken();
   }
 
   hasValidAccessToken(): boolean {
-    return this.session.hasValidAccessToken();
-  }
-
-  needsRefresh(windowMs?: number): boolean {
-    return this.session.needsRefresh(windowMs);
+    return this.tokenService.hasAccessToken();
   }
 
   handleRefreshFailure(error: unknown): RefreshFailureKind {
-    return this.session.handleRefreshFailure(error);
+    const kind = error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
+    this.clearSession();
+    this.sessionExpiredState.set(true);
+    return kind;
   }
 
   dismissSessionExpired(): void {
-    this.session.dismissSessionExpired();
+    this.sessionExpiredState.set(false);
+    this.sessionClosedState.set(false);
+  }
+
+  private requestSession(path: string, body: unknown): Observable<void> {
+    return this.http
+      .post<AuthTokenResponse>(`${this.apiUrl}${path}`, body, { withCredentials: true })
+      .pipe(
+        tap((response) => this.acceptTokenResponse(response)),
+        map(() => undefined),
+      );
+  }
+
+  private restoreSession(): Observable<SessionRestoreResult> {
+    if (this.restoreInFlight$) {
+      return this.restoreInFlight$;
+    }
+
+    this.sessionStateValue.set('restoring');
+    const restore$ = this.refreshAccessToken().pipe(
+      map(() => 'authenticated' as const),
+      catchError((error: unknown) => {
+        const kind = error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
+        this.clearSession();
+        this.sessionExpiredState.set(false);
+        return of(kind === 'invalid' ? ('anonymous' as const) : ('unavailable' as const));
+      }),
+      finalize(() => {
+        if (this.restoreInFlight$ === restore$) {
+          this.restoreInFlight$ = null;
+        }
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    this.restoreInFlight$ = restore$;
+    return restore$;
+  }
+
+  private acceptTokenResponse(response: AuthTokenResponse): void {
+    if (!response?.accessToken?.trim() || !response.user?.id) {
+      this.clearSession();
+      throw new AuthRefreshError('invalid');
+    }
+
+    this.tokenService.setAccessToken(response.accessToken);
+    this.userState.set(response.user);
+    this.activeWorkshopState.set(response.activeWorkshop);
+    this.requiresPasswordChangeState.set(response.requiresPasswordChange);
+    this.sessionStateValue.set('authenticated');
+    this.profileStateValue.set('ready');
+    this.sessionExpiredState.set(false);
+    this.sessionClosedState.set(false);
+  }
+
+  private classifyRefreshFailure(error: unknown): RefreshFailureKind {
+    if (error instanceof TimeoutError) {
+      return 'unavailable';
+    }
+
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'unavailable';
+    }
+
+    return error.status === 0 || error.status === 408 || error.status === 429 || error.status >= 500
+      ? 'unavailable'
+      : 'invalid';
+  }
+
+  private clearSession(): void {
+    this.tokenService.clear();
+    this.userState.set(null);
+    this.activeWorkshopState.set(null);
+    this.requiresPasswordChangeState.set(false);
+    this.sessionStateValue.set('anonymous');
+    this.profileStateValue.set('idle');
   }
 }

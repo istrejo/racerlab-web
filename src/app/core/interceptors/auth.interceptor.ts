@@ -7,9 +7,9 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { API_URL } from '../../shared/utils/api-url.token';
-import { AuthRefreshSupersededError, AuthService } from '@core/services/auth/auth';
+import { AuthService } from '@core/services/auth/auth';
 import { sanitizeReturnUrl } from '@core/services/auth/auth-navigation';
+import { API_URL } from '@shared/utils/api-url.token';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 
 const AUTH_RETRIED = new HttpContextToken<boolean>(() => false);
@@ -51,12 +51,11 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     );
 
   const accessToken = auth.getAccessToken();
-  const accessToken$ =
-    accessToken && !auth.needsRefresh()
-      ? of(accessToken)
-      : auth
-          .refreshAccessToken(accessToken ?? undefined)
-          .pipe(catchError((error: unknown) => handleRefreshFailure(auth, router, error)));
+  const accessToken$ = accessToken
+    ? of(accessToken)
+    : auth
+        .refreshAccessToken()
+        .pipe(catchError((error: unknown) => handleRefreshFailure(auth, router, error)));
 
   return accessToken$.pipe(switchMap((token) => send(token)));
 };
@@ -77,10 +76,6 @@ function handleRefreshFailure(
   router: Router,
   error: unknown,
 ): Observable<never> {
-  if (error instanceof AuthRefreshSupersededError) {
-    return throwError(() => error);
-  }
-
   const sessionExpiryAlreadyHandled = auth.sessionExpired();
   auth.handleRefreshFailure(error);
   if (!sessionExpiryAlreadyHandled) {
