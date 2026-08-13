@@ -29,7 +29,7 @@ export interface ActiveWorkshop {
   membershipId: string;
   name: string;
   role: UserRole;
-  profile?: WorkshopProfile;
+  profile: WorkshopProfile;
 }
 
 export interface AuthTokenResponse {

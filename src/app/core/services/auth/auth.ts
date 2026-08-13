@@ -174,12 +174,16 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
+    // Clear local state eagerly so the UI reflects the logged-out condition
+    // immediately, before the server round-trip completes.
+    // TODO: set sessionClosedState.set(true) here once cross-tab logout
+    // detection is added (e.g. via a backend-controlled mechanism). Using
+    // BroadcastChannel or localStorage events is explicitly forbidden by
+    // AGENTS.md. Until then, sessionClosed is intentionally always false.
     this.sessionExpiredState.set(false);
     this.sessionClosedState.set(false);
     this.clearSession();
-    return defer(() =>
-      this.http.post<void>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true }),
-    ).pipe(finalize(() => this.clearSession()));
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true });
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
@@ -210,7 +214,8 @@ export class AuthService {
   }
 
   handleRefreshFailure(error: unknown): RefreshFailureKind {
-    const kind = error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
+    const kind =
+      error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
     this.clearSession();
     this.sessionExpiredState.set(true);
     return kind;
@@ -239,7 +244,8 @@ export class AuthService {
     const restore$ = this.refreshAccessToken().pipe(
       map(() => 'authenticated' as const),
       catchError((error: unknown) => {
-        const kind = error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
+        const kind =
+          error instanceof AuthRefreshError ? error.kind : this.classifyRefreshFailure(error);
         this.clearSession();
         this.sessionExpiredState.set(false);
         return of(kind === 'invalid' ? ('anonymous' as const) : ('unavailable' as const));
