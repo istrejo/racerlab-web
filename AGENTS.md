@@ -41,6 +41,13 @@ Organize user-facing work under feature boundaries that match the product and AP
 
 Use `src/app/core` for cross-cutting infrastructure, `src/app/shared` for reusable UI primitives, and `src/app/features` for product areas.
 
+### Structure And Service Responsibilities
+
+- Give every guard under a `guards` directory its own named subdirectory. Keep each guard and its focused tests together, for example `guards/auth/auth-guard.ts` and `guards/auth/auth-guard.spec.ts`.
+- Keep module-level types and interfaces in that module's `model` directory. Do not declare reusable API, domain, or service-contract types inside components, guards, interceptors, or service implementation files.
+- Keep service classes focused on one responsibility. Orchestration services such as `AuthService` must delegate access-token parsing and state to a token service, and session restoration, refresh coordination, profile state, logout, and cross-tab synchronization to a session service.
+- Preserve a small facade when many components depend on a service contract; move implementation details behind focused services instead of spreading session logic across consumers.
+
 ## Angular Rules
 
 - Always use standalone components over NgModules.

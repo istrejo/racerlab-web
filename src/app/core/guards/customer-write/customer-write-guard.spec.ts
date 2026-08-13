@@ -5,7 +5,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '../services/auth/auth';
+import { AuthService } from '@core/services/auth/auth';
 import { customerWriteGuard } from './customer-write-guard';
 
 describe('customerWriteGuard', () => {

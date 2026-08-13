@@ -7,7 +7,7 @@ import {
   UrlTree,
 } from '@angular/router';
 import { firstValueFrom, isObservable, of } from 'rxjs';
-import { AuthService, SessionRestoreResult } from '../services/auth/auth';
+import { AuthService, SessionRestoreResult } from '@core/services/auth/auth';
 import { guestGuard } from './guest-guard';
 
 describe('guestGuard', () => {
@@ -49,8 +49,7 @@ describe('guestGuard', () => {
   async function resolveResult(returnUrl?: string): Promise<boolean | UrlTree> {
     const result = run(returnUrl);
     return (isObservable(result) ? await firstValueFrom(result) : await result) as
-      | boolean
-      | UrlTree;
+      boolean | UrlTree;
   }
 
   it('redirects an already active in-memory session without refreshing', async () => {

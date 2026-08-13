@@ -6,7 +6,7 @@ import {
   UrlTree,
 } from '@angular/router';
 import { firstValueFrom, isObservable, map, of } from 'rxjs';
-import { AuthService, SessionRestoreResult } from '../services/auth/auth';
+import { AuthService, SessionRestoreResult } from '@core/services/auth/auth';
 import { workshopGuard } from './workshop-guard';
 
 describe('workshopGuard', () => {
@@ -53,8 +53,7 @@ describe('workshopGuard', () => {
   async function resolveResult(url = '/dashboard'): Promise<boolean | UrlTree> {
     const result = run(url);
     return (isObservable(result) ? await firstValueFrom(result) : await result) as
-      | boolean
-      | UrlTree;
+      boolean | UrlTree;
   }
 
   it('allows a session with an active workshop', () => {

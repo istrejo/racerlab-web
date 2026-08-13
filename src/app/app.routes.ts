@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { adminGuard } from '@core/guards/admin-guard';
-import { authGuard } from '@core/guards/auth-guard';
-import { customerReadGuard } from '@core/guards/customer-read-guard';
-import { customerWriteGuard } from '@core/guards/customer-write-guard';
-import { guestGuard } from '@core/guards/guest-guard';
-import { passwordChangeGuard } from '@core/guards/password-change-guard';
-import { workshopGuard } from '@core/guards/workshop-guard';
+import { adminGuard } from '@core/guards/admin/admin-guard';
+import { authGuard } from '@core/guards/auth/auth-guard';
+import { customerReadGuard } from '@core/guards/customer-read/customer-read-guard';
+import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
+import { guestGuard } from '@core/guards/guest/guest-guard';
+import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
+import { workshopGuard } from '@core/guards/workshop/workshop-guard';
 
 export const routes: Routes = [
   {

@@ -1,8 +1,8 @@
-import { authGuard } from '@core/guards/auth-guard';
-import { customerReadGuard } from '@core/guards/customer-read-guard';
-import { customerWriteGuard } from '@core/guards/customer-write-guard';
-import { guestGuard } from '@core/guards/guest-guard';
-import { passwordChangeGuard } from '@core/guards/password-change-guard';
+import { authGuard } from '@core/guards/auth/auth-guard';
+import { customerReadGuard } from '@core/guards/customer-read/customer-read-guard';
+import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
+import { guestGuard } from '@core/guards/guest/guest-guard';
+import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
 import { routes } from './app.routes';
 
 describe('application routes', () => {

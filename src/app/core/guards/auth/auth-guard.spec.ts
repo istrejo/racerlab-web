@@ -6,7 +6,7 @@ import {
   UrlTree,
 } from '@angular/router';
 import { firstValueFrom, isObservable, of } from 'rxjs';
-import { AuthService, SessionRestoreResult } from '../services/auth/auth';
+import { AuthService, SessionRestoreResult } from '@core/services/auth/auth';
 import { authGuard } from './auth-guard';
 
 describe('authGuard', () => {
