@@ -38,84 +38,94 @@
       </div>
     }
 
-    <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      @if (loading()) {
-        <p class="p-6 text-slate-600" aria-live="polite">Cargando clientes...</p>
-      } @else if (page()?.items?.length === 0) {
-        <p class="p-6 text-slate-600">No hay clientes que coincidan con la búsqueda.</p>
-      } @else if (page(); as result) {
-        <table class="w-full border-collapse text-left text-sm">
-          <caption class="sr-only">
-            Clientes del taller activo
-          </caption>
-          <thead class="bg-slate-100 text-slate-700">
-            <tr>
-              <th class="px-4 py-3">Cliente</th>
-              <th class="px-4 py-3">Contacto</th>
-              <th class="px-4 py-3">Documento</th>
-              <th class="px-4 py-3">Historial</th>
-              <th class="px-4 py-3"><span class="sr-only">Acciones</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (customer of result.items; track customer.id) {
-              <tr class="border-t border-slate-200">
-                <td class="px-4 py-4 font-semibold">
-                  <a
-                    class="text-[#004AC6] hover:underline"
-                    [routerLink]="['/customers', customer.id]"
-                    >{{ customer.fullName }}</a
-                  >
-                </td>
-                <td class="px-4 py-4">
-                  <p>{{ customer.phone || customer.whatsapp || 'Sin teléfono' }}</p>
-                  <p class="text-slate-500">{{ customer.email || 'Sin correo' }}</p>
-                </td>
-                <td class="px-4 py-4">{{ customer.document || '—' }}</td>
-                <td class="px-4 py-4">
-                  {{ customer.vehicleCount }} vehículos · {{ customer.serviceOrderCount }} órdenes
-                </td>
-                <td class="px-4 py-4 text-right">
-                  @if (auth.canWriteCustomers()) {
-                    <a
-                      class="font-semibold text-[#004AC6] hover:underline"
-                      [routerLink]="['/customers', customer.id, 'edit']"
-                      >Editar</a
-                    >
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+    <div class="mt-6">
+      <app-loading-skeleton
+        label="Cargando clientes…"
+        name="customers"
+        variant="table"
+        [loading]="loading()"
+      >
+        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          @if (page()?.items?.length === 0) {
+            <p class="p-6 text-slate-600">No hay clientes que coincidan con la búsqueda.</p>
+          } @else if (page(); as result) {
+            <table class="w-full border-collapse text-left text-sm">
+              <caption class="sr-only">
+                Clientes del taller activo
+              </caption>
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="px-4 py-3">Cliente</th>
+                  <th class="px-4 py-3">Contacto</th>
+                  <th class="px-4 py-3">Documento</th>
+                  <th class="px-4 py-3">Historial</th>
+                  <th class="px-4 py-3"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (customer of result.items; track customer.id) {
+                  <tr class="border-t border-slate-200">
+                    <td class="px-4 py-4 font-semibold">
+                      <a
+                        class="text-[#004AC6] hover:underline"
+                        [routerLink]="['/customers', customer.id]"
+                        >{{ customer.fullName }}</a
+                      >
+                    </td>
+                    <td class="px-4 py-4">
+                      <p>{{ customer.phone || customer.whatsapp || 'Sin teléfono' }}</p>
+                      <p class="text-slate-500">{{ customer.email || 'Sin correo' }}</p>
+                    </td>
+                    <td class="px-4 py-4">{{ customer.document || '—' }}</td>
+                    <td class="px-4 py-4">
+                      {{ customer.vehicleCount }} vehículos ·
+                      {{ customer.serviceOrderCount }} órdenes
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                      @if (auth.canWriteCustomers()) {
+                        <a
+                          class="font-semibold text-[#004AC6] hover:underline"
+                          [routerLink]="['/customers', customer.id, 'edit']"
+                          >Editar</a
+                        >
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </app-loading-skeleton>
     </div>
 
-    @if (page(); as result) {
-      <nav class="mt-5 flex items-center justify-between" aria-label="Paginación de clientes">
-        <p class="text-sm text-slate-600">{{ result.total }} clientes</p>
-        <div class="flex gap-2">
-          <button
-            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
-            [disabled]="result.page <= 1"
-            (click)="goToPage(result.page - 1)"
-            type="button"
-          >
-            Anterior
-          </button>
-          <span class="px-2 py-2 text-sm"
-            >Página {{ result.page }} de {{ result.totalPages || 1 }}</span
-          >
-          <button
-            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
-            [disabled]="result.page >= result.totalPages"
-            (click)="goToPage(result.page + 1)"
-            type="button"
-          >
-            Siguiente
-          </button>
-        </div>
-      </nav>
+    @if (!loading()) {
+      @if (page(); as result) {
+        <nav class="mt-5 flex items-center justify-between" aria-label="Paginación de clientes">
+          <p class="text-sm text-slate-600">{{ result.total }} clientes</p>
+          <div class="flex gap-2">
+            <button
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
+              [disabled]="result.page <= 1"
+              (click)="goToPage(result.page - 1)"
+              type="button"
+            >
+              Anterior
+            </button>
+            <span class="px-2 py-2 text-sm"
+              >Página {{ result.page }} de {{ result.totalPages || 1 }}</span
+            >
+            <button
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
+              [disabled]="result.page >= result.totalPages"
+              (click)="goToPage(result.page + 1)"
+              type="button"
+            >
+              Siguiente
+            </button>
+          </div>
+        </nav>
+      }
     }
   </section>
 </main>

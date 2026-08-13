@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Customer, CustomerInput, CustomersService } from '@core/services/customers/customers';
+import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { CustomerFormComponent } from '../customer-form/customer-form';
 
 @Component({
   selector: 'app-customer-edit',
-  imports: [CustomerFormComponent, RouterLink],
+  imports: [CustomerFormComponent, LoadingSkeletonComponent, RouterLink],
   templateUrl: './customer-edit.html',
 })
 export class CustomerEditComponent {

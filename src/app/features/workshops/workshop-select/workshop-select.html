@@ -25,50 +25,48 @@
       </div>
     }
 
-    @if (loading()) {
-      <div
-        aria-live="polite"
-        class="mt-8 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm font-medium text-blue-950"
-        data-loading="workshops"
-        role="status"
+    <div class="mt-6">
+      <app-loading-skeleton
+        label="Cargando tus talleres…"
+        name="workshops"
+        variant="list"
+        [loading]="loading()"
       >
-        <span
-          aria-hidden="true"
-          class="size-5 shrink-0 animate-spin rounded-full border-2 border-blue-200 border-t-[#004AC6]"
-        ></span>
-        <span>Cargando tus talleres…</span>
-      </div>
-    } @else if (workshops().length > 0) {
-      <ul class="mt-6 space-y-3" aria-label="Talleres disponibles">
-        @for (workshop of workshops(); track workshop.membershipId) {
-          <li>
-            <button
-              class="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 text-left hover:border-blue-500 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] disabled:cursor-wait disabled:opacity-60"
-              [attr.aria-current]="
-                workshop.id === auth.activeWorkshop()?.workshopId ? 'true' : null
-              "
-              [disabled]="selectingId() !== null"
-              (click)="select(workshop)"
-              type="button"
-            >
-              <span
-                ><span class="block font-semibold">{{ workshop.name }}</span
-                ><span class="mt-1 block text-xs text-slate-500">{{ workshop.role }}</span></span
-              >
-              <span class="text-sm font-semibold text-blue-700">
-                {{
-                  workshop.id === auth.activeWorkshop()?.workshopId
-                    ? 'Actual'
-                    : selectingId() === workshop.id
-                      ? 'Cambiando...'
-                      : 'Seleccionar'
-                }}
-              </span>
-            </button>
-          </li>
+        @if (workshops().length > 0) {
+          <ul class="space-y-3" aria-label="Talleres disponibles">
+            @for (workshop of workshops(); track workshop.membershipId) {
+              <li>
+                <button
+                  class="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 text-left hover:border-blue-500 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] disabled:cursor-wait disabled:opacity-60"
+                  [attr.aria-current]="
+                    workshop.id === auth.activeWorkshop()?.workshopId ? 'true' : null
+                  "
+                  [disabled]="selectingId() !== null"
+                  (click)="select(workshop)"
+                  type="button"
+                >
+                  <span
+                    ><span class="block font-semibold">{{ workshop.name }}</span
+                    ><span class="mt-1 block text-xs text-slate-500">{{
+                      workshop.role
+                    }}</span></span
+                  >
+                  <span class="text-sm font-semibold text-blue-700">
+                    {{
+                      workshop.id === auth.activeWorkshop()?.workshopId
+                        ? 'Actual'
+                        : selectingId() === workshop.id
+                          ? 'Cambiando...'
+                          : 'Seleccionar'
+                    }}
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
         }
-      </ul>
-    }
+      </app-loading-skeleton>
+    </div>
 
     <div class="mt-7 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-5">
       @if (auth.hasActiveWorkshop()) {

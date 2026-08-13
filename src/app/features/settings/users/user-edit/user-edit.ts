@@ -8,11 +8,12 @@ import {
   MembershipsService,
   roleLabel,
 } from '@core/services/memberships/memberships';
+import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { createTemporaryPassword } from '../user-new/user-new';
 
 @Component({
   selector: 'app-user-edit',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './user-edit.html',
   styles: `
     .field {

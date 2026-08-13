@@ -4,11 +4,12 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import { CustomerPage, CustomersService } from '@core/services/customers/customers';
+import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
 
 @Component({
   selector: 'app-customer-list',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './customer-list.html',
 })
 export class CustomerListComponent {

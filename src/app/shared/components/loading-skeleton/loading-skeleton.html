@@ -1,0 +1,19 @@
+@if (loading()) {
+  <span class="sr-only" aria-live="polite" role="status" [attr.data-loading]="name()">{{
+    label()
+  }}</span>
+  <boneyard-skeleton
+    animate="shimmer"
+    cssClass="w-full"
+    select="viewport"
+    [initialBones]="bones()"
+    [loading]="true"
+    [name]="name()"
+    [stagger]="35"
+  >
+    <div aria-hidden="true" class="w-full" [style.height.px]="height()"></div>
+    <p fallback class="py-6 text-sm text-slate-600">{{ label() }}</p>
+  </boneyard-skeleton>
+} @else {
+  <ng-content />
+}

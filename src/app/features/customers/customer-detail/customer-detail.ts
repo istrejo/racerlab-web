@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import { Customer, CustomersService } from '@core/services/customers/customers';
+import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 
 @Component({
   selector: 'app-customer-detail',
-  imports: [RouterLink],
+  imports: [LoadingSkeletonComponent, RouterLink],
   templateUrl: './customer-detail.html',
 })
 export class CustomerDetailComponent {
