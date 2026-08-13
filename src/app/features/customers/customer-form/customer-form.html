@@ -1,0 +1,61 @@
+<form class="grid gap-5 sm:grid-cols-2" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="sm:col-span-2">
+    <label class="mb-2 block text-sm font-semibold" for="customer-name">Nombre completo *</label>
+    <input class="field" id="customer-name" formControlName="fullName" autocomplete="name" />
+    @if (form.controls.fullName.touched && form.controls.fullName.invalid) {
+      <p class="mt-1 text-sm text-red-700">Ingresá un nombre de hasta 120 caracteres.</p>
+    }
+  </div>
+  <div>
+    <label class="mb-2 block text-sm font-semibold" for="customer-phone">Teléfono</label>
+    <input class="field" id="customer-phone" formControlName="phone" autocomplete="tel" />
+  </div>
+  <div>
+    <label class="mb-2 block text-sm font-semibold" for="customer-whatsapp">WhatsApp</label>
+    <input class="field" id="customer-whatsapp" formControlName="whatsapp" autocomplete="tel" />
+  </div>
+  <div>
+    <label class="mb-2 block text-sm font-semibold" for="customer-email">Correo electrónico</label>
+    <input
+      class="field"
+      id="customer-email"
+      formControlName="email"
+      autocomplete="email"
+      type="email"
+    />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="mt-1 text-sm text-red-700">Ingresá un correo válido.</p>
+    }
+  </div>
+  <div>
+    <label class="mb-2 block text-sm font-semibold" for="customer-document">Documento</label>
+    <input class="field" id="customer-document" formControlName="document" />
+  </div>
+  <div class="sm:col-span-2">
+    <label class="mb-2 block text-sm font-semibold" for="customer-address">Dirección</label>
+    <input
+      class="field"
+      id="customer-address"
+      formControlName="address"
+      autocomplete="street-address"
+    />
+  </div>
+  <div class="sm:col-span-2">
+    <label class="mb-2 block text-sm font-semibold" for="customer-notes">Notas internas</label>
+    <textarea class="field min-h-28" id="customer-notes" formControlName="notes"></textarea>
+  </div>
+  <div class="sm:col-span-2 flex justify-end gap-3 border-t border-slate-200 pt-5">
+    <a
+      class="flex h-11 items-center px-4 text-sm font-semibold text-slate-700"
+      [routerLink]="cancelHref()"
+      >Cancelar</a
+    >
+    <button
+      class="h-11 rounded-lg bg-[#004AC6] px-5 text-sm font-semibold text-white disabled:bg-blue-400"
+      [disabled]="pending()"
+      type="submit"
+    >
+      {{ pending() ? 'Guardando...' : 'Guardar cliente' }}
+    </button>
+  </div>
+</form>

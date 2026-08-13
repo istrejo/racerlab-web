@@ -2,11 +2,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import { WorkshopsService, WorkshopSummary } from '@core/services/workshops/workshops';
+import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-workshop-select',
-  imports: [RouterLink],
+  imports: [LoadingSkeletonComponent, RouterLink],
   templateUrl: './workshop-select.html',
 })
 export class WorkshopSelectComponent implements OnInit {

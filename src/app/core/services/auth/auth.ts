@@ -87,6 +87,24 @@ export class AuthService {
     const role = this.role();
     return role === 'ADMIN' || role === 'OWNER';
   });
+  readonly canReadCustomers = computed(() => {
+    const role = this.role();
+    return (
+      role === 'OWNER' ||
+      role === 'ADMIN' ||
+      role === 'MANAGER' ||
+      role === 'ADVISOR' ||
+      role === 'TECHNICIAN'
+    );
+  });
+  readonly canWriteCustomers = computed(() => {
+    const role = this.role();
+    return role === 'OWNER' || role === 'ADMIN' || role === 'MANAGER' || role === 'ADVISOR';
+  });
+  readonly canDeleteCustomers = computed(() => {
+    const role = this.role();
+    return role === 'OWNER' || role === 'ADMIN';
+  });
 
   login(credentials: LoginRequest): Observable<void> {
     return this.http

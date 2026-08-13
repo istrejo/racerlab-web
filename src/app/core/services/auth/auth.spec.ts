@@ -169,6 +169,24 @@ describe('AuthService', () => {
     expect(auth.requiresPasswordChange()).toBe(true);
   });
 
+  it.each([
+    ['OWNER', true, true, true],
+    ['ADMIN', true, true, true],
+    ['MANAGER', true, true, false],
+    ['ADVISOR', true, true, false],
+    ['TECHNICIAN', true, false, false],
+    ['INVENTORY_MANAGER', false, false, false],
+  ] as const)('maps the %s role to customer permissions', (role, canRead, canWrite, canDelete) => {
+    auth.applyTokenResponse({
+      ...response,
+      activeWorkshop: { ...response.activeWorkshop, role },
+    });
+
+    expect(auth.canReadCustomers()).toBe(canRead);
+    expect(auth.canWriteCustomers()).toBe(canWrite);
+    expect(auth.canDeleteCustomers()).toBe(canDelete);
+  });
+
   it('clears the forced flag after changing the password', () => {
     auth.login({ email: 'advisor@racerlab.test', password: 'password123' }).subscribe();
     http.expectOne('https://api.racerlab.test/api/auth/login').flush({
