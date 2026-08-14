@@ -5,6 +5,8 @@ import { customerReadGuard } from '@core/guards/customer-read/customer-read-guar
 import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
 import { guestGuard } from '@core/guards/guest/guest-guard';
 import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
+import { vehicleReadGuard } from '@core/guards/vehicle-read/vehicle-read-guard';
+import { vehicleWriteGuard } from '@core/guards/vehicle-write/vehicle-write-guard';
 import { workshopGuard } from '@core/guards/workshop/workshop-guard';
 
 export const routes: Routes = [
@@ -86,6 +88,36 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/customers/customer-detail/customer-detail').then(
             (component) => component.CustomerDetailComponent,
+          ),
+      },
+      {
+        path: 'customers/:customerId/vehicles/new',
+        canActivate: [vehicleWriteGuard],
+        loadComponent: () =>
+          import('./features/vehicles/vehicle-new/vehicle-new').then((m) => m.VehicleNewComponent),
+      },
+      {
+        path: 'customers/:customerId/vehicles/:vehicleId/edit',
+        canActivate: [vehicleWriteGuard],
+        loadComponent: () =>
+          import('./features/vehicles/vehicle-edit/vehicle-edit').then(
+            (m) => m.VehicleEditComponent,
+          ),
+      },
+      {
+        path: 'customers/:customerId/vehicles/:vehicleId',
+        canActivate: [vehicleReadGuard],
+        loadComponent: () =>
+          import('./features/vehicles/vehicle-detail/vehicle-detail').then(
+            (m) => m.VehicleDetailComponent,
+          ),
+      },
+      {
+        path: 'customers/:customerId/vehicles',
+        canActivate: [vehicleReadGuard],
+        loadComponent: () =>
+          import('./features/vehicles/vehicle-list/vehicle-list').then(
+            (m) => m.VehicleListComponent,
           ),
       },
       {

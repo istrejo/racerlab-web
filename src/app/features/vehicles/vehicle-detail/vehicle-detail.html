@@ -1,12 +1,16 @@
 <main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
   <section class="mx-auto max-w-4xl">
-    <a class="text-sm font-semibold text-[#004AC6] hover:underline" routerLink="/customers"
-      >← Volver a clientes</a
+    <a
+      class="text-sm font-semibold text-[#004AC6] hover:underline"
+      [routerLink]="['/customers', customerId, 'vehicles']"
     >
+      ← Volver a vehículos
+    </a>
+
     <div class="mt-6">
       <app-loading-skeleton
-        label="Cargando ficha del cliente…"
-        name="customer-detail"
+        label="Cargando ficha del vehículo…"
+        name="vehicle-detail"
         variant="detail"
         [loading]="loading()"
       >
@@ -17,42 +21,51 @@
               Reintentar
             </button>
           </div>
-        } @else if (customer(); as current) {
+        } @else if (vehicle(); as current) {
           <header class="mt-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p class="text-sm font-semibold text-[#F97316]">Cliente</p>
-              <h1 class="mt-1 text-3xl font-bold">{{ current.fullName }}</h1>
+              <p class="text-sm font-semibold text-[#F97316]">Vehículo</p>
+              <h1 class="mt-1 text-3xl font-bold tracking-wider">{{ current.plate }}</h1>
+              <p class="text-slate-600">{{ current.brand }} {{ current.model }}</p>
             </div>
-            @if (permissions.canWriteCustomers()) {
+            @if (permissions.canWriteVehicles()) {
               <a
                 class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white"
-                [routerLink]="['/customers', current.id, 'edit']"
-                >Editar cliente</a
+                [routerLink]="['/customers', customerId, 'vehicles', vehicleId, 'edit']"
               >
+                Editar vehículo
+              </a>
             }
           </header>
+
           <div class="mt-6 grid gap-5 lg:grid-cols-3">
             <dl class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
               <div class="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Teléfono</dt>
-                  <dd class="mt-1">{{ current.phone || '—' }}</dd>
+                  <dt class="text-xs font-semibold uppercase text-slate-500">Año</dt>
+                  <dd class="mt-1">{{ current.year || '—' }}</dd>
                 </div>
                 <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">WhatsApp</dt>
-                  <dd class="mt-1">{{ current.whatsapp || '—' }}</dd>
+                  <dt class="text-xs font-semibold uppercase text-slate-500">Color</dt>
+                  <dd class="mt-1">{{ current.color || '—' }}</dd>
                 </div>
                 <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Correo</dt>
-                  <dd class="mt-1">{{ current.email || '—' }}</dd>
+                  <dt class="text-xs font-semibold uppercase text-slate-500">VIN</dt>
+                  <dd class="mt-1 font-mono text-sm">{{ current.vin || '—' }}</dd>
                 </div>
                 <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Documento</dt>
-                  <dd class="mt-1">{{ current.document || '—' }}</dd>
+                  <dt class="text-xs font-semibold uppercase text-slate-500">Kilometraje</dt>
+                  <dd class="mt-1">
+                    @if (current.mileage !== null) {
+                      {{ current.mileage | number }} km
+                    } @else {
+                      —
+                    }
+                  </dd>
                 </div>
-                <div class="sm:col-span-2">
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Dirección</dt>
-                  <dd class="mt-1">{{ current.address || '—' }}</dd>
+                <div>
+                  <dt class="text-xs font-semibold uppercase text-slate-500">Tipo</dt>
+                  <dd class="mt-1">{{ current.vehicleType || '—' }}</dd>
                 </div>
                 <div class="sm:col-span-2">
                   <dt class="text-xs font-semibold uppercase text-slate-500">Notas internas</dt>
@@ -60,21 +73,18 @@
                 </div>
               </div>
             </dl>
+
             <aside class="space-y-4">
-              <a
-                class="block rounded-xl border border-slate-200 bg-white p-5 hover:border-[#004AC6]"
-                [routerLink]="['/customers', current.id, 'vehicles']"
-              >
-                <p class="text-3xl font-bold">{{ current.vehicleCount }}</p>
-                <p class="text-sm text-slate-600">Vehículos asociados</p>
-              </a>
               <div class="rounded-xl border border-slate-200 bg-white p-5">
                 <p class="text-3xl font-bold">{{ current.serviceOrderCount }}</p>
-                <p class="text-sm text-slate-600">Órdenes de servicio</p>
+                <p class="text-sm text-slate-600">
+                  {{ current.serviceOrderCount === 1 ? 'Orden de servicio' : 'Órdenes de servicio' }}
+                </p>
               </div>
             </aside>
           </div>
-          @if (permissions.canDeleteCustomers()) {
+
+          @if (permissions.canDeleteVehicles()) {
             <div class="mt-8 border-t border-slate-200 pt-6">
               @if (!deleteOpen()) {
                 <button
@@ -82,7 +92,7 @@
                   (click)="deleteOpen.set(true)"
                   type="button"
                 >
-                  Eliminar cliente
+                  Eliminar vehículo
                 </button>
               } @else {
                 <section
@@ -91,9 +101,9 @@
                   aria-labelledby="delete-title"
                   aria-describedby="delete-description"
                 >
-                  <h2 id="delete-title" class="font-bold text-red-900">¿Eliminar este cliente?</h2>
+                  <h2 id="delete-title" class="font-bold text-red-900">¿Eliminar este vehículo?</h2>
                   <p id="delete-description" class="mt-1 text-sm text-red-800">
-                    Solo será posible si no tiene vehículos ni órdenes.
+                    Solo será posible si no tiene órdenes de servicio asociadas.
                   </p>
                   @if (deleteError()) {
                     <p class="mt-2 text-sm font-semibold text-red-900" role="alert">
@@ -107,8 +117,9 @@
                       (click)="remove()"
                       type="button"
                     >
-                      {{ deleting() ? 'Eliminando...' : 'Confirmar eliminación' }}</button
-                    ><button
+                      {{ deleting() ? 'Eliminando...' : 'Confirmar eliminación' }}
+                    </button>
+                    <button
                       class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
                       [disabled]="deleting()"
                       (click)="deleteOpen.set(false)"

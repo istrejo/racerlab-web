@@ -40,4 +40,25 @@ export class PermissionsService {
     const role = this.auth.role();
     return role === 'OWNER' || role === 'ADMIN';
   });
+
+  readonly canReadVehicles = computed(() => {
+    const role = this.auth.role();
+    return (
+      role === 'OWNER' ||
+      role === 'ADMIN' ||
+      role === 'MANAGER' ||
+      role === 'ADVISOR' ||
+      role === 'TECHNICIAN'
+    );
+  });
+
+  readonly canWriteVehicles = computed(() => {
+    const role = this.auth.role();
+    return role === 'OWNER' || role === 'ADMIN' || role === 'MANAGER' || role === 'ADVISOR';
+  });
+
+  readonly canDeleteVehicles = computed(() => {
+    const role = this.auth.role();
+    return role === 'OWNER' || role === 'ADMIN';
+  });
 }
