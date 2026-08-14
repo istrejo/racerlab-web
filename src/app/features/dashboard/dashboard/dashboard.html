@@ -1,7 +1,27 @@
 <section aria-labelledby="dashboard-title">
   <header class="flex flex-wrap items-end justify-between gap-4">
-    <div><p class="text-sm font-semibold text-[#F97316]">Workshop operations</p><h1 id="dashboard-title" class="mt-1 font-[Manrope,ui-sans-serif] text-3xl font-bold tracking-tight sm:text-4xl">Overview</h1><p class="mt-2 text-sm text-slate-600">Today's activity and the operational metrics that need attention.</p></div>
-    <div class="flex gap-2"><button class="flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed" disabled type="button">Today</button><button class="flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed" disabled type="button">Filter</button></div>
+    <div>
+      <p class="text-sm font-semibold text-[#F97316]">Workshop operations</p>
+      <h1
+        id="dashboard-title"
+        class="mt-1 font-[Manrope,ui-sans-serif] text-3xl font-bold tracking-tight sm:text-4xl"
+      >
+        Overview
+      </h1>
+      <p class="mt-2 text-sm text-slate-600">
+        Today's activity and the operational metrics that need attention.
+      </p>
+    </div>
+    <div class="flex gap-2">
+      @if (permissions.canWriteOrders()) {
+        <a
+          class="flex h-9 items-center rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm"
+          routerLink="/service-orders/new"
+        >
+          New order
+        </a>
+      }
+    </div>
   </header>
 
   <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -17,6 +37,18 @@
 </section>
 
 <section class="mt-6 grid gap-6 lg:grid-cols-2" aria-label="Operational attention items">
-  <app-dashboard-attention-list [badge]="dashboard().pendingQuotes.length + ' waiting'" [description]="'Customer decisions waiting to move work forward'" [items]="pendingQuoteItems()" [title]="'Pending quotes'" tone="warning" />
-  <app-dashboard-attention-list badge="Action needed" [description]="'Parts below their preferred minimum level'" [items]="lowStockItems()" title="Low stock" tone="danger" />
+  <app-dashboard-attention-list
+    [badge]="dashboard().pendingQuotes.length + ' waiting'"
+    [description]="'Customer decisions waiting to move work forward'"
+    [items]="pendingQuoteItems()"
+    [title]="'Pending quotes'"
+    tone="warning"
+  />
+  <app-dashboard-attention-list
+    badge="Action needed"
+    [description]="'Parts below their preferred minimum level'"
+    [items]="lowStockItems()"
+    title="Low stock"
+    tone="danger"
+  />
 </section>

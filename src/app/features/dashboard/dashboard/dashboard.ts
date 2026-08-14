@@ -1,4 +1,6 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { AttentionListComponent } from '../components/attention-list/attention-list';
 import type { DashboardAttentionListItem } from '../components/attention-list/attention-list';
 import { MetricCardComponent } from '../components/metric-card/metric-card';
@@ -12,11 +14,13 @@ import { DASHBOARD_MOCK_DATA } from './dashboard.mock-data';
     AttentionListComponent,
     MetricCardComponent,
     RecentServiceOrdersComponent,
+    RouterLink,
     TechnicianWorkloadComponent,
   ],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent {
+  readonly permissions = inject(PermissionsService);
   readonly dashboard = signal(DASHBOARD_MOCK_DATA);
   readonly pendingQuoteItems = computed<readonly DashboardAttentionListItem[]>(() =>
     this.dashboard().pendingQuotes.map((quote) => ({
