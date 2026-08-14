@@ -61,4 +61,31 @@ export class PermissionsService {
     const role = this.auth.role();
     return role === 'OWNER' || role === 'ADMIN';
   });
+
+  readonly canReadOrders = computed(() => {
+    const role = this.auth.role();
+    return (
+      role === 'OWNER' ||
+      role === 'ADMIN' ||
+      role === 'MANAGER' ||
+      role === 'ADVISOR' ||
+      role === 'TECHNICIAN'
+    );
+  });
+
+  readonly canWriteOrders = computed(() => {
+    const role = this.auth.role();
+    return role === 'OWNER' || role === 'ADMIN' || role === 'MANAGER' || role === 'ADVISOR';
+  });
+
+  readonly canManageOrders = computed(() => {
+    const role = this.auth.role();
+    return (
+      role === 'OWNER' ||
+      role === 'ADMIN' ||
+      role === 'MANAGER' ||
+      role === 'ADVISOR' ||
+      role === 'TECHNICIAN'
+    );
+  });
 }
