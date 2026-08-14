@@ -42,6 +42,8 @@ describe('LayoutComponent', () => {
           useValue: {
             canManageUsers: () => false,
             canReadCustomers,
+            canReadOrders: () => true,
+            canWriteOrders: () => true,
           },
         },
       ],

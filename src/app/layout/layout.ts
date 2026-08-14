@@ -2,6 +2,7 @@ import { Component, computed, ElementRef, inject, signal, viewChild } from '@ang
 import { Router, RouterOutlet } from '@angular/router';
 import { AppNavigationComponent } from '@core/components/app-navigation/app-navigation';
 import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { AppIconSpriteComponent } from '@shared/components/app-icon-sprite/app-icon-sprite';
 import { finalize } from 'rxjs';
 
@@ -16,6 +17,7 @@ import { finalize } from 'rxjs';
 })
 export class LayoutComponent {
   readonly auth = inject(AuthService);
+  readonly permissions = inject(PermissionsService);
   private readonly router = inject(Router);
   private readonly userMenuTrigger = viewChild<ElementRef<HTMLButtonElement>>('userMenuTrigger');
   readonly workshopName = computed(() => this.auth.activeWorkshop()?.name ?? 'Your workshop');

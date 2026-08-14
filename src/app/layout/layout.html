@@ -35,14 +35,14 @@
         />
       </div>
       <div class="ml-auto flex items-center gap-2 sm:gap-3">
-        <button
-          class="hidden h-9 rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-blue-900 sm:block"
-          disabled
-          title="Service orders are not available yet"
-          type="button"
-        >
-          New order
-        </button>
+        @if (permissions.canWriteOrders()) {
+          <a
+            class="hidden h-9 items-center rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm sm:flex"
+            routerLink="/service-orders/new"
+          >
+            New order
+          </a>
+        }
         <div class="hidden text-right sm:block">
           <p class="text-sm font-semibold">{{ workshopName() }}</p>
           <p class="text-xs font-medium text-slate-500">{{ workshopRole() }}</p>

@@ -61,6 +61,8 @@ export class ServiceOrderListComponent {
         map((params) => ({
           search: params.get('search')?.trim() ?? '',
           status: (params.get('status') as ServiceOrderStatus | null) ?? null,
+          customerId: params.get('customerId')?.trim() || null,
+          vehicleId: params.get('vehicleId')?.trim() || null,
           page: Math.max(1, Number(params.get('page')) || 1),
           refresh: params.get('refresh') ?? '',
         })),
@@ -68,6 +70,8 @@ export class ServiceOrderListComponent {
           (left, right) =>
             left.search === right.search &&
             left.status === right.status &&
+            left.customerId === right.customerId &&
+            left.vehicleId === right.vehicleId &&
             left.page === right.page &&
             left.refresh === right.refresh,
         ),
@@ -77,10 +81,17 @@ export class ServiceOrderListComponent {
           this.loading.set(true);
           this.error.set(null);
         }),
-        switchMap(({ search, status, page }) =>
+        switchMap(({ search, status, customerId, vehicleId, page }) =>
           timer(300).pipe(
             switchMap(() =>
-              this.serviceOrders.list({ search, status: status ?? undefined, page, limit: 20 }),
+              this.serviceOrders.list({
+                search,
+                status: status ?? undefined,
+                customerId: customerId ?? undefined,
+                vehicleId: vehicleId ?? undefined,
+                page,
+                limit: 20,
+              }),
             ),
             catchError(() => {
               this.error.set('No pudimos cargar las órdenes de servicio.');
