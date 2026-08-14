@@ -5,6 +5,8 @@ import { customerReadGuard } from '@core/guards/customer-read/customer-read-guar
 import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
 import { guestGuard } from '@core/guards/guest/guest-guard';
 import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
+import { serviceOrderReadGuard } from '@core/guards/service-order-read/service-order-read-guard';
+import { serviceOrderWriteGuard } from '@core/guards/service-order-write/service-order-write-guard';
 import { vehicleReadGuard } from '@core/guards/vehicle-read/vehicle-read-guard';
 import { vehicleWriteGuard } from '@core/guards/vehicle-write/vehicle-write-guard';
 import { workshopGuard } from '@core/guards/workshop/workshop-guard';
@@ -118,6 +120,30 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/vehicles/vehicle-list/vehicle-list').then(
             (m) => m.VehicleListComponent,
+          ),
+      },
+      {
+        path: 'service-orders',
+        canActivate: [serviceOrderReadGuard],
+        loadComponent: () =>
+          import('./features/service-orders/service-order-list/service-order-list').then(
+            (m) => m.ServiceOrderListComponent,
+          ),
+      },
+      {
+        path: 'service-orders/new',
+        canActivate: [serviceOrderWriteGuard],
+        loadComponent: () =>
+          import('./features/service-orders/service-order-new/service-order-new').then(
+            (m) => m.ServiceOrderNewComponent,
+          ),
+      },
+      {
+        path: 'service-orders/:orderId',
+        canActivate: [serviceOrderReadGuard],
+        loadComponent: () =>
+          import('./features/service-orders/service-order-detail/service-order-detail').then(
+            (m) => m.ServiceOrderDetailComponent,
           ),
       },
       {

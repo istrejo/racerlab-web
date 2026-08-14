@@ -75,12 +75,18 @@
             </dl>
 
             <aside class="space-y-4">
-              <div class="rounded-xl border border-slate-200 bg-white p-5">
+              <a
+                class="block rounded-xl border border-slate-200 bg-white p-5 hover:border-[#004AC6]"
+                [routerLink]="['/service-orders']"
+                [queryParams]="{ vehicleId: current.id }"
+              >
                 <p class="text-3xl font-bold">{{ current.serviceOrderCount }}</p>
                 <p class="text-sm text-slate-600">
-                  {{ current.serviceOrderCount === 1 ? 'Orden de servicio' : 'Órdenes de servicio' }}
+                  {{
+                    current.serviceOrderCount === 1 ? 'Orden de servicio' : 'Órdenes de servicio'
+                  }}
                 </p>
-              </div>
+              </a>
             </aside>
           </div>
 

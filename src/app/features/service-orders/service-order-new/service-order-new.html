@@ -1,0 +1,219 @@
+<main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+  <section class="mx-auto max-w-3xl">
+    <a
+      class="text-sm font-semibold text-[#004AC6] hover:underline"
+      routerLink="/service-orders"
+    >
+      ← Volver a órdenes
+    </a>
+
+    <h1 class="mt-6 text-2xl font-bold">Nueva orden de servicio</h1>
+
+    @if (error()) {
+      <div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Step 1: Customer -->
+    @if (step() === 'customer') {
+      <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="font-semibold">1. Selecciona el cliente</h2>
+        <label class="sr-only" for="customer-search">Buscar cliente</label>
+        <input
+          id="customer-search"
+          type="search"
+          class="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#004AC6] focus:ring-2 focus:ring-[#004AC6]/20"
+          placeholder="Nombre, documento o teléfono…"
+          [formControl]="customerSearch"
+        />
+
+        <div class="mt-4">
+          @if (customerLoading()) {
+            <p class="text-sm text-slate-500">Buscando…</p>
+          } @else if (customersPage(); as page) {
+            @if (page.items.length === 0 && customerSearch.value.trim()) {
+              <p class="text-sm text-slate-500">No se encontraron clientes.</p>
+            } @else {
+              <ul class="space-y-2" role="list">
+                @for (customer of page.items; track customer.id) {
+                  <li>
+                    <button
+                      class="w-full rounded-lg border border-slate-200 p-3 text-left hover:border-[#004AC6] hover:bg-slate-50"
+                      (click)="selectCustomer(customer)"
+                      type="button"
+                    >
+                      <p class="font-semibold">{{ customer.fullName }}</p>
+                      @if (customer.phone) {
+                        <p class="text-sm text-slate-500">{{ customer.phone }}</p>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Vehicle -->
+    @if (step() === 'vehicle') {
+      <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">2. Selecciona el vehículo</h2>
+          <button
+            class="text-sm text-[#004AC6] hover:underline"
+            (click)="goBack()"
+            type="button"
+          >
+            Cambiar cliente
+          </button>
+        </div>
+        <p class="mt-2 text-sm text-slate-600">
+          Cliente: <span class="font-semibold">{{ selectedCustomer()?.fullName }}</span>
+        </p>
+
+        <div class="mt-4">
+          @if (vehicleLoading()) {
+            <p class="text-sm text-slate-500">Cargando vehículos…</p>
+          } @else if (vehicles(); as vehicleList) {
+            @if (vehicleList.length === 0) {
+              <p class="text-sm text-slate-500">Este cliente no tiene vehículos registrados.</p>
+            } @else {
+              <ul class="space-y-2" role="list">
+                @for (vehicle of vehicleList; track vehicle.id) {
+                  <li>
+                    <button
+                      class="w-full rounded-lg border border-slate-200 p-3 text-left hover:border-[#004AC6] hover:bg-slate-50"
+                      (click)="selectVehicle(vehicle)"
+                      type="button"
+                    >
+                      <p class="font-mono font-semibold">{{ vehicle.plate }}</p>
+                      <p class="text-sm text-slate-600">
+                        {{ vehicle.brand }} {{ vehicle.model }}
+                        @if (vehicle.year) { · {{ vehicle.year }} }
+                      </p>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 3: Reception details -->
+    @if (step() === 'reception') {
+      <form class="mt-6 space-y-5" (ngSubmit)="submit()">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold">3. Datos de recepción</h2>
+            <button
+              class="text-sm text-[#004AC6] hover:underline"
+              (click)="goBack()"
+              type="button"
+            >
+              Cambiar vehículo
+            </button>
+          </div>
+          <p class="mt-2 text-sm text-slate-600">
+            Cliente: <span class="font-semibold">{{ selectedCustomer()?.fullName }}</span>
+          </p>
+          <p class="text-sm text-slate-600">
+            Vehículo: <span class="font-semibold">{{ selectedVehicle()?.plate }}</span>
+            · {{ selectedVehicle()?.brand }} {{ selectedVehicle()?.model }}
+          </p>
+
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium text-slate-700" for="priority">Prioridad</label>
+              <select
+                id="priority"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.priority"
+              >
+                @for (priority of priorityOptions; track priority) {
+                  <option [value]="priority">{{ priority }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700" for="fuelLevel">Nivel de combustible</label>
+              <select
+                id="fuelLevel"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.fuelLevel"
+              >
+                <option [value]="null">—</option>
+                @for (level of fuelOptions; track level) {
+                  <option [value]="level">{{ level }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700" for="mileageIn">Kilometraje de entrada</label>
+              <input
+                id="mileageIn"
+                type="number"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.mileageIn"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700" for="estimatedDeliveryDate">Fecha estimada de entrega</label>
+              <input
+                id="estimatedDeliveryDate"
+                type="date"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.estimatedDeliveryDate"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700" for="reportedIssues">Problemas reportados</label>
+              <textarea
+                id="reportedIssues"
+                rows="3"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.reportedIssues"
+              ></textarea>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-slate-700" for="receptionNotes">Notas de recepción</label>
+              <textarea
+                id="receptionNotes"
+                rows="2"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                [formControl]="form.controls.receptionNotes"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="mt-6 flex gap-3">
+            <button
+              class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              [disabled]="saving()"
+              type="submit"
+            >
+              {{ saving() ? 'Creando…' : 'Crear orden de servicio' }}
+            </button>
+            <button
+              class="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+              (click)="goBack()"
+              [disabled]="saving()"
+              type="button"
+            >
+              Atrás
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  </section>
+</main>

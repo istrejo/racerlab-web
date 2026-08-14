@@ -1,0 +1,96 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
+import { PermissionsService } from '@core/services/permissions/permissions';
+import { ServiceOrderPage, ServiceOrdersService } from '@core/services/service-orders/service-orders';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { vi } from 'vitest';
+import { ServiceOrderListComponent } from './service-order-list';
+
+describe('ServiceOrderListComponent', () => {
+  let fixture: ComponentFixture<ServiceOrderListComponent>;
+  let queryParams: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
+  let list: ReturnType<typeof vi.fn>;
+
+  const emptyPage: ServiceOrderPage = {
+    items: [],
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    queryParams = new BehaviorSubject(convertToParamMap({ search: 'Toyota', status: 'RECEIVED', page: '2' }));
+    list = vi.fn(() => of({ ...emptyPage, page: 2 }));
+
+    await TestBed.configureTestingModule({
+      imports: [ServiceOrderListComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParamMap: queryParams.asObservable(),
+          },
+        },
+        {
+          provide: PermissionsService,
+          useValue: { canWriteOrders: () => true },
+        },
+        { provide: ServiceOrdersService, useValue: { list } },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ServiceOrderListComponent);
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('waits 300 ms and loads the page represented in the URL', async () => {
+    await vi.advanceTimersByTimeAsync(299);
+    expect(list).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(list).toHaveBeenCalledWith({
+      search: 'Toyota',
+      status: 'RECEIVED',
+      page: 2,
+      limit: 20,
+    });
+    expect(fixture.componentInstance.page()?.page).toBe(2);
+  });
+
+  it('cancels the previous request when URL parameters change', async () => {
+    const cancelled = vi.fn();
+    let requestNumber = 0;
+    list.mockImplementation(
+      () =>
+        new Observable<ServiceOrderPage>(() => {
+          requestNumber += 1;
+          return requestNumber === 1 ? cancelled : undefined;
+        }),
+    );
+
+    await vi.advanceTimersByTimeAsync(300);
+    queryParams.next(convertToParamMap({ search: 'ABC', page: '1' }));
+    expect(cancelled).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(list).toHaveBeenLastCalledWith({ search: 'ABC', page: 1, limit: 20 });
+  });
+
+  it('writes a trimmed search and resets page to the URL', () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.search.setValue('  SO-0001  ');
+
+    fixture.componentInstance.applySearch();
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'SO-0001', page: 1 },
+      queryParamsHandling: 'merge',
+    });
+  });
+});
