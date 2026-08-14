@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { Customer, CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 
@@ -10,7 +10,7 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
   templateUrl: './customer-detail.html',
 })
 export class CustomerDetailComponent {
-  readonly auth = inject(AuthService);
+  readonly permissions = inject(PermissionsService);
   private readonly customers = inject(CustomersService);
   private readonly router = inject(Router);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';

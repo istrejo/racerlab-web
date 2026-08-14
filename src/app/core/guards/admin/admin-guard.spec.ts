@@ -5,7 +5,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { adminGuard } from './admin-guard';
 
 describe('adminGuard', () => {
@@ -17,7 +17,7 @@ describe('adminGuard', () => {
       providers: [
         provideRouter([]),
         {
-          provide: AuthService,
+          provide: PermissionsService,
           useValue: { canManageUsers: () => canManageUsers },
         },
       ],

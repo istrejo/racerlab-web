@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { Customer, CustomersService } from '@core/services/customers/customers';
 import { of, throwError } from 'rxjs';
 import { CustomerDetailComponent } from './customer-detail';
@@ -35,7 +35,7 @@ describe('CustomerDetailComponent', () => {
           useValue: { snapshot: { paramMap: convertToParamMap({ id: customer.id }) } },
         },
         {
-          provide: AuthService,
+          provide: PermissionsService,
           useValue: {
             canWriteCustomers: () => false,
             canDeleteCustomers: canDelete,

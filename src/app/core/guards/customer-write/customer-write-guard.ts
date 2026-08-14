@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 
 export const customerWriteGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
-  return auth.canWriteCustomers() ? true : inject(Router).createUrlTree(['/customers']);
+  const permissions = inject(PermissionsService);
+  return permissions.canWriteCustomers() ? true : inject(Router).createUrlTree(['/customers']);
 };

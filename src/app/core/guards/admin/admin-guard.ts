@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 
 export const adminGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
+  const permissions = inject(PermissionsService);
 
-  return auth.canManageUsers() ? true : inject(Router).createUrlTree(['/dashboard']);
+  return permissions.canManageUsers() ? true : inject(Router).createUrlTree(['/dashboard']);
 };

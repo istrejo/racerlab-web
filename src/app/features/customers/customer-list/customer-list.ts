@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { CustomerPage, CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
@@ -13,7 +13,7 @@ import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from
   templateUrl: './customer-list.html',
 })
 export class CustomerListComponent {
-  readonly auth = inject(AuthService);
+  readonly permissions = inject(PermissionsService);
   private readonly customers = inject(CustomersService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

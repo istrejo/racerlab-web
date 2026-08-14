@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -33,9 +34,14 @@ describe('LayoutComponent', () => {
             }),
             user: signal({ id: 'user-1', name: 'Ada Lovelace', email: 'ada@racerlab.test' }),
             profileState: signal('ready'),
+            logout,
+          },
+        },
+        {
+          provide: PermissionsService,
+          useValue: {
             canManageUsers: () => false,
             canReadCustomers,
-            logout,
           },
         },
       ],

@@ -5,7 +5,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { customerReadGuard } from './customer-read-guard';
 
 describe('customerReadGuard', () => {
@@ -16,7 +16,7 @@ describe('customerReadGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: AuthService, useValue: { canReadCustomers: () => allowed } },
+        { provide: PermissionsService, useValue: { canReadCustomers: () => allowed } },
       ],
     });
   });

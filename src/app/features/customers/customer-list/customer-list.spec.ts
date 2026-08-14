@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { CustomerPage, CustomersService } from '@core/services/customers/customers';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { vi } from 'vitest';
@@ -34,7 +34,7 @@ describe('CustomerListComponent', () => {
             snapshot: { queryParamMap: queryParams.value },
           },
         },
-        { provide: AuthService, useValue: { canWriteCustomers: () => true } },
+        { provide: PermissionsService, useValue: { canWriteCustomers: () => true } },
         { provide: CustomersService, useValue: { list } },
       ],
     }).compileComponents();

@@ -23,7 +23,7 @@
               <p class="text-sm font-semibold text-[#F97316]">Cliente</p>
               <h1 class="mt-1 text-3xl font-bold">{{ current.fullName }}</h1>
             </div>
-            @if (auth.canWriteCustomers()) {
+            @if (permissions.canWriteCustomers()) {
               <a
                 class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white"
                 [routerLink]="['/customers', current.id, 'edit']"
@@ -71,7 +71,7 @@
               </div>
             </aside>
           </div>
-          @if (auth.canDeleteCustomers()) {
+          @if (permissions.canDeleteCustomers()) {
             <div class="mt-8 border-t border-slate-200 pt-6">
               @if (!deleteOpen()) {
                 <button

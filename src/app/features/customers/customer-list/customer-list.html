@@ -6,7 +6,7 @@
         <h1 id="customers-title" class="mt-1 text-3xl font-bold">Clientes</h1>
         <p class="mt-2 text-slate-600">Buscá y administrá los clientes del taller activo.</p>
       </div>
-      @if (auth.canWriteCustomers()) {
+      @if (permissions.canWriteCustomers()) {
         <a
           class="flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white"
           routerLink="/customers/new"
@@ -82,7 +82,7 @@
                       {{ customer.serviceOrderCount }} órdenes
                     </td>
                     <td class="px-4 py-4 text-right">
-                      @if (auth.canWriteCustomers()) {
+                      @if (permissions.canWriteCustomers()) {
                         <a
                           class="font-semibold text-[#004AC6] hover:underline"
                           [routerLink]="['/customers', customer.id, 'edit']"

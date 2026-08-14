@@ -1,6 +1,6 @@
 import { Component, inject, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 
 @Component({
   selector: 'app-application-navigation',
@@ -8,7 +8,7 @@ import { AuthService } from '@core/services/auth/auth';
   templateUrl: './app-navigation.html',
 })
 export class AppNavigationComponent {
-  readonly auth = inject(AuthService);
+  readonly permissions = inject(PermissionsService);
   readonly mobileNavigationOpen = input(false);
   readonly mobileNavigationDismissed = output<void>();
 }

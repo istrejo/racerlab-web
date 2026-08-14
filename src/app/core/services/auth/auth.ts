@@ -73,29 +73,6 @@ export class AuthService {
   readonly profileState = this.profileStateValue.asReadonly();
   readonly sessionExpired = this.sessionExpiredState.asReadonly();
   readonly sessionClosed = this.sessionClosedState.asReadonly();
-  readonly canManageUsers = computed(() => {
-    const role = this.role();
-    return role === 'ADMIN' || role === 'OWNER';
-  });
-  readonly canReadCustomers = computed(() => {
-    const role = this.role();
-    return (
-      role === 'OWNER' ||
-      role === 'ADMIN' ||
-      role === 'MANAGER' ||
-      role === 'ADVISOR' ||
-      role === 'TECHNICIAN'
-    );
-  });
-  readonly canWriteCustomers = computed(() => {
-    const role = this.role();
-    return role === 'OWNER' || role === 'ADMIN' || role === 'MANAGER' || role === 'ADVISOR';
-  });
-  readonly canDeleteCustomers = computed(() => {
-    const role = this.role();
-    return role === 'OWNER' || role === 'ADMIN';
-  });
-
   login(credentials: LoginRequest): Observable<void> {
     return this.requestSession('/auth/login', credentials);
   }

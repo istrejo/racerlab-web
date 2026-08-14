@@ -5,7 +5,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '@core/services/auth/auth';
+import { PermissionsService } from '@core/services/permissions/permissions';
 import { customerWriteGuard } from './customer-write-guard';
 
 describe('customerWriteGuard', () => {
@@ -16,7 +16,7 @@ describe('customerWriteGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: AuthService, useValue: { canWriteCustomers: () => allowed } },
+        { provide: PermissionsService, useValue: { canWriteCustomers: () => allowed } },
       ],
     });
   });
