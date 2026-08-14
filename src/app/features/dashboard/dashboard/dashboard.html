@@ -16,7 +16,7 @@
       @if (permissions.canWriteOrders()) {
         <a
           class="flex h-9 items-center rounded-md bg-[#004AC6] px-3 text-sm font-semibold text-white shadow-sm"
-          routerLink="/service-orders/new"
+          [routerLink]="'/service-orders/new'"
         >
           New order
         </a>
