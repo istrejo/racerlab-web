@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AppNavigationComponent } from '@core/components/app-navigation/app-navigation';
 import { AuthService } from '@core/services/auth/auth';
 import { PermissionsService } from '@core/services/permissions/permissions';
@@ -8,7 +8,7 @@ import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-layout',
-  imports: [AppIconSpriteComponent, AppNavigationComponent, RouterOutlet],
+  imports: [AppIconSpriteComponent, AppNavigationComponent, RouterLink, RouterOutlet],
   templateUrl: './layout.html',
   host: {
     '(document:click)': 'closeUserMenuFromDocument($event)',
