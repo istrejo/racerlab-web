@@ -2,8 +2,9 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Customer, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
+import { Customer } from '@core/models/customer.interface';
 
 @Component({
   selector: 'app-customer-detail',

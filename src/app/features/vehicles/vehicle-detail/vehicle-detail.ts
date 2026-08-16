@@ -1,8 +1,9 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Vehicle } from '@core/models/vehicle.interface';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Vehicle, VehiclesService } from '@core/services/vehicles/vehicles';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 
 @Component({

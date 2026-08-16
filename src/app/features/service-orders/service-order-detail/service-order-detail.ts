@@ -3,14 +3,13 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DiagnosesService, Diagnosis } from '@core/services/diagnoses/diagnoses';
+import { Diagnosis } from '@core/models/diagnoses.interface';
+import { Quote, QuoteStatus } from '@core/models/quotes.interface';
+import { ServiceOrderDetail, ServiceOrderStatus } from '@core/models/service-order.interface';
+import { DiagnosesService } from '@core/services/diagnoses/diagnoses';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Quote, QuoteStatus, QuotesService } from '@core/services/quotes/quotes';
-import {
-  ServiceOrderStatus,
-  ServiceOrdersService,
-  ServiceOrderDetail,
-} from '@core/services/service-orders/service-orders';
+import { QuotesService } from '@core/services/quotes/quotes';
+import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 

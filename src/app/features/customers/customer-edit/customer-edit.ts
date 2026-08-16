@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Customer, CustomerInput, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { CustomerFormComponent } from '../customer-form/customer-form';
+import { Customer, CustomerInput } from '@core/models/customer.interface';
 
 @Component({
   selector: 'app-customer-edit',

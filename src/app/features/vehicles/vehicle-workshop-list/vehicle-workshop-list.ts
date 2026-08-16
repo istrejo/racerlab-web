@@ -2,7 +2,8 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { VehicleWithCustomerPage, VehiclesService } from '@core/services/vehicles/vehicles';
+import { VehicleWithCustomerPage } from '@core/models/vehicle.interface';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
 

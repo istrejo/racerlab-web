@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CustomerInput, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
 import { CustomerFormComponent } from '../customer-form/customer-form';
+import { CustomerInput } from '@core/models/customer.interface';
 
 @Component({
   selector: 'app-customer-new',

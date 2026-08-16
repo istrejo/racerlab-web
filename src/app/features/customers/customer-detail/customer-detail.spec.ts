@@ -2,9 +2,10 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Customer, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
 import { of, throwError } from 'rxjs';
-import { CustomerDetailComponent } from './customer-detail';
+import CustomerDetailComponent from './customer-detail';
+import { Customer } from '@core/models/customer.interface';
 
 describe('CustomerDetailComponent', () => {
   let fixture: ComponentFixture<CustomerDetailComponent>;

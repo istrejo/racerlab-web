@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { CreateMembershipRequest } from '@core/models/membership.interface';
 import {
   assignableRoles,
-  CreateMembershipRequest,
   MembershipsService,
   roleLabel,
 } from '@core/services/memberships/memberships';

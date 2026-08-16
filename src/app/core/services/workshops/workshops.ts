@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
 import { map, Observable, switchMap } from 'rxjs';
-import { AuthService, AuthTokenResponse, UserRole } from '../auth/auth';
+import { AuthService, AuthTokenResponse } from '../auth/auth';
 import { CreateWorkshopRequest, WorkshopSummary } from '@core/models/workshop.interface';
 
 @Injectable({ providedIn: 'root' })

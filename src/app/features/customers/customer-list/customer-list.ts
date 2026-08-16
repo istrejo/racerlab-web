@@ -3,9 +3,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { CustomerPage, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
+import { CustomerPage } from '@core/models/customer.interface';
 
 @Component({
   selector: 'app-customer-list',

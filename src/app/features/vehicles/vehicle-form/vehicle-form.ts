@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import type { Vehicle, VehicleInput } from '@core/services/vehicles/vehicles';
+import { Vehicle, VehicleInput } from '@core/models/vehicle.interface';
 
 function trimmedRequired(control: AbstractControl): ValidationErrors | null {
   return String(control.value ?? '').trim() ? null : { required: true };

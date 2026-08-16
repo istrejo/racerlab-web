@@ -2,12 +2,12 @@ import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Customer, CustomerPage, CustomersService } from '@core/services/customers/customers';
-import {
-  ServiceOrderInput,
-  ServiceOrdersService,
-} from '@core/services/service-orders/service-orders';
-import { Vehicle, VehiclesService } from '@core/services/vehicles/vehicles';
+import { Customer, CustomerPage } from '@core/models/customer.interface';
+import { ServiceOrderInput } from '@core/models/service-order.interface';
+import { Vehicle } from '@core/models/vehicle.interface';
+import { CustomersService } from '@core/services/customers/customers';
+import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 
 type Step = 'customer' | 'vehicle' | 'reception';

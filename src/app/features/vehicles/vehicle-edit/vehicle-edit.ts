@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Vehicle, VehicleInput, VehiclesService } from '@core/services/vehicles/vehicles';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { VehicleFormComponent } from '../vehicle-form/vehicle-form';
+import { Vehicle, VehicleInput } from '@core/models/vehicle.interface';
 
 @Component({
   selector: 'app-vehicle-edit',

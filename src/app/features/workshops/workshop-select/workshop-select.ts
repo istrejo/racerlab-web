@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { WorkshopSummary } from '@core/models/workshop.interface';
 import { AuthService } from '@core/services/auth/auth';
 import { authenticatedDestination, sanitizeReturnUrl } from '@core/services/auth/auth-navigation';
-import { WorkshopsService, WorkshopSummary } from '@core/services/workshops/workshops';
+import { WorkshopsService } from '@core/services/workshops/workshops';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { finalize } from 'rxjs';
 

@@ -2,7 +2,8 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { QuotePage, QuoteStatus, QuotesService } from '@core/services/quotes/quotes';
+import { QuotePage, QuoteStatus } from '@core/models/quotes.interface';
+import { QuotesService } from '@core/services/quotes/quotes';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
 

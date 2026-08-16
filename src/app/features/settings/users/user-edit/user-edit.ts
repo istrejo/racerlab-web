@@ -4,12 +4,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import {
   assignableRoles,
-  Membership,
   MembershipsService,
   roleLabel,
 } from '@core/services/memberships/memberships';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { createTemporaryPassword } from '../user-new/user-new';
+import { Membership } from '@core/models/membership.interface';
 
 @Component({
   selector: 'app-user-edit',

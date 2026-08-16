@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Membership, MembershipsService, roleLabel } from '@core/services/memberships/memberships';
+import { Membership } from '@core/models/membership.interface';
+import { MembershipsService, roleLabel } from '@core/services/memberships/memberships';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 
 @Component({

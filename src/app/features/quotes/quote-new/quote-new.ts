@@ -11,7 +11,8 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { QuoteItemType, QuotesService } from '@core/services/quotes/quotes';
+import { QuoteItemType } from '@core/models/quotes.interface';
+import { QuotesService } from '@core/services/quotes/quotes';
 
 type QuoteItemModel = {
   type: QuoteItemType;

@@ -3,8 +3,9 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Quote, QuoteItemType, QuoteStatus } from '@core/models/quotes.interface';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Quote, QuoteItemType, QuoteStatus, QuotesService } from '@core/services/quotes/quotes';
+import { QuotesService } from '@core/services/quotes/quotes';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, of } from 'rxjs';
 

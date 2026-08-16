@@ -2,12 +2,9 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ServiceOrderPage, ServiceOrderStatus } from '@core/models/service-order.interface';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import {
-  ServiceOrderPage,
-  ServiceOrderStatus,
-  ServiceOrdersService,
-} from '@core/services/service-orders/service-orders';
+import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
 

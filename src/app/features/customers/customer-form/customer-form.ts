@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import type { Customer, CustomerInput } from '@core/services/customers/customers';
+import { Customer, CustomerInput } from '@core/models/customer.interface';
 
 function trimmedEmail(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value ?? '').trim();
