@@ -2,18 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
 import { Observable } from 'rxjs';
-import type { MemberSummary } from '@core/services/service-orders/service-orders';
-
-export type Diagnosis = {
-  id: string;
-  serviceOrderId: string;
-  technician: MemberSummary;
-  description: string;
-  requiredPartsNotes: string | null;
-  suggestedLabor: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+import { Diagnosis } from '@core/models/diagnoses.interface';
 
 export type DiagnosisInput = {
   description: string;

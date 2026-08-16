@@ -1,63 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { CustomerSummary } from '@core/services/service-orders/service-orders';
+import {
+  Vehicle,
+  VehicleInput,
+  VehiclePage,
+  VehicleSearch,
+  VehicleWithCustomerPage,
+} from '@core/models/vehicle.interface';
 import { API_URL } from '@shared/utils/api-url.token';
 import { Observable } from 'rxjs';
-
-export type Vehicle = {
-  id: string;
-  customerId: string;
-  plate: string;
-  brand: string;
-  model: string;
-  year: number | null;
-  color: string | null;
-  vin: string | null;
-  mileage: number | null;
-  vehicleType: string | null;
-  notes: string | null;
-  serviceOrderCount: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type VehicleInput = {
-  plate: string;
-  brand: string;
-  model: string;
-  year?: number | null;
-  color?: string | null;
-  vin?: string | null;
-  mileage?: number | null;
-  vehicleType?: string | null;
-  notes?: string | null;
-};
-
-export type VehiclePage = {
-  items: Vehicle[];
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-};
-
-export type VehicleWithCustomer = Vehicle & {
-  customer: CustomerSummary;
-};
-
-export type VehicleWithCustomerPage = {
-  items: VehicleWithCustomer[];
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-};
-
-export type VehicleSearch = {
-  search?: string;
-  page?: number;
-  limit?: number;
-};
 
 @Injectable({ providedIn: 'root' })
 export class VehiclesService {

@@ -3,18 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
 import { map, Observable, switchMap } from 'rxjs';
 import { AuthService, AuthTokenResponse, UserRole } from '../auth/auth';
-
-export type CreateWorkshopRequest = {
-  name: string;
-};
-
-export type WorkshopSummary = {
-  id: string;
-  name: string;
-  ownerUserId: string;
-  membershipId: string;
-  role: UserRole;
-};
+import { CreateWorkshopRequest, WorkshopSummary } from '@core/models/workshop.interface';
 
 @Injectable({ providedIn: 'root' })
 export class WorkshopsService {
