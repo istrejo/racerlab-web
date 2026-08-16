@@ -39,6 +39,7 @@ describe('CustomerDetailComponent', () => {
           useValue: {
             canWriteCustomers: () => false,
             canDeleteCustomers: canDelete,
+            canWriteOrders: () => false,
           },
         },
         {

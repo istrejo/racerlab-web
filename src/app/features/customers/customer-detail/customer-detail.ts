@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
@@ -6,7 +7,7 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
 
 @Component({
   selector: 'app-customer-detail',
-  imports: [LoadingSkeletonComponent, RouterLink],
+  imports: [DatePipe, LoadingSkeletonComponent, RouterLink],
   templateUrl: './customer-detail.html',
 })
 export class CustomerDetailComponent {

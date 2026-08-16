@@ -1,8 +1,5 @@
 <main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
   <section class="mx-auto max-w-4xl">
-    <a class="text-sm font-semibold text-[#004AC6] hover:underline" routerLink="/customers"
-      >← Volver a clientes</a
-    >
     <div class="mt-6">
       <app-loading-skeleton
         label="Cargando ficha del cliente…"
@@ -18,79 +15,196 @@
             </button>
           </div>
         } @else if (customer(); as current) {
-          <header class="mt-5 flex flex-wrap items-end justify-between gap-4">
+          <nav class="text-sm" aria-label="Breadcrumb">
+            <a class="font-semibold text-[#004AC6] hover:underline" routerLink="/customers"
+              >Clientes</a
+            >
+            <span class="mx-2 text-slate-400" aria-hidden="true">/</span>
+            <span class="font-semibold text-slate-900">{{ current.fullName }}</span>
+          </nav>
+
+          <header class="mt-4 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p class="text-sm font-semibold text-[#F97316]">Cliente</p>
-              <h1 class="mt-1 text-3xl font-bold">{{ current.fullName }}</h1>
+              <h1 class="font-['Manrope'] text-3xl font-bold text-slate-900">
+                {{ current.fullName }}
+              </h1>
+              <p class="mt-1 text-sm text-slate-600">Ficha del cliente</p>
             </div>
-            @if (permissions.canWriteCustomers()) {
-              <a
-                class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white"
-                [routerLink]="['/customers', current.id, 'edit']"
-                >Editar cliente</a
-              >
-            }
+            <div class="flex flex-wrap items-center gap-3">
+              @if (permissions.canWriteCustomers()) {
+                <a
+                  class="inline-flex h-11 items-center rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-slate-50"
+                  [routerLink]="['/customers', current.id, 'edit']"
+                  >Editar</a
+                >
+              }
+              @if (permissions.canWriteOrders()) {
+                <a
+                  class="inline-flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+                  routerLink="/service-orders/new"
+                  [queryParams]="{ customerId: current.id }"
+                  >Nueva orden</a
+                >
+              }
+            </div>
           </header>
+
           <div class="mt-6 grid gap-5 lg:grid-cols-3">
-            <dl class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
-              <div class="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Teléfono</dt>
-                  <dd class="mt-1">{{ current.phone || '—' }}</dd>
+            <div class="space-y-5 lg:col-span-2">
+              <div
+                class="rounded-xl border border-[#E2E8F0] bg-white p-6 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+              >
+                <div class="mb-5 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-500" aria-hidden="true"
+                      >call</span
+                    >
+                    <h2 class="font-['Manrope'] text-lg font-bold text-slate-900">
+                      Información de contacto
+                    </h2>
+                  </div>
+                  <span
+                    class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700"
+                    >Cliente activo</span
+                  >
                 </div>
-                <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">WhatsApp</dt>
-                  <dd class="mt-1">{{ current.whatsapp || '—' }}</dd>
-                </div>
-                <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Correo</dt>
-                  <dd class="mt-1">{{ current.email || '—' }}</dd>
-                </div>
-                <div>
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Documento</dt>
-                  <dd class="mt-1">{{ current.document || '—' }}</dd>
-                </div>
-                <div class="sm:col-span-2">
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Dirección</dt>
-                  <dd class="mt-1">{{ current.address || '—' }}</dd>
-                </div>
-                <div class="sm:col-span-2">
-                  <dt class="text-xs font-semibold uppercase text-slate-500">Notas internas</dt>
-                  <dd class="mt-1 whitespace-pre-wrap">{{ current.notes || '—' }}</dd>
+                <dl class="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Teléfono
+                    </dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900">
+                      {{ current.phone || '—' }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      WhatsApp
+                    </dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900">
+                      {{ current.whatsapp || '—' }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Correo
+                    </dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900">
+                      {{ current.email || '—' }}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Documento
+                    </dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900">
+                      {{ current.document || '—' }}
+                    </dd>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Dirección
+                    </dt>
+                    <dd class="mt-1 text-sm font-medium text-slate-900">
+                      {{ current.address || '—' }}
+                    </dd>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Notas internas
+                    </dt>
+                    <dd class="mt-1 whitespace-pre-wrap text-sm font-medium text-slate-900">
+                      {{ current.notes || '—' }}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <aside class="space-y-5">
+              <div
+                class="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+              >
+                <h3
+                  class="mb-4 border-b border-slate-100 pb-2 text-base font-semibold text-slate-900"
+                >
+                  Resumen
+                </h3>
+                <div class="grid grid-cols-3 gap-4">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Total de órdenes
+                    </p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900">
+                      {{ current.serviceOrderCount }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Cliente desde
+                    </p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900">
+                      {{ current.createdAt | date: 'dd/MM/yyyy' }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">LTV</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900">—</p>
+                  </div>
                 </div>
               </div>
-            </dl>
-            <aside class="space-y-4">
+
               <a
-                class="block rounded-xl border border-slate-200 bg-white p-5 hover:border-[#004AC6]"
+                class="block rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.08)] transition-colors hover:border-[#004AC6]"
                 [routerLink]="['/customers', current.id, 'vehicles']"
               >
-                <p class="text-3xl font-bold">{{ current.vehicleCount }}</p>
-                <p class="text-sm text-slate-600">Vehículos asociados</p>
+                <div class="flex items-center justify-between">
+                  <p class="text-3xl font-bold text-slate-900">{{ current.vehicleCount }}</p>
+                  <span
+                    aria-hidden="true"
+                    class="material-symbols-outlined text-[#004AC6]"
+                    style="font-size: 24px"
+                    >directions_car</span
+                  >
+                </div>
+                <p class="mt-1 text-sm text-slate-500">Vehículos asociados</p>
               </a>
+
               <a
-                class="block rounded-xl border border-slate-200 bg-white p-5 hover:border-[#004AC6]"
+                class="block rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.08)] transition-colors hover:border-[#004AC6]"
                 [routerLink]="['/service-orders']"
                 [queryParams]="{ customerId: current.id }"
               >
-                <p class="text-3xl font-bold">{{ current.serviceOrderCount }}</p>
-                <p class="text-sm text-slate-600">Órdenes de servicio</p>
+                <div class="flex items-center justify-between">
+                  <p class="text-3xl font-bold text-slate-900">{{ current.serviceOrderCount }}</p>
+                  <span
+                    aria-hidden="true"
+                    class="material-symbols-outlined text-[#004AC6]"
+                    style="font-size: 24px"
+                    >history</span
+                  >
+                </div>
+                <p class="mt-1 text-sm text-slate-500">Órdenes de servicio</p>
               </a>
             </aside>
           </div>
+
           @if (permissions.canDeleteCustomers()) {
             <div class="mt-8 border-t border-slate-200 pt-6">
               @if (!deleteOpen()) {
                 <button
-                  class="text-sm font-semibold text-red-700 hover:underline"
+                  class="inline-flex items-center gap-1 text-sm font-semibold text-red-700 hover:underline"
                   (click)="deleteOpen.set(true)"
                   type="button"
                 >
+                  <span aria-hidden="true" class="material-symbols-outlined" style="font-size: 18px"
+                    >delete</span
+                  >
                   Eliminar cliente
                 </button>
               } @else {
                 <section
-                  class="rounded-lg border border-red-200 bg-red-50 p-4"
+                  class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
                   role="alertdialog"
                   aria-labelledby="delete-title"
                   aria-describedby="delete-description"
@@ -106,14 +220,15 @@
                   }
                   <div class="mt-4 flex gap-3">
                     <button
-                      class="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                      class="h-10 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white disabled:opacity-50"
                       [disabled]="deleting()"
                       (click)="remove()"
                       type="button"
                     >
-                      {{ deleting() ? 'Eliminando...' : 'Confirmar eliminación' }}</button
-                    ><button
-                      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
+                      {{ deleting() ? 'Eliminando...' : 'Confirmar eliminación' }}
+                    </button>
+                    <button
+                      class="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50"
                       [disabled]="deleting()"
                       (click)="deleteOpen.set(false)"
                       type="button"

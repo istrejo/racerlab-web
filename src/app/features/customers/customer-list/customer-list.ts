@@ -84,4 +84,20 @@ export class CustomerListComponent {
       queryParamsHandling: 'merge',
     });
   }
+
+  initials(fullName: string): string {
+    return fullName
+      .split(/\s+/)
+      .filter((part) => !!part)
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join('');
+  }
+
+  pageSummary(result: CustomerPage): string {
+    if (result.total === 0) return '0 clientes';
+    const start = (result.page - 1) * result.limit + 1;
+    const end = Math.min(result.page * result.limit, result.total);
+    return `Mostrando ${start} - ${end} de ${result.total} clientes`;
+  }
 }

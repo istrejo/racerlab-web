@@ -2,33 +2,54 @@
   <section class="mx-auto max-w-6xl" aria-labelledby="customers-title">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p class="text-sm font-semibold text-[#F97316]">Operación</p>
-        <h1 id="customers-title" class="mt-1 text-3xl font-bold">Clientes</h1>
-        <p class="mt-2 text-slate-600">Buscá y administrá los clientes del taller activo.</p>
+        <h1 id="customers-title" class="font-['Manrope'] text-3xl font-bold text-slate-900">
+          Clientes
+        </h1>
+        <p class="mt-2 text-sm text-slate-600">
+          Buscá y administrá los clientes del taller activo.
+        </p>
       </div>
       @if (permissions.canWriteCustomers()) {
         <a
-          class="flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white"
+          class="flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
           routerLink="/customers/new"
-          >Crear cliente</a
+          >Nuevo cliente</a
         >
       }
     </header>
 
-    <form class="mt-6 flex gap-2" (ngSubmit)="applySearch()">
+    <form class="mt-6 flex items-center gap-3" (ngSubmit)="applySearch()">
       <label class="sr-only" for="customer-search">Buscar clientes</label>
-      <input
-        class="h-11 flex-1 rounded-lg border border-slate-300 px-3"
-        id="customer-search"
-        [formControl]="search"
-        placeholder="Nombre, teléfono, documento o correo"
-      />
-      <button
-        class="h-11 rounded-lg border border-slate-300 bg-white px-4 font-semibold"
-        type="submit"
-      >
-        Buscar
-      </button>
+      <div class="relative flex-1">
+        <span
+          class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          aria-hidden="true"
+          >search</span
+        >
+        <input
+          class="h-11 w-full rounded-lg border border-[#E2E8F0] bg-white pl-10 pr-4 text-sm outline-none focus:border-[#004AC6] focus:ring-2 focus:ring-[#004AC6]/20"
+          id="customer-search"
+          type="search"
+          [formControl]="search"
+          placeholder="Nombre, teléfono, documento o correo"
+        />
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="h-11 rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+          disabled
+          type="button"
+        >
+          Filtros
+        </button>
+        <button
+          class="h-11 rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+          disabled
+          type="button"
+        >
+          Exportar
+        </button>
+      </div>
     </form>
 
     @if (error()) {
@@ -45,7 +66,9 @@
         variant="table"
         [loading]="loading()"
       >
-        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div
+          class="overflow-x-auto rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+        >
           @if (page()?.items?.length === 0) {
             <p class="p-6 text-slate-600">No hay clientes que coincidan con la búsqueda.</p>
           } @else if (page(); as result) {
@@ -53,38 +76,68 @@
               <caption class="sr-only">
                 Clientes del taller activo
               </caption>
-              <thead class="bg-slate-100 text-slate-700">
-                <tr>
-                  <th class="px-4 py-3">Cliente</th>
-                  <th class="px-4 py-3">Contacto</th>
-                  <th class="px-4 py-3">Documento</th>
-                  <th class="px-4 py-3">Historial</th>
-                  <th class="px-4 py-3"><span class="sr-only">Acciones</span></th>
+              <thead>
+                <tr class="border-b border-[#E2E8F0]">
+                  <th
+                    class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
+                  >
+                    Cliente
+                  </th>
+                  <th
+                    class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
+                  >
+                    Contacto
+                  </th>
+                  <th
+                    class="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
+                  >
+                    Vehículos
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500"
+                  >
+                    <span class="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 @for (customer of result.items; track customer.id) {
-                  <tr class="border-t border-slate-200">
-                    <td class="px-4 py-4 font-semibold">
-                      <a
-                        class="text-[#004AC6] hover:underline"
-                        [routerLink]="['/customers', customer.id]"
-                        >{{ customer.fullName }}</a
+                  <tr class="border-b border-[#E2E8F0] last:border-b-0">
+                    <td class="px-4 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#004AC6]"
+                          aria-hidden="true"
+                        >
+                          {{ initials(customer.fullName) }}
+                        </div>
+                        <div>
+                          <a
+                            class="font-semibold text-[#004AC6] hover:underline"
+                            [routerLink]="['/customers', customer.id]"
+                            >{{ customer.fullName }}</a
+                          >
+                          <p class="text-xs text-slate-500">Cliente</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4">
+                      <p class="font-medium text-slate-900">
+                        {{ customer.phone || customer.whatsapp || 'Sin teléfono' }}
+                      </p>
+                      <p class="text-xs text-slate-500">{{ customer.email || 'Sin correo' }}</p>
+                    </td>
+                    <td class="px-4 py-4">
+                      <span
+                        class="inline-flex items-center rounded-full bg-[#EFF6FF] px-2.5 py-1 text-xs font-semibold text-[#004AC6]"
                       >
-                    </td>
-                    <td class="px-4 py-4">
-                      <p>{{ customer.phone || customer.whatsapp || 'Sin teléfono' }}</p>
-                      <p class="text-slate-500">{{ customer.email || 'Sin correo' }}</p>
-                    </td>
-                    <td class="px-4 py-4">{{ customer.document || '—' }}</td>
-                    <td class="px-4 py-4">
-                      {{ customer.vehicleCount }} vehículos ·
-                      {{ customer.serviceOrderCount }} órdenes
+                        {{ customer.vehicleCount }}
+                      </span>
                     </td>
                     <td class="px-4 py-4 text-right">
                       @if (permissions.canWriteCustomers()) {
                         <a
-                          class="font-semibold text-[#004AC6] hover:underline"
+                          class="inline-flex h-9 items-center rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
                           [routerLink]="['/customers', customer.id, 'edit']"
                           >Editar</a
                         >
@@ -102,21 +155,18 @@
     @if (!loading()) {
       @if (page(); as result) {
         <nav class="mt-5 flex items-center justify-between" aria-label="Paginación de clientes">
-          <p class="text-sm text-slate-600">{{ result.total }} clientes</p>
+          <p class="text-sm text-slate-600">{{ pageSummary(result) }}</p>
           <div class="flex gap-2">
             <button
-              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
+              class="h-9 rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-slate-50 disabled:opacity-50"
               [disabled]="result.page <= 1"
               (click)="goToPage(result.page - 1)"
               type="button"
             >
               Anterior
             </button>
-            <span class="px-2 py-2 text-sm"
-              >Página {{ result.page }} de {{ result.totalPages || 1 }}</span
-            >
             <button
-              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50"
+              class="h-9 rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm font-semibold text-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-slate-50 disabled:opacity-50"
               [disabled]="result.page >= result.totalPages"
               (click)="goToPage(result.page + 1)"
               type="button"
