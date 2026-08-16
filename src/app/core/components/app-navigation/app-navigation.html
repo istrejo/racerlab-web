@@ -73,14 +73,30 @@
         }
       </li>
       <li>
-        <span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"
-          ><svg aria-hidden="true" class="size-4"><use href="#icon-vehicle" /></svg>Vehicles</span
-        >
+        @if (permissions.canReadVehicles()) {
+          <a
+            ariaCurrentWhenActive="page"
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400 hover:bg-slate-800 hover:text-white"
+            routerLink="/vehicles"
+            routerLinkActive="bg-slate-800 text-white"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="mobileNavigationDismissed.emit()"
+            ><svg aria-hidden="true" class="size-4"><use href="#icon-vehicle" /></svg>Vehicles</a
+          >
+        }
       </li>
       <li>
-        <span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"
-          ><svg aria-hidden="true" class="size-4"><use href="#icon-quotes" /></svg>Quotes</span
-        >
+        @if (permissions.canReadQuotes()) {
+          <a
+            ariaCurrentWhenActive="page"
+            class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400 hover:bg-slate-800 hover:text-white"
+            routerLink="/quotes"
+            routerLinkActive="bg-slate-800 text-white"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="mobileNavigationDismissed.emit()"
+            ><svg aria-hidden="true" class="size-4"><use href="#icon-quotes" /></svg>Quotes</a
+          >
+        }
       </li>
       <li>
         <span class="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-400"

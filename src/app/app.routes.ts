@@ -5,6 +5,8 @@ import { customerReadGuard } from '@core/guards/customer-read/customer-read-guar
 import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
 import { guestGuard } from '@core/guards/guest/guest-guard';
 import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
+import { quoteReadGuard } from '@core/guards/quote-read/quote-read-guard';
+import { quoteWriteGuard } from '@core/guards/quote-write/quote-write-guard';
 import { serviceOrderReadGuard } from '@core/guards/service-order-read/service-order-read-guard';
 import { serviceOrderWriteGuard } from '@core/guards/service-order-write/service-order-write-guard';
 import { vehicleReadGuard } from '@core/guards/vehicle-read/vehicle-read-guard';
@@ -12,6 +14,10 @@ import { vehicleWriteGuard } from '@core/guards/vehicle-write/vehicle-write-guar
 import { workshopGuard } from '@core/guards/workshop/workshop-guard';
 
 export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'dashboard',
+  },
   {
     path: 'login',
     canActivate: [guestGuard],
@@ -115,6 +121,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'vehicles',
+        canActivate: [vehicleReadGuard],
+        loadComponent: () =>
+          import('./features/vehicles/vehicle-workshop-list/vehicle-workshop-list').then(
+            (m) => m.VehicleWorkshopListComponent,
+          ),
+      },
+      {
         path: 'customers/:customerId/vehicles',
         canActivate: [vehicleReadGuard],
         loadComponent: () =>
@@ -139,12 +153,30 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'service-orders/:orderId/quotes/new',
+        canActivate: [quoteWriteGuard],
+        loadComponent: () =>
+          import('./features/quotes/quote-new/quote-new').then((m) => m.QuoteNewComponent),
+      },
+      {
+        path: 'service-orders/:orderId/quotes/:quoteId',
+        canActivate: [quoteReadGuard],
+        loadComponent: () =>
+          import('./features/quotes/quote-detail/quote-detail').then((m) => m.QuoteDetailComponent),
+      },
+      {
         path: 'service-orders/:orderId',
         canActivate: [serviceOrderReadGuard],
         loadComponent: () =>
           import('./features/service-orders/service-order-detail/service-order-detail').then(
             (m) => m.ServiceOrderDetailComponent,
           ),
+      },
+      {
+        path: 'quotes',
+        canActivate: [quoteReadGuard],
+        loadComponent: () =>
+          import('./features/quotes/quote-list/quote-list').then((m) => m.QuoteListComponent),
       },
       {
         path: 'settings/users',

@@ -5,13 +5,14 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DiagnosesService, Diagnosis } from '@core/services/diagnoses/diagnoses';
 import { PermissionsService } from '@core/services/permissions/permissions';
+import { Quote, QuoteStatus, QuotesService } from '@core/services/quotes/quotes';
 import {
   ServiceOrderStatus,
   ServiceOrdersService,
   ServiceOrderDetail,
 } from '@core/services/service-orders/service-orders';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
-import { catchError, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, of, switchMap } from 'rxjs';
 
 type DialogMode = 'status' | 'diagnosis' | null;
 
@@ -47,6 +48,15 @@ const FUEL_LABELS: Record<string, string> = {
   FULL: 'Lleno',
 };
 
+const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
+  DRAFT: 'Borrador',
+  ACTIVE: 'Activa',
+  APPROVED: 'Aprobada',
+  REJECTED: 'Rechazada',
+  EXPIRED: 'Vencida',
+  CANCELLED: 'Cancelada',
+};
+
 const PRIORITY_LABELS: Record<string, string> = {
   LOW: 'Baja',
   NORMAL: 'Normal',
@@ -63,6 +73,7 @@ export class ServiceOrderDetailComponent {
   readonly permissions = inject(PermissionsService);
   private readonly serviceOrders = inject(ServiceOrdersService);
   private readonly diagnosesService = inject(DiagnosesService);
+  private readonly quotesService = inject(QuotesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -70,6 +81,7 @@ export class ServiceOrderDetailComponent {
   readonly orderId = this.route.snapshot.paramMap.get('orderId') ?? '';
   readonly order = signal<ServiceOrderDetail | null>(null);
   readonly diagnoses = signal<Diagnosis[]>([]);
+  readonly quotes = signal<Quote[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly actionPending = signal(false);
@@ -79,6 +91,7 @@ export class ServiceOrderDetailComponent {
   readonly statusLabels = STATUS_LABELS;
   readonly fuelLabels = FUEL_LABELS;
   readonly priorityLabels = PRIORITY_LABELS;
+  readonly quoteStatusLabels = QUOTE_STATUS_LABELS;
 
   readonly statusForm = new FormGroup({
     status: new FormControl<ServiceOrderStatus | null>(null, { validators: Validators.required }),
@@ -113,7 +126,12 @@ export class ServiceOrderDetailComponent {
       .pipe(
         switchMap((order) => {
           this.order.set(order);
-          return this.diagnosesService.list(order.id).pipe(catchError(() => of([] as Diagnosis[])));
+          return forkJoin({
+            diagnoses: this.diagnosesService
+              .list(order.id)
+              .pipe(catchError(() => of([] as Diagnosis[]))),
+            quotes: this.quotesService.list(order.id).pipe(catchError(() => of([] as Quote[]))),
+          });
         }),
         catchError(() => {
           this.error.set('No pudimos cargar la orden de servicio.');
@@ -121,9 +139,10 @@ export class ServiceOrderDetailComponent {
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((diagnoses) => {
-        if (diagnoses !== null) {
-          this.diagnoses.set(diagnoses);
+      .subscribe((related) => {
+        if (related !== null) {
+          this.diagnoses.set(related.diagnoses);
+          this.quotes.set(related.quotes);
         }
         this.loading.set(false);
       });

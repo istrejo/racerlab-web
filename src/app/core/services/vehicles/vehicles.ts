@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { CustomerSummary } from '@core/services/service-orders/service-orders';
 import { API_URL } from '@shared/utils/api-url.token';
 import { Observable } from 'rxjs';
 
@@ -40,6 +41,18 @@ export type VehiclePage = {
   totalPages: number;
 };
 
+export type VehicleWithCustomer = Vehicle & {
+  customer: CustomerSummary;
+};
+
+export type VehicleWithCustomerPage = {
+  items: VehicleWithCustomer[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 export type VehicleSearch = {
   search?: string;
   page?: number;
@@ -51,10 +64,16 @@ export class VehiclesService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = inject(API_URL);
 
+  listForWorkshop(query: VehicleSearch = {}): Observable<VehicleWithCustomerPage> {
+    let params = new HttpParams().set('page', query.page ?? 1).set('limit', query.limit ?? 20);
+    if (query.search?.trim()) {
+      params = params.set('search', query.search.trim());
+    }
+    return this.http.get<VehicleWithCustomerPage>(`${this.apiUrl}/vehicles`, { params });
+  }
+
   list(customerId: string, query: VehicleSearch = {}): Observable<VehiclePage> {
-    let params = new HttpParams()
-      .set('page', query.page ?? 1)
-      .set('limit', query.limit ?? 20);
+    let params = new HttpParams().set('page', query.page ?? 1).set('limit', query.limit ?? 20);
     if (query.search?.trim()) {
       params = params.set('search', query.search.trim());
     }
@@ -64,23 +83,14 @@ export class VehiclesService {
   }
 
   get(customerId: string, vehicleId: string): Observable<Vehicle> {
-    return this.http.get<Vehicle>(
-      `${this.apiUrl}/customers/${customerId}/vehicles/${vehicleId}`,
-    );
+    return this.http.get<Vehicle>(`${this.apiUrl}/customers/${customerId}/vehicles/${vehicleId}`);
   }
 
   create(customerId: string, input: VehicleInput): Observable<Vehicle> {
-    return this.http.post<Vehicle>(
-      `${this.apiUrl}/customers/${customerId}/vehicles`,
-      input,
-    );
+    return this.http.post<Vehicle>(`${this.apiUrl}/customers/${customerId}/vehicles`, input);
   }
 
-  update(
-    customerId: string,
-    vehicleId: string,
-    input: Partial<VehicleInput>,
-  ): Observable<Vehicle> {
+  update(customerId: string, vehicleId: string, input: Partial<VehicleInput>): Observable<Vehicle> {
     return this.http.patch<Vehicle>(
       `${this.apiUrl}/customers/${customerId}/vehicles/${vehicleId}`,
       input,
@@ -88,8 +98,6 @@ export class VehiclesService {
   }
 
   remove(customerId: string, vehicleId: string): Observable<void> {
-    return this.http.delete<void>(
-      `${this.apiUrl}/customers/${customerId}/vehicles/${vehicleId}`,
-    );
+    return this.http.delete<void>(`${this.apiUrl}/customers/${customerId}/vehicles/${vehicleId}`);
   }
 }

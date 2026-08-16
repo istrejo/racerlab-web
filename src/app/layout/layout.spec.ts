@@ -44,6 +44,8 @@ describe('LayoutComponent', () => {
             canReadCustomers,
             canReadOrders: () => true,
             canWriteOrders: () => true,
+            canReadVehicles: () => true,
+            canReadQuotes: () => true,
           },
         },
       ],

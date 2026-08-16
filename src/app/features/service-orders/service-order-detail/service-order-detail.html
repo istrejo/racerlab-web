@@ -1,9 +1,6 @@
 <main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
   <section class="mx-auto max-w-5xl">
-    <a
-      class="text-sm font-semibold text-[#004AC6] hover:underline"
-      routerLink="/service-orders"
-    >
+    <a class="text-sm font-semibold text-[#004AC6] hover:underline" routerLink="/service-orders">
       ← Volver a órdenes
     </a>
 
@@ -32,14 +29,22 @@
                 [class.text-green-800]="current.status === 'DELIVERED'"
                 [class.bg-red-100]="current.status === 'CANCELLED'"
                 [class.text-red-800]="current.status === 'CANCELLED'"
-                [class.bg-blue-100]="current.status !== 'DELIVERED' && current.status !== 'CANCELLED'"
-                [class.text-blue-800]="current.status !== 'DELIVERED' && current.status !== 'CANCELLED'"
+                [class.bg-blue-100]="
+                  current.status !== 'DELIVERED' && current.status !== 'CANCELLED'
+                "
+                [class.text-blue-800]="
+                  current.status !== 'DELIVERED' && current.status !== 'CANCELLED'
+                "
               >
                 {{ statusLabels[current.status] }}
               </span>
             </div>
             <div class="flex gap-2">
-              @if (permissions.canManageOrders() && current.status !== 'DELIVERED' && current.status !== 'CANCELLED') {
+              @if (
+                permissions.canManageOrders() &&
+                current.status !== 'DELIVERED' &&
+                current.status !== 'CANCELLED'
+              ) {
                 <button
                   class="rounded-lg border border-[#004AC6] bg-white px-4 py-3 text-sm font-semibold text-[#004AC6]"
                   (click)="openStatusDialog()"
@@ -70,34 +75,48 @@
                   </div>
                   <div>
                     <dt class="text-xs font-semibold uppercase text-slate-500">Prioridad</dt>
-                    <dd class="mt-1">{{ current.priority ? priorityLabels[current.priority] : '—' }}</dd>
+                    <dd class="mt-1">
+                      {{ current.priority ? priorityLabels[current.priority] : '—' }}
+                    </dd>
                   </div>
                   <div>
                     <dt class="text-xs font-semibold uppercase text-slate-500">Técnico asignado</dt>
-                    <dd class="mt-1">{{ current.assignedTechnician?.displayName ?? 'Sin asignar' }}</dd>
+                    <dd class="mt-1">
+                      {{ current.assignedTechnician?.displayName ?? 'Sin asignar' }}
+                    </dd>
                   </div>
                   <div>
-                    <dt class="text-xs font-semibold uppercase text-slate-500">Kilometraje de entrada</dt>
+                    <dt class="text-xs font-semibold uppercase text-slate-500">
+                      Kilometraje de entrada
+                    </dt>
                     <dd class="mt-1">
                       @if (current.mileageIn !== null) {
                         {{ current.mileageIn | number }} km
-                      } @else { — }
+                      } @else {
+                        —
+                      }
                     </dd>
                   </div>
                   <div>
                     <dt class="text-xs font-semibold uppercase text-slate-500">Combustible</dt>
-                    <dd class="mt-1">{{ current.fuelLevel ? fuelLabels[current.fuelLevel] : '—' }}</dd>
+                    <dd class="mt-1">
+                      {{ current.fuelLevel ? fuelLabels[current.fuelLevel] : '—' }}
+                    </dd>
                   </div>
                   <div>
                     <dt class="text-xs font-semibold uppercase text-slate-500">Entrega estimada</dt>
                     <dd class="mt-1">{{ current.estimatedDeliveryDate ?? '—' }}</dd>
                   </div>
                   <div class="sm:col-span-2">
-                    <dt class="text-xs font-semibold uppercase text-slate-500">Problemas reportados</dt>
+                    <dt class="text-xs font-semibold uppercase text-slate-500">
+                      Problemas reportados
+                    </dt>
                     <dd class="mt-1 whitespace-pre-wrap">{{ current.reportedIssues ?? '—' }}</dd>
                   </div>
                   <div class="sm:col-span-2">
-                    <dt class="text-xs font-semibold uppercase text-slate-500">Notas de recepción</dt>
+                    <dt class="text-xs font-semibold uppercase text-slate-500">
+                      Notas de recepción
+                    </dt>
                     <dd class="mt-1 whitespace-pre-wrap">{{ current.receptionNotes ?? '—' }}</dd>
                   </div>
                 </dl>
@@ -121,7 +140,7 @@
                         }
                       </p>
                       <p class="text-xs text-slate-500">
-                        {{ entry.changedBy.displayName }} · {{ entry.createdAt | date:'short' }}
+                        {{ entry.changedBy.displayName }} · {{ entry.createdAt | date: 'short' }}
                       </p>
                       @if (entry.comment) {
                         <p class="mt-1 text-sm text-slate-700">{{ entry.comment }}</p>
@@ -150,6 +169,41 @@
                 }
               </div>
 
+              <!-- Quotes -->
+              <div class="rounded-xl border border-slate-200 bg-white p-5">
+                <p class="text-3xl font-bold" data-testid="quote-count">{{ quotes().length }}</p>
+                <p class="text-sm text-slate-600">
+                  {{ quotes().length === 1 ? 'Cotización' : 'Cotizaciones' }}
+                </p>
+
+                @if (quotes().length > 0) {
+                  <ul class="mt-3 space-y-2" role="list">
+                    @for (quote of quotes(); track quote.id) {
+                      <li>
+                        <a
+                          class="flex items-center justify-between gap-2 text-sm hover:opacity-80"
+                          [routerLink]="['/service-orders', current.id, 'quotes', quote.id]"
+                        >
+                          <span class="font-semibold text-[#004AC6]">
+                            {{ quoteStatusLabels[quote.status] }}
+                          </span>
+                          <span class="font-semibold">{{ quote.total }}</span>
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                }
+
+                @if (permissions.canWriteQuotes()) {
+                  <a
+                    class="mt-3 block w-full rounded-lg bg-[#004AC6] px-3 py-2 text-center text-sm font-semibold text-white"
+                    [routerLink]="['/service-orders', current.id, 'quotes', 'new']"
+                  >
+                    Nueva cotización
+                  </a>
+                }
+              </div>
+
               <!-- Diagnoses list -->
               @if (diagnoses().length > 0) {
                 <div class="rounded-xl border border-slate-200 bg-white p-5">
@@ -160,10 +214,14 @@
                         <p class="text-sm font-medium">{{ diagnosis.technician.displayName }}</p>
                         <p class="text-sm text-slate-700">{{ diagnosis.description }}</p>
                         @if (diagnosis.requiredPartsNotes) {
-                          <p class="mt-1 text-xs text-slate-500">Partes: {{ diagnosis.requiredPartsNotes }}</p>
+                          <p class="mt-1 text-xs text-slate-500">
+                            Partes: {{ diagnosis.requiredPartsNotes }}
+                          </p>
                         }
                         @if (diagnosis.suggestedLabor) {
-                          <p class="text-xs text-slate-500">Trabajo: {{ diagnosis.suggestedLabor }}</p>
+                          <p class="text-xs text-slate-500">
+                            Trabajo: {{ diagnosis.suggestedLabor }}
+                          </p>
                         }
                       </li>
                     }

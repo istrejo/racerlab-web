@@ -1,0 +1,112 @@
+<main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+  <section class="mx-auto max-w-5xl">
+    <h1 class="text-2xl font-bold">Vehículos</h1>
+    <p class="mt-1 text-sm text-slate-600">
+      Los vehículos se registran desde la ficha de su cliente.
+    </p>
+
+    <form class="mt-5 flex gap-2" (ngSubmit)="applySearch()">
+      <label class="sr-only" for="vehicle-search">Buscar vehículo</label>
+      <input
+        class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#004AC6] focus:ring-2 focus:ring-[#004AC6]/20"
+        id="vehicle-search"
+        type="search"
+        placeholder="Placa, marca, modelo o cliente…"
+        [formControl]="search"
+      />
+      <button
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
+        type="submit"
+      >
+        Buscar
+      </button>
+    </form>
+
+    <div class="mt-6">
+      <app-loading-skeleton
+        label="Cargando vehículos…"
+        name="vehicle-workshop-list"
+        variant="list"
+        [loading]="loading()"
+      >
+        @if (error()) {
+          <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+            {{ error() }}
+            <button class="font-semibold underline" (click)="retry()" type="button">
+              Reintentar
+            </button>
+          </div>
+        } @else if (page(); as currentPage) {
+          @if (currentPage.items.length === 0) {
+            <p class="py-10 text-center text-slate-500">No hay vehículos registrados.</p>
+          } @else {
+            <ul class="space-y-3" role="list">
+              @for (vehicle of currentPage.items; track vehicle.id) {
+                <li class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <a
+                      class="hover:opacity-80"
+                      [routerLink]="[
+                        '/customers',
+                        vehicle.customerId,
+                        'vehicles',
+                        vehicle.id,
+                      ]"
+                    >
+                      <p class="font-mono font-bold text-[#F97316]">{{ vehicle.plate }}</p>
+                      <p class="text-sm text-slate-600">
+                        {{ vehicle.brand }} {{ vehicle.model }}
+                        @if (vehicle.year) {
+                          · {{ vehicle.year }}
+                        }
+                      </p>
+                    </a>
+                    <div class="text-right">
+                      <a
+                        class="text-sm font-semibold text-[#004AC6] hover:underline"
+                        [routerLink]="['/customers', vehicle.customerId]"
+                      >
+                        {{ vehicle.customer.fullName }}
+                      </a>
+                      <p class="mt-1 text-xs text-slate-500">
+                        {{ vehicle.serviceOrderCount }}
+                        {{ vehicle.serviceOrderCount === 1 ? 'orden' : 'órdenes' }}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+
+            @if (currentPage.totalPages > 1) {
+              <nav
+                class="mt-6 flex items-center justify-between text-sm"
+                aria-label="Paginación de vehículos"
+              >
+                <button
+                  class="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-40"
+                  [disabled]="currentPage.page <= 1"
+                  (click)="goToPage(currentPage.page - 1)"
+                  type="button"
+                >
+                  Anterior
+                </button>
+                <span class="text-slate-600">
+                  Página {{ currentPage.page }} de {{ currentPage.totalPages }}
+                </span>
+                <button
+                  class="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-40"
+                  [disabled]="currentPage.page >= currentPage.totalPages"
+                  (click)="goToPage(currentPage.page + 1)"
+                  type="button"
+                >
+                  Siguiente
+                </button>
+              </nav>
+            }
+          }
+        }
+      </app-loading-skeleton>
+    </div>
+  </section>
+</main>

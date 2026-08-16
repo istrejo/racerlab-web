@@ -1,0 +1,142 @@
+<main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+  <section class="mx-auto max-w-5xl">
+    <h1 class="text-2xl font-bold">Cotizaciones</h1>
+    <p class="mt-1 text-sm text-slate-600">
+      Las cotizaciones se crean desde la orden de servicio correspondiente.
+    </p>
+
+    <form class="mt-5 flex gap-2" (ngSubmit)="applySearch()">
+      <label class="sr-only" for="quote-search">Buscar cotización</label>
+      <input
+        class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#004AC6] focus:ring-2 focus:ring-[#004AC6]/20"
+        id="quote-search"
+        type="search"
+        placeholder="Código de OT, cliente o placa…"
+        [formControl]="search"
+      />
+      <button
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
+        type="submit"
+      >
+        Buscar
+      </button>
+    </form>
+
+    <nav class="mt-4 flex flex-wrap gap-2" aria-label="Filtrar por estado">
+      <button
+        class="rounded-full border px-3 py-1 text-xs font-semibold"
+        [class.border-slate-300]="selectedStatus() !== null"
+        [class.bg-white]="selectedStatus() !== null"
+        [class.text-slate-600]="selectedStatus() !== null"
+        [class.border-[#004AC6]]="selectedStatus() === null"
+        [class.bg-[#004AC6]]="selectedStatus() === null"
+        [class.text-white]="selectedStatus() === null"
+        (click)="filterByStatus(null)"
+        type="button"
+      >
+        Todas
+      </button>
+      @for (status of statuses; track status) {
+        <button
+          class="rounded-full border px-3 py-1 text-xs font-semibold"
+          [class.border-slate-300]="selectedStatus() !== status"
+          [class.bg-white]="selectedStatus() !== status"
+          [class.text-slate-600]="selectedStatus() !== status"
+          [class.border-[#004AC6]]="selectedStatus() === status"
+          [class.bg-[#004AC6]]="selectedStatus() === status"
+          [class.text-white]="selectedStatus() === status"
+          (click)="filterByStatus(status)"
+          type="button"
+        >
+          {{ statusLabels[status] }}
+        </button>
+      }
+    </nav>
+
+    <div class="mt-6">
+      <app-loading-skeleton
+        label="Cargando cotizaciones…"
+        name="quote-list"
+        variant="list"
+        [loading]="loading()"
+      >
+        @if (error()) {
+          <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+            {{ error() }}
+            <button class="font-semibold underline" (click)="retry()" type="button">
+              Reintentar
+            </button>
+          </div>
+        } @else if (page(); as currentPage) {
+          @if (currentPage.items.length === 0) {
+            <p class="py-10 text-center text-slate-500">No hay cotizaciones registradas.</p>
+          } @else {
+            <ul class="space-y-3" role="list">
+              @for (quote of currentPage.items; track quote.id) {
+                <li class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <a
+                    class="flex flex-wrap items-center justify-between gap-3 hover:opacity-80"
+                    [routerLink]="['/service-orders', quote.serviceOrder.id, 'quotes', quote.id]"
+                  >
+                    <div>
+                      <p class="font-mono font-bold text-[#F97316]">{{ quote.serviceOrder.code }}</p>
+                      <p class="text-sm text-slate-600">
+                        {{ quote.customer.fullName }} · {{ quote.vehicle.plate }}
+                      </p>
+                      <p class="text-sm text-slate-600">
+                        {{ quote.itemCount }} {{ quote.itemCount === 1 ? 'ítem' : 'ítems' }}
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <span
+                        class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
+                        [class.bg-green-100]="quote.status === 'APPROVED'"
+                        [class.text-green-800]="quote.status === 'APPROVED'"
+                        [class.bg-red-100]="quote.status === 'REJECTED' || quote.status === 'CANCELLED'"
+                        [class.text-red-800]="quote.status === 'REJECTED' || quote.status === 'CANCELLED'"
+                        [class.bg-slate-100]="quote.status === 'DRAFT' || quote.status === 'EXPIRED'"
+                        [class.text-slate-700]="quote.status === 'DRAFT' || quote.status === 'EXPIRED'"
+                        [class.bg-blue-100]="quote.status === 'ACTIVE'"
+                        [class.text-blue-800]="quote.status === 'ACTIVE'"
+                      >
+                        {{ statusLabels[quote.status] }}
+                      </span>
+                      <p class="mt-1 text-lg font-bold text-slate-900">{{ quote.total }}</p>
+                    </div>
+                  </a>
+                </li>
+              }
+            </ul>
+
+            @if (currentPage.totalPages > 1) {
+              <nav
+                class="mt-6 flex items-center justify-between text-sm"
+                aria-label="Paginación de cotizaciones"
+              >
+                <button
+                  class="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-40"
+                  [disabled]="currentPage.page <= 1"
+                  (click)="goToPage(currentPage.page - 1)"
+                  type="button"
+                >
+                  Anterior
+                </button>
+                <span class="text-slate-600">
+                  Página {{ currentPage.page }} de {{ currentPage.totalPages }}
+                </span>
+                <button
+                  class="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-40"
+                  [disabled]="currentPage.page >= currentPage.totalPages"
+                  (click)="goToPage(currentPage.page + 1)"
+                  type="button"
+                >
+                  Siguiente
+                </button>
+              </nav>
+            }
+          }
+        }
+      </app-loading-skeleton>
+    </div>
+  </section>
+</main>

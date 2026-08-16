@@ -88,4 +88,20 @@ export class PermissionsService {
       role === 'TECHNICIAN'
     );
   });
+
+  readonly canReadQuotes = computed(() => {
+    const role = this.auth.role();
+    return (
+      role === 'OWNER' ||
+      role === 'ADMIN' ||
+      role === 'MANAGER' ||
+      role === 'ADVISOR' ||
+      role === 'TECHNICIAN'
+    );
+  });
+
+  readonly canWriteQuotes = computed(() => {
+    const role = this.auth.role();
+    return role === 'OWNER' || role === 'ADMIN' || role === 'MANAGER' || role === 'ADVISOR';
+  });
 }

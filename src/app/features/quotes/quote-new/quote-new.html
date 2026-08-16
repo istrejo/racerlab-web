@@ -1,0 +1,177 @@
+<main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+  <section class="mx-auto max-w-3xl">
+    <a class="text-sm font-semibold text-[#004AC6]" [routerLink]="['/service-orders', orderId]">
+      ← Volver a la orden
+    </a>
+    <h1 class="mt-3 text-2xl font-bold">Nueva cotización</h1>
+
+    <form class="mt-6 space-y-4" (ngSubmit)="save()">
+      <ul class="space-y-4" role="list">
+        @for (item of quoteForm.items; track $index) {
+          <li class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-semibold text-slate-700">Ítem {{ $index + 1 }}</p>
+              @if (quoteForm.items.length > 1) {
+                <button
+                  class="text-xs font-semibold text-red-700 underline"
+                  (click)="removeItem($index)"
+                  type="button"
+                >
+                  Quitar
+                </button>
+              }
+            </div>
+
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              <label class="block text-sm">
+                <span class="font-medium text-slate-700">Tipo</span>
+                <select
+                  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  [formField]="item.type"
+                >
+                  @for (type of itemTypes; track type) {
+                    <option [value]="type">{{ itemTypeLabels[type] }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="block text-sm">
+                <span class="font-medium text-slate-700">Descripción</span>
+                <input
+                  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  type="text"
+                  [formField]="item.description"
+                />
+                @if (item.description().touched() && item.description().invalid()) {
+                  <span class="mt-1 block text-xs text-red-700" role="alert">
+                    {{ item.description().errors()[0].message }}
+                  </span>
+                }
+              </label>
+
+              <label class="block text-sm">
+                <span class="font-medium text-slate-700">Cantidad</span>
+                <input
+                  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  type="number"
+                  step="0.01"
+                  [formField]="item.quantity"
+                />
+                @if (item.quantity().touched() && item.quantity().invalid()) {
+                  <span class="mt-1 block text-xs text-red-700" role="alert">
+                    {{ item.quantity().errors()[0].message }}
+                  </span>
+                }
+              </label>
+
+              <label class="block text-sm">
+                <span class="font-medium text-slate-700">Precio unitario</span>
+                <input
+                  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  type="number"
+                  step="0.01"
+                  [formField]="item.unitPrice"
+                />
+                @if (item.unitPrice().touched() && item.unitPrice().invalid()) {
+                  <span class="mt-1 block text-xs text-red-700" role="alert">
+                    {{ item.unitPrice().errors()[0].message }}
+                  </span>
+                }
+              </label>
+
+              <label class="block text-sm">
+                <span class="font-medium text-slate-700">Costo (opcional)</span>
+                <input
+                  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  type="number"
+                  step="0.01"
+                  [formField]="item.costPrice"
+                />
+              </label>
+
+              <p class="self-end text-sm text-slate-600">
+                Total línea:
+                <span class="font-semibold" data-testid="line-total">
+                  {{ lineTotal(item().value()) }}
+                </span>
+              </p>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <button
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold"
+        (click)="addItem()"
+        type="button"
+      >
+        + Agregar ítem
+      </button>
+
+      <div class="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2">
+        <label class="block text-sm">
+          <span class="font-medium text-slate-700">Descuento</span>
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            type="number"
+            step="0.01"
+            [formField]="quoteForm.discount"
+          />
+          @if (quoteForm.discount().touched() && quoteForm.discount().invalid()) {
+            <span class="mt-1 block text-xs text-red-700" role="alert">
+              {{ quoteForm.discount().errors()[0].message }}
+            </span>
+          }
+        </label>
+
+        <label class="block text-sm">
+          <span class="font-medium text-slate-700">Impuesto</span>
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            type="number"
+            step="0.01"
+            [formField]="quoteForm.tax"
+          />
+          @if (quoteForm.tax().touched() && quoteForm.tax().invalid()) {
+            <span class="mt-1 block text-xs text-red-700" role="alert">
+              {{ quoteForm.tax().errors()[0].message }}
+            </span>
+          }
+        </label>
+      </div>
+
+      <dl class="rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-sm">
+        <div class="flex justify-between">
+          <dt class="text-slate-600">Subtotal</dt>
+          <dd class="font-semibold" data-testid="subtotal">{{ subtotal() }}</dd>
+        </div>
+        <div class="mt-2 flex justify-between border-t border-slate-200 pt-2">
+          <dt class="font-semibold text-slate-700">Total</dt>
+          <dd class="text-lg font-bold text-[#004AC6]" data-testid="total">{{ total() }}</dd>
+        </div>
+      </dl>
+
+      @if (error()) {
+        <p class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
+          {{ error() }}
+        </p>
+      }
+
+      <div class="flex gap-3">
+        <button
+          class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          [disabled]="pending()"
+          type="submit"
+        >
+          {{ pending() ? 'Guardando…' : 'Guardar borrador' }}
+        </button>
+        <a
+          class="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+          [routerLink]="['/service-orders', orderId]"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </section>
+</main>
