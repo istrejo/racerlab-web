@@ -15,10 +15,6 @@ import { workshopGuard } from '@core/guards/workshop/workshop-guard';
 
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'dashboard',
-  },
-  {
     path: 'login',
     canActivate: [guestGuard],
     loadComponent: () =>
