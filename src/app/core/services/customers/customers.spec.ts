@@ -2,7 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { API_URL } from '@shared/utils/api-url.token';
-import { CustomerInput, CustomersService } from './customers';
+import { CustomerInput } from '@core/models/customer.interface';
+import { CustomersService } from './customers';
 
 describe('CustomersService', () => {
   let service: CustomersService;

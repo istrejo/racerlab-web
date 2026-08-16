@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { AuthService } from '@core/services/auth/auth';
 import { PermissionsService } from './permissions';
-import type { UserRole } from '@core/model/auth.interface';
+import type { UserRole } from '@core/models/auth.interface';
 
 describe('PermissionsService', () => {
   const role = signal<UserRole | null>(null);

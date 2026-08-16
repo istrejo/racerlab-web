@@ -3,7 +3,6 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { API_URL } from '@shared/utils/api-url.token';
 import {
   catchError,
-  defer,
   finalize,
   map,
   Observable,
@@ -27,11 +26,11 @@ import {
   SessionRestoreResult,
   SessionState,
   SignupRequest,
-} from '../../model/auth.interface';
+} from '../../models/auth.interface';
 
 const AUTH_REQUEST_TIMEOUT_MS = 5_000;
 
-export { AuthRefreshError } from '../../model/auth.interface';
+export { AuthRefreshError } from '../../models/auth.interface';
 export type {
   ActiveWorkshop,
   AuthSessionBootstrap,
@@ -45,7 +44,7 @@ export type {
   SignupRequest,
   UserRole,
   WorkshopProfile,
-} from '../../model/auth.interface';
+} from '../../models/auth.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
