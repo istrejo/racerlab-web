@@ -11,7 +11,7 @@ import { finalize } from 'rxjs';
   imports: [LoadingSkeletonComponent, RouterLink],
   templateUrl: './workshop-select.html',
 })
-export class WorkshopSelectComponent implements OnInit {
+export default class WorkshopSelectComponent implements OnInit {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

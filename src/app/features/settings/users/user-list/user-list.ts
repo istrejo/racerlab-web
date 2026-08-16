@@ -8,7 +8,7 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
   imports: [LoadingSkeletonComponent, RouterLink],
   templateUrl: './user-list.html',
 })
-export class UserListComponent {
+export default class UserListComponent {
   private readonly membershipsService = inject(MembershipsService);
 
   readonly memberships = signal<Membership[]>([]);

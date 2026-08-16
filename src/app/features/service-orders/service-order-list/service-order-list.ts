@@ -40,7 +40,7 @@ const STATUS_ORDER: ServiceOrderStatus[] = [
   imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './service-order-list.html',
 })
-export class ServiceOrderListComponent {
+export default class ServiceOrderListComponent {
   readonly permissions = inject(PermissionsService);
   private readonly serviceOrders = inject(ServiceOrdersService);
   private readonly route = inject(ActivatedRoute);

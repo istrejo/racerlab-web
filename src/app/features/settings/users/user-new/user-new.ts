@@ -33,7 +33,7 @@ type CreatedCredentials = {
     }
   `,
 })
-export class UserNewComponent {
+export default class UserNewComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly memberships = inject(MembershipsService);
 

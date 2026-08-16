@@ -15,7 +15,7 @@ import { finalize } from 'rxjs';
     '(document:keydown.escape)': 'closeUserMenuAndRestoreFocus()',
   },
 })
-export class LayoutComponent {
+export default class LayoutComponent {
   readonly auth = inject(AuthService);
   readonly permissions = inject(PermissionsService);
   private readonly router = inject(Router);

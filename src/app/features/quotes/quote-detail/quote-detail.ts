@@ -40,7 +40,7 @@ const METHOD_REQUIRED: QuoteStatus[] = ['APPROVED', 'REJECTED'];
   imports: [DatePipe, LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './quote-detail.html',
 })
-export class QuoteDetailComponent {
+export default class QuoteDetailComponent {
   readonly permissions = inject(PermissionsService);
   private readonly quotes = inject(QuotesService);
   private readonly route = inject(ActivatedRoute);

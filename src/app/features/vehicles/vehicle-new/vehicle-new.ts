@@ -8,11 +8,10 @@ import { VehicleFormComponent } from '../vehicle-form/vehicle-form';
   imports: [VehicleFormComponent, RouterLink],
   templateUrl: './vehicle-new.html',
 })
-export class VehicleNewComponent {
+export default class VehicleNewComponent {
   private readonly vehicles = inject(VehiclesService);
   private readonly router = inject(Router);
-  readonly customerId =
-    inject(ActivatedRoute).snapshot.paramMap.get('customerId') ?? '';
+  readonly customerId = inject(ActivatedRoute).snapshot.paramMap.get('customerId') ?? '';
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -21,12 +20,7 @@ export class VehicleNewComponent {
     this.error.set(null);
     this.vehicles.create(this.customerId, input).subscribe({
       next: (vehicle) =>
-        void this.router.navigate([
-          '/customers',
-          this.customerId,
-          'vehicles',
-          vehicle.id,
-        ]),
+        void this.router.navigate(['/customers', this.customerId, 'vehicles', vehicle.id]),
       error: (err: { status?: number }) => {
         this.pending.set(false);
         this.error.set(

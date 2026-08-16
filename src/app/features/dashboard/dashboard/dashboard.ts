@@ -19,7 +19,7 @@ import { DASHBOARD_MOCK_DATA } from './dashboard.mock-data';
   ],
   templateUrl: './dashboard.html',
 })
-export class DashboardComponent {
+export default class DashboardComponent {
   readonly permissions = inject(PermissionsService);
   readonly dashboard = signal(DASHBOARD_MOCK_DATA);
   readonly pendingQuoteItems = computed<readonly DashboardAttentionListItem[]>(() =>

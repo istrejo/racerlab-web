@@ -10,7 +10,7 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
   imports: [DecimalPipe, LoadingSkeletonComponent, RouterLink],
   templateUrl: './vehicle-detail.html',
 })
-export class VehicleDetailComponent {
+export default class VehicleDetailComponent {
   readonly permissions = inject(PermissionsService);
   private readonly vehicles = inject(VehiclesService);
   private readonly router = inject(Router);

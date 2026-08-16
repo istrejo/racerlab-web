@@ -29,7 +29,7 @@ const STATUS_ORDER: QuoteStatus[] = [
   imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './quote-list.html',
 })
-export class QuoteListComponent {
+export default class QuoteListComponent {
   private readonly quotes = inject(QuotesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

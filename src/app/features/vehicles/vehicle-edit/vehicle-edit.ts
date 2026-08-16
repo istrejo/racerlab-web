@@ -9,7 +9,7 @@ import { VehicleFormComponent } from '../vehicle-form/vehicle-form';
   imports: [VehicleFormComponent, LoadingSkeletonComponent, RouterLink],
   templateUrl: './vehicle-edit.html',
 })
-export class VehicleEditComponent {
+export default class VehicleEditComponent {
   private readonly vehicles = inject(VehiclesService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -39,12 +39,7 @@ export class VehicleEditComponent {
     this.saveError.set(null);
     this.vehicles.update(this.customerId, this.vehicleId, input).subscribe({
       next: () =>
-        void this.router.navigate([
-          '/customers',
-          this.customerId,
-          'vehicles',
-          this.vehicleId,
-        ]),
+        void this.router.navigate(['/customers', this.customerId, 'vehicles', this.vehicleId]),
       error: (err: { status?: number }) => {
         this.pending.set(false);
         this.saveError.set(

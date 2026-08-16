@@ -12,7 +12,7 @@ import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from
   imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './customer-list.html',
 })
-export class CustomerListComponent {
+export default class CustomerListComponent {
   readonly permissions = inject(PermissionsService);
   private readonly customers = inject(CustomersService);
   private readonly route = inject(ActivatedRoute);

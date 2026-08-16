@@ -69,7 +69,7 @@ const PRIORITY_LABELS: Record<string, string> = {
   imports: [DatePipe, DecimalPipe, LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './service-order-detail.html',
 })
-export class ServiceOrderDetailComponent {
+export default class ServiceOrderDetailComponent {
   readonly permissions = inject(PermissionsService);
   private readonly serviceOrders = inject(ServiceOrdersService);
   private readonly diagnosesService = inject(DiagnosesService);

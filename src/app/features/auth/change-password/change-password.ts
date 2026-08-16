@@ -9,7 +9,7 @@ import { authenticatedDestination, sanitizeReturnUrl } from '@core/services/auth
   imports: [ReactiveFormsModule],
   templateUrl: './change-password.html',
 })
-export class ChangePasswordComponent {
+export default class ChangePasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);

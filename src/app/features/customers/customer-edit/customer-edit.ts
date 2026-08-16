@@ -9,7 +9,7 @@ import { CustomerFormComponent } from '../customer-form/customer-form';
   imports: [CustomerFormComponent, LoadingSkeletonComponent, RouterLink],
   templateUrl: './customer-edit.html',
 })
-export class CustomerEditComponent {
+export default class CustomerEditComponent {
   private readonly customers = inject(CustomersService);
   private readonly router = inject(Router);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';

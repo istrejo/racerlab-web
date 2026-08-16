@@ -9,7 +9,7 @@ import { authenticatedDestination } from '@core/services/auth/auth-navigation';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
 })
-export class LoginComponent {
+export default class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);

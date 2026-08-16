@@ -30,7 +30,7 @@ import { createTemporaryPassword } from '../user-new/user-new';
     }
   `,
 })
-export class UserEditComponent {
+export default class UserEditComponent {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

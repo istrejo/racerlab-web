@@ -21,7 +21,7 @@ const PRIORITY_OPTIONS = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './service-order-new.html',
 })
-export class ServiceOrderNewComponent {
+export default class ServiceOrderNewComponent {
   private readonly customers = inject(CustomersService);
   private readonly vehiclesService = inject(VehiclesService);
   private readonly serviceOrders = inject(ServiceOrdersService);

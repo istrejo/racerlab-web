@@ -12,7 +12,7 @@ import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from
   imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './vehicle-list.html',
 })
-export class VehicleListComponent {
+export default class VehicleListComponent {
   readonly permissions = inject(PermissionsService);
   private readonly vehicles = inject(VehiclesService);
   private readonly route = inject(ActivatedRoute);
@@ -46,9 +46,7 @@ export class VehicleListComponent {
         }),
         switchMap(({ search, page }) =>
           timer(300).pipe(
-            switchMap(() =>
-              this.vehicles.list(this.customerId, { search, page, limit: 20 }),
-            ),
+            switchMap(() => this.vehicles.list(this.customerId, { search, page, limit: 20 })),
             catchError(() => {
               this.error.set('No pudimos cargar los vehículos.');
               return of(null);

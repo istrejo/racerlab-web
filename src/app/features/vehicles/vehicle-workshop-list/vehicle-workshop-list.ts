@@ -11,7 +11,7 @@ import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from
   imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './vehicle-workshop-list.html',
 })
-export class VehicleWorkshopListComponent {
+export default class VehicleWorkshopListComponent {
   private readonly vehicles = inject(VehiclesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

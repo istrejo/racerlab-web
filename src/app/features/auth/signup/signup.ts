@@ -9,7 +9,7 @@ import { AuthService } from '@core/services/auth/auth';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './signup.html',
 })
-export class SignupComponent {
+export default class SignupComponent {
   private readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);

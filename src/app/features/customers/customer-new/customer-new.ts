@@ -8,7 +8,7 @@ import { CustomerFormComponent } from '../customer-form/customer-form';
   imports: [CustomerFormComponent, RouterLink],
   templateUrl: './customer-new.html',
 })
-export class CustomerNewComponent {
+export default class CustomerNewComponent {
   private readonly customers = inject(CustomersService);
   private readonly router = inject(Router);
   readonly pending = signal(false);

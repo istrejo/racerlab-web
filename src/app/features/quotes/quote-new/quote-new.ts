@@ -74,7 +74,7 @@ const quoteSchema = schema<QuoteModel>((path) => {
   imports: [FormField, RouterLink],
   templateUrl: './quote-new.html',
 })
-export class QuoteNewComponent {
+export default class QuoteNewComponent {
   private readonly quotes = inject(QuotesService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

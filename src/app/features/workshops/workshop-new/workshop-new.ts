@@ -10,7 +10,7 @@ import { WorkshopsService } from '@core/services/workshops/workshops';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './workshop-new.html',
 })
-export class WorkshopNewComponent {
+export default class WorkshopNewComponent {
   readonly auth = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
