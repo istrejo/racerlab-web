@@ -2,9 +2,10 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { Vehicle, VehiclesService } from '@core/services/vehicles/vehicles';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { of, throwError } from 'rxjs';
-import { VehicleDetailComponent } from './vehicle-detail';
+import VehicleDetailComponent from './vehicle-detail';
+import { Vehicle } from '@core/models/vehicle.interface';
 
 describe('VehicleDetailComponent', () => {
   let fixture: ComponentFixture<VehicleDetailComponent>;
