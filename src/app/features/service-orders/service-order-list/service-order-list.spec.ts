@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { ServiceOrderPage, ServiceOrdersService } from '@core/services/service-orders/service-orders';
+import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { vi } from 'vitest';
-import { ServiceOrderListComponent } from './service-order-list';
+import ServiceOrderListComponent from './service-order-list';
+import { ServiceOrderPage } from '@core/models/service-order.interface';
 
 describe('ServiceOrderListComponent', () => {
   let fixture: ComponentFixture<ServiceOrderListComponent>;
@@ -21,7 +22,9 @@ describe('ServiceOrderListComponent', () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    queryParams = new BehaviorSubject(convertToParamMap({ search: 'Toyota', status: 'RECEIVED', page: '2' }));
+    queryParams = new BehaviorSubject(
+      convertToParamMap({ search: 'Toyota', status: 'RECEIVED', page: '2' }),
+    );
     list = vi.fn(() => of({ ...emptyPage, page: 2 }));
 
     await TestBed.configureTestingModule({

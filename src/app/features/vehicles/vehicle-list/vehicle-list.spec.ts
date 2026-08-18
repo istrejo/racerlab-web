@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { VehiclePage, VehiclesService } from '@core/services/vehicles/vehicles';
+import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { vi } from 'vitest';
-import { VehicleListComponent } from './vehicle-list';
+import VehicleListComponent from './vehicle-list';
+import { VehiclePage } from '@core/models/vehicle.interface';
 
 describe('VehicleListComponent', () => {
   let fixture: ComponentFixture<VehicleListComponent>;

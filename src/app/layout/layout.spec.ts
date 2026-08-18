@@ -5,8 +5,7 @@ import { AuthService } from '@core/services/auth/auth';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
-
-import { LayoutComponent } from './layout';
+import LayoutComponent from './layout';
 
 describe('LayoutComponent', () => {
   let component: LayoutComponent;
