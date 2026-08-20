@@ -3,7 +3,7 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '@core/services/auth/auth';
-import { ChangePasswordComponent } from './change-password';
+import ChangePasswordComponent from './change-password';
 
 describe('ChangePasswordComponent', () => {
   const changePassword = vi.fn();

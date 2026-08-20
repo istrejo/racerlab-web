@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
-import { CustomerPage, CustomersService } from '@core/services/customers/customers';
+import { CustomersService } from '@core/services/customers/customers';
+import { CustomerPage } from '@core/models/customer.interface';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { vi } from 'vitest';
-import { CustomerListComponent } from './customer-list';
+import CustomerListComponent from './customer-list';
 
 describe('CustomerListComponent', () => {
   let fixture: ComponentFixture<CustomerListComponent>;

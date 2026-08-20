@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
-import { WorkshopsService, WorkshopSummary } from '@core/services/workshops/workshops';
+import { WorkshopsService } from '@core/services/workshops/workshops';
+import { WorkshopSummary } from '@core/models/workshop.interface';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { WorkshopSelectComponent } from './workshop-select';
+import WorkshopSelectComponent from './workshop-select';
 
 describe('WorkshopSelectComponent', () => {
   let fixture: ComponentFixture<WorkshopSelectComponent>;

@@ -4,7 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '@core/services/auth/auth';
-import { SignupComponent } from './signup';
+import SignupComponent from './signup';
 
 describe('SignupComponent', () => {
   const signup = vi.fn();

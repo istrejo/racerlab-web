@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { MembershipsService } from '@core/services/memberships/memberships';
-import { UserNewComponent, createTemporaryPassword } from './user-new';
+import UserNewComponent, { createTemporaryPassword } from './user-new';
 
 describe('UserNewComponent', () => {
   const create = vi.fn();

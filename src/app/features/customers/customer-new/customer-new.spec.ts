@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { CustomersService } from '@core/services/customers/customers';
 import { throwError } from 'rxjs';
-import { CustomerNewComponent } from './customer-new';
+import CustomerNewComponent from './customer-new';
 
 describe('CustomerNewComponent', () => {
   it('translates a duplicate document conflict', () => {

@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '@core/services/auth/auth';
 import { WorkshopsService } from '@core/services/workshops/workshops';
-import { WorkshopNewComponent } from './workshop-new';
+import WorkshopNewComponent from './workshop-new';
 
 describe('WorkshopNewComponent', () => {
   const create = vi.fn();

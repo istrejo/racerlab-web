@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '@core/services/auth/auth';
-import { LoginComponent } from './login';
+import LoginComponent from './login';
 
 describe('LoginComponent', () => {
   const login = vi.fn();
