@@ -1,29 +1,28 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, output, signal } from '@angular/core';
+import { Customer, CustomerInput } from '@core/models/customer.interface';
 import { CustomersService } from '@core/services/customers/customers';
+import { AppModalComponent } from '@shared/components/app-modal/app-modal';
 import { CustomerFormComponent } from '../customer-form/customer-form';
-import { CustomerInput } from '@core/models/customer.interface';
 
 @Component({
-  selector: 'app-customer-new',
-  imports: [CustomerFormComponent, RouterLink],
-  templateUrl: './customer-new.html',
+  selector: 'app-customer-create-dialog',
+  imports: [AppModalComponent, CustomerFormComponent],
+  templateUrl: './customer-create-dialog.html',
 })
-export default class CustomerNewComponent {
+export class CustomerCreateDialogComponent {
   private readonly customers = inject(CustomersService);
-  private readonly router = inject(Router);
+
+  readonly created = output<Customer>();
+  readonly closed = output<void>();
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
 
-  cancel(): void {
-    void this.router.navigateByUrl('/customers');
-  }
-
   save(input: CustomerInput): void {
+    if (this.pending()) return;
     this.pending.set(true);
     this.error.set(null);
     this.customers.create(input).subscribe({
-      next: (customer) => void this.router.navigate(['/customers', customer.id]),
+      next: (customer) => this.created.emit(customer),
       error: (error: { status?: number }) => {
         this.pending.set(false);
         this.error.set(

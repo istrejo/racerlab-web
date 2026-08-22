@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth';
 import { PermissionsService } from '@core/services/permissions/permissions';
+import { WorkshopsService } from '@core/services/workshops/workshops';
 import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import LayoutComponent from './layout';
@@ -46,6 +47,10 @@ describe('LayoutComponent', () => {
             canReadVehicles: () => true,
             canReadQuotes: () => true,
           },
+        },
+        {
+          provide: WorkshopsService,
+          useValue: { list: () => of([]), select: () => of(undefined) },
         },
       ],
     }).compileComponents();
@@ -144,17 +149,17 @@ describe('LayoutComponent', () => {
 
   it('keeps workshop switching separate from logout', () => {
     fixture.detectChanges();
-    const router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
-
     const fixtureElement: HTMLElement = fixture.nativeElement;
-    const workshopSwitcher = fixtureElement.querySelector<HTMLAnchorElement>(
-      'a[href="/workshops/select"]',
-    );
+    const workshopSwitcher = Array.from(
+      fixtureElement.querySelectorAll<HTMLButtonElement>('button'),
+    ).find((button) => button.textContent?.includes('Cambiar taller'));
 
     workshopSwitcher?.click();
+    fixture.detectChanges();
 
     expect(workshopSwitcher?.textContent).toContain('Cambiar taller');
+    expect(component.workshopDialogOpen()).toBe(true);
+    expect(fixtureElement.textContent).toContain('Seleccioná el contexto de trabajo');
     expect(logout).not.toHaveBeenCalled();
   });
 

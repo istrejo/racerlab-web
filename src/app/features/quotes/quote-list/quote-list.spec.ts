@@ -40,9 +40,7 @@ describe('QuoteListComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('waits 300 ms and loads the page/status/search from the URL', async () => {
-    await vi.advanceTimersByTimeAsync(300);
-
+  it('loads the page/status/search from the URL immediately', () => {
     expect(listForWorkshop).toHaveBeenCalledWith({
       search: 'Ada',
       status: 'ACTIVE',
@@ -63,6 +61,7 @@ describe('QuoteListComponent', () => {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { status: 'DRAFT', page: 1 },
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   });
 
@@ -77,6 +76,7 @@ describe('QuoteListComponent', () => {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { search: 'Grace Hopper', page: 1 },
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   });
 
@@ -90,16 +90,40 @@ describe('QuoteListComponent', () => {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { page: 5 },
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   });
 
-  it('shows an error message when the request fails', async () => {
+  it('shows an error message when the request fails', () => {
     listForWorkshop.mockReturnValue(
       new Observable((subscriber) => subscriber.error(new Error('fail'))),
     );
-
-    await vi.advanceTimersByTimeAsync(300);
+    queryParams.next(convertToParamMap({ search: 'trigger-error' }));
 
     expect(fixture.componentInstance.error()).toBe('No pudimos cargar las cotizaciones.');
+  });
+
+  it('debounces live search and normalizes invalid statuses', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.search.setValue('Grace');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(navigate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'Grace', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+
+    queryParams.next(convertToParamMap({ status: 'NOT_A_STATUS' }));
+    expect(listForWorkshop).toHaveBeenLastCalledWith({
+      search: '',
+      status: undefined,
+      page: 1,
+      limit: 20,
+    });
   });
 });

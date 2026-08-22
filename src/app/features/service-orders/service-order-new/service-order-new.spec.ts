@@ -6,7 +6,7 @@ import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { Customer, CustomerPage } from '@core/models/customer.interface';
 import { Vehicle } from '@core/models/vehicle.interface';
 import { ServiceOrderDetail } from '@core/models/service-order.interface';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import ServiceOrderNewComponent from './service-order-new';
 
@@ -55,7 +55,9 @@ describe('ServiceOrderNewComponent', () => {
         { provide: CustomersService, useValue: overrides.customers ?? {} },
         {
           provide: VehiclesService,
-          useValue: overrides.vehicles ?? { list: () => of({ items: [], page: 1, limit: 100, total: 0, totalPages: 0 }) },
+          useValue: overrides.vehicles ?? {
+            list: () => of({ items: [], page: 1, limit: 100, total: 0, totalPages: 0 }),
+          },
         },
         { provide: ServiceOrdersService, useValue: overrides.serviceOrders ?? {} },
       ],
@@ -66,19 +68,41 @@ describe('ServiceOrderNewComponent', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('searches customers after debouncing and ignores short queries', async () => {
+  it('loads customers initially and searches any query after debouncing', async () => {
     const emptyPage: CustomerPage = { items: [], page: 1, limit: 10, total: 0, totalPages: 0 };
     const list = vi.fn(() => of({ ...emptyPage, items: [customer] }));
     const component = createWith({ customers: { list } });
 
-    component.customerSearch.setValue('a');
-    await vi.advanceTimersByTimeAsync(300);
-    expect(list).not.toHaveBeenCalled();
+    expect(list).toHaveBeenCalledWith({ search: '', page: 1, limit: 10 });
 
-    component.customerSearch.setValue('ada');
-    await vi.advanceTimersByTimeAsync(300);
-    expect(list).toHaveBeenCalledWith({ search: 'ada', page: 1, limit: 10 });
+    component.customerSearch.setValue('a');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(list).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(list).toHaveBeenLastCalledWith({ search: 'a', page: 1, limit: 10 });
     expect(component.customersPage()?.items).toEqual([customer]);
+  });
+
+  it('selects a new customer and opens vehicle creation immediately', () => {
+    const component = createWith({});
+
+    component.customerCreated(customer);
+
+    expect(component.selectedCustomer()).toEqual(customer);
+    expect(component.step()).toBe('vehicle');
+    expect(component.vehicleDialogOpen()).toBe(true);
+  });
+
+  it('selects a newly created vehicle and advances to reception', () => {
+    const component = createWith({});
+    component.selectCustomer(customer);
+    TestBed.flushEffects();
+
+    component.vehicleCreated(vehicle);
+
+    expect(component.selectedVehicle()).toEqual(vehicle);
+    expect(component.step()).toBe('reception');
+    expect(component.vehicleDialogOpen()).toBe(false);
   });
 
   it('loads the customer vehicles when a customer is selected', () => {
@@ -93,6 +117,26 @@ describe('ServiceOrderNewComponent', () => {
     expect(list).toHaveBeenCalledWith(customer.id, { page: 1, limit: 100 });
     expect(component.vehicles()).toEqual([vehicle]);
     expect(component.step()).toBe('vehicle');
+  });
+
+  it('cancels the previous vehicle request when the customer changes', () => {
+    const cancelled = vi.fn();
+    let requestNumber = 0;
+    const list = vi.fn(
+      () =>
+        new Observable<never>(() => {
+          requestNumber += 1;
+          return requestNumber === 1 ? cancelled : undefined;
+        }),
+    );
+    const component = createWith({ vehicles: { list } });
+    const secondCustomer = { ...customer, id: 'cust-2', fullName: 'Grace Hopper' };
+
+    component.selectCustomer(customer);
+    component.selectCustomer(secondCustomer);
+
+    expect(cancelled).toHaveBeenCalledOnce();
+    expect(list).toHaveBeenLastCalledWith(secondCustomer.id, { page: 1, limit: 100 });
   });
 
   it('moves to the reception step after selecting a vehicle', () => {

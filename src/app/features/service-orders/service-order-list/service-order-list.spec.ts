@@ -50,11 +50,7 @@ describe('ServiceOrderListComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('waits 300 ms and loads the page represented in the URL', async () => {
-    await vi.advanceTimersByTimeAsync(299);
-    expect(list).not.toHaveBeenCalled();
-
-    await vi.advanceTimersByTimeAsync(1);
+  it('loads the page represented in the URL immediately', () => {
     expect(list).toHaveBeenCalledWith({
       search: 'Toyota',
       status: 'RECEIVED',
@@ -75,12 +71,11 @@ describe('ServiceOrderListComponent', () => {
         }),
     );
 
-    await vi.advanceTimersByTimeAsync(300);
     queryParams.next(convertToParamMap({ search: 'ABC', page: '1' }));
+    queryParams.next(convertToParamMap({ search: 'DEF', page: '1' }));
     expect(cancelled).toHaveBeenCalledOnce();
-    await vi.advanceTimersByTimeAsync(300);
 
-    expect(list).toHaveBeenLastCalledWith({ search: 'ABC', page: 1, limit: 20 });
+    expect(list).toHaveBeenLastCalledWith({ search: 'DEF', page: 1, limit: 20 });
   });
 
   it('writes a trimmed search and resets page to the URL', () => {
@@ -94,6 +89,33 @@ describe('ServiceOrderListComponent', () => {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { search: 'SO-0001', page: 1 },
       queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  });
+
+  it('debounces live search and normalizes invalid statuses', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.search.setValue('SO-0002');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(navigate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'SO-0002', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+
+    queryParams.next(convertToParamMap({ status: 'NOT_A_STATUS' }));
+    expect(list).toHaveBeenLastCalledWith({
+      search: '',
+      status: undefined,
+      customerId: undefined,
+      vehicleId: undefined,
+      page: 1,
+      limit: 20,
     });
   });
 });

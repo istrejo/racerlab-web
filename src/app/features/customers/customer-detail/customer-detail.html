@@ -31,6 +31,15 @@
               <p class="mt-1 text-sm text-slate-600">Ficha del cliente</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+              @if (permissions.canWriteVehicles()) {
+                <button
+                  class="inline-flex h-11 items-center rounded-lg border border-[#004AC6] bg-white px-4 text-sm font-semibold text-[#004AC6]"
+                  (click)="vehicleDialogOpen.set(true)"
+                  type="button"
+                >
+                  Agregar vehículo
+                </button>
+              }
               @if (permissions.canWriteCustomers()) {
                 <a
                   class="inline-flex h-11 items-center rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-slate-50"
@@ -245,3 +254,12 @@
     </div>
   </section>
 </main>
+
+@if (vehicleDialogOpen() && customer(); as current) {
+  <app-vehicle-create-dialog
+    [customerId]="current.id"
+    [customerName]="current.fullName"
+    (closed)="vehicleDialogOpen.set(false)"
+    (created)="vehicleCreated($event)"
+  />
+}

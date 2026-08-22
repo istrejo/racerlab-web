@@ -53,12 +53,12 @@
       }
     </nav>
 
-    <div class="mt-6">
+    <div class="mt-6" [attr.aria-busy]="refreshing()">
       <app-loading-skeleton
         label="Cargando cotizaciones…"
         name="quote-list"
         variant="list"
-        [loading]="loading()"
+        [loading]="loading() && !page()"
       >
         @if (error()) {
           <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
@@ -79,7 +79,9 @@
                     [routerLink]="['/service-orders', quote.serviceOrder.id, 'quotes', quote.id]"
                   >
                     <div>
-                      <p class="font-mono font-bold text-[#F97316]">{{ quote.serviceOrder.code }}</p>
+                      <p class="font-mono font-bold text-[#F97316]">
+                        {{ quote.serviceOrder.code }}
+                      </p>
                       <p class="text-sm text-slate-600">
                         {{ quote.customer.fullName }} · {{ quote.vehicle.plate }}
                       </p>
@@ -92,10 +94,18 @@
                         class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
                         [class.bg-green-100]="quote.status === 'APPROVED'"
                         [class.text-green-800]="quote.status === 'APPROVED'"
-                        [class.bg-red-100]="quote.status === 'REJECTED' || quote.status === 'CANCELLED'"
-                        [class.text-red-800]="quote.status === 'REJECTED' || quote.status === 'CANCELLED'"
-                        [class.bg-slate-100]="quote.status === 'DRAFT' || quote.status === 'EXPIRED'"
-                        [class.text-slate-700]="quote.status === 'DRAFT' || quote.status === 'EXPIRED'"
+                        [class.bg-red-100]="
+                          quote.status === 'REJECTED' || quote.status === 'CANCELLED'
+                        "
+                        [class.text-red-800]="
+                          quote.status === 'REJECTED' || quote.status === 'CANCELLED'
+                        "
+                        [class.bg-slate-100]="
+                          quote.status === 'DRAFT' || quote.status === 'EXPIRED'
+                        "
+                        [class.text-slate-700]="
+                          quote.status === 'DRAFT' || quote.status === 'EXPIRED'
+                        "
                         [class.bg-blue-100]="quote.status === 'ACTIVE'"
                         [class.text-blue-800]="quote.status === 'ACTIVE'"
                       >

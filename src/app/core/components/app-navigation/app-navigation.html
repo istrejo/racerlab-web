@@ -112,13 +112,13 @@
     </ul>
   </nav>
 
-  <a
+  <button
     class="mt-6 flex items-center gap-3 rounded-lg border border-slate-700 px-3 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-    routerLink="/workshops/select"
-    (click)="mobileNavigationDismissed.emit()"
+    (click)="mobileNavigationDismissed.emit(); workshopChangeRequested.emit()"
+    type="button"
   >
     <span aria-hidden="true">↔</span>Cambiar taller
-  </a>
+  </button>
 
   @if (permissions.canManageUsers()) {
     <a

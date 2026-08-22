@@ -21,7 +21,10 @@
           </div>
         } @else {
           @if (saveError()) {
-            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+            <div
+              class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+              role="alert"
+            >
               {{ saveError() }}
             </div>
           }
@@ -29,7 +32,7 @@
             <app-vehicle-form
               [vehicle]="vehicle()"
               [pending]="pending()"
-              [cancelHref]="'/customers/' + customerId + '/vehicles/' + vehicleId"
+              (cancelled)="cancel()"
               (submitted)="save($event)"
             />
           </div>

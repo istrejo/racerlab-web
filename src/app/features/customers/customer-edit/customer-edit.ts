@@ -19,6 +19,10 @@ export default class CustomerEditComponent {
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
 
+  cancel(): void {
+    void this.router.navigate(['/customers', this.id]);
+  }
+
   constructor() {
     this.customers.get(this.id).subscribe({
       next: (customer) => this.customer.set(customer),

@@ -10,11 +10,13 @@
         </p>
       </div>
       @if (permissions.canWriteCustomers()) {
-        <a
+        <button
           class="flex h-11 items-center rounded-lg bg-[#004AC6] px-4 text-sm font-semibold text-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
-          routerLink="/customers/new"
-          >Nuevo cliente</a
+          (click)="customerDialogOpen.set(true)"
+          type="button"
         >
+          Nuevo cliente
+        </button>
       }
     </header>
 
@@ -37,7 +39,9 @@
       <div class="flex items-center gap-2">
         <button
           class="h-11 rounded-lg border border-[#E2E8F0] bg-white px-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-          disabled
+          [attr.aria-expanded]="filtersOpen()"
+          aria-controls="customer-filters"
+          (click)="filtersOpen.update((open) => !open)"
           type="button"
         >
           Filtros
@@ -52,6 +56,68 @@
       </div>
     </form>
 
+    @if (filtersOpen()) {
+      <section
+        class="mt-3 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3"
+        id="customer-filters"
+        aria-label="Filtros de clientes"
+      >
+        <div>
+          <label class="block text-sm font-semibold text-slate-700" for="has-vehicles"
+            >Vehículos</label
+          >
+          <select
+            class="mt-1 h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
+            id="has-vehicles"
+            [formControl]="hasVehicles"
+            (change)="applyFilters()"
+          >
+            <option value="all">Todos</option>
+            <option value="true">Con vehículos</option>
+            <option value="false">Sin vehículos</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700" for="has-orders">Órdenes</label>
+          <select
+            class="mt-1 h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
+            id="has-orders"
+            [formControl]="hasServiceOrders"
+            (change)="applyFilters()"
+          >
+            <option value="all">Todos</option>
+            <option value="true">Con órdenes</option>
+            <option value="false">Sin órdenes</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700" for="customer-sort"
+            >Ordenar</label
+          >
+          <select
+            class="mt-1 h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
+            id="customer-sort"
+            [formControl]="sort"
+            (change)="applyFilters()"
+          >
+            <option value="NAME_ASC">Nombre A–Z</option>
+            <option value="NAME_DESC">Nombre Z–A</option>
+            <option value="NEWEST">Más recientes</option>
+            <option value="OLDEST">Más antiguos</option>
+          </select>
+        </div>
+        <div class="sm:col-span-3">
+          <button
+            class="text-sm font-semibold text-[#004AC6] hover:underline"
+            (click)="clearFilters()"
+            type="button"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </section>
+    }
+
     @if (error()) {
       <div class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
         {{ error() }}
@@ -59,12 +125,12 @@
       </div>
     }
 
-    <div class="mt-6">
+    <div class="mt-6" [attr.aria-busy]="refreshing()">
       <app-loading-skeleton
         label="Cargando clientes…"
         name="customers"
         variant="table"
-        [loading]="loading()"
+        [loading]="loading() && !page()"
       >
         <div
           class="overflow-x-auto rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
@@ -179,3 +245,10 @@
     }
   </section>
 </main>
+
+@if (customerDialogOpen()) {
+  <app-customer-create-dialog
+    (closed)="customerDialogOpen.set(false)"
+    (created)="customerCreated($event)"
+  />
+}

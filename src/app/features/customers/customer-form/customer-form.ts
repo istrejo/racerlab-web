@@ -7,7 +7,6 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Customer, CustomerInput } from '@core/models/customer.interface';
 
 function trimmedEmail(control: AbstractControl): ValidationErrors | null {
@@ -21,7 +20,7 @@ function trimmedRequired(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-customer-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './customer-form.html',
   styles: `
     .field {
@@ -40,8 +39,8 @@ function trimmedRequired(control: AbstractControl): ValidationErrors | null {
 export class CustomerFormComponent {
   readonly customer = input<Customer | null>(null);
   readonly pending = input(false);
-  readonly cancelHref = input('/customers');
   readonly submitted = output<CustomerInput>();
+  readonly cancelled = output<void>();
 
   readonly form = new FormGroup({
     fullName: new FormControl('', {

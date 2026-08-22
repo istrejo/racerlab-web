@@ -44,11 +44,7 @@ describe('VehicleWorkshopListComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('waits 300 ms and loads the page represented in the URL', async () => {
-    await vi.advanceTimersByTimeAsync(299);
-    expect(listForWorkshop).not.toHaveBeenCalled();
-
-    await vi.advanceTimersByTimeAsync(1);
+  it('loads the page represented in the URL immediately', () => {
     expect(listForWorkshop).toHaveBeenCalledWith({ search: 'ABC', page: 2, limit: 20 });
     expect(fixture.componentInstance.page()?.page).toBe(2);
   });
@@ -64,12 +60,11 @@ describe('VehicleWorkshopListComponent', () => {
         }),
     );
 
-    await vi.advanceTimersByTimeAsync(300);
     queryParams.next(convertToParamMap({ search: 'XYZ', page: '1' }));
+    queryParams.next(convertToParamMap({ search: 'LMN', page: '1' }));
     expect(cancelled).toHaveBeenCalledOnce();
-    await vi.advanceTimersByTimeAsync(300);
 
-    expect(listForWorkshop).toHaveBeenLastCalledWith({ search: 'XYZ', page: 1, limit: 20 });
+    expect(listForWorkshop).toHaveBeenLastCalledWith({ search: 'LMN', page: 1, limit: 20 });
   });
 
   it('writes a trimmed search and reset page to the URL', () => {
@@ -83,6 +78,7 @@ describe('VehicleWorkshopListComponent', () => {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { search: 'ABC1234', page: 1 },
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   });
 
@@ -93,7 +89,7 @@ describe('VehicleWorkshopListComponent', () => {
     const router = TestBed.inject(Router);
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
-    await vi.advanceTimersByTimeAsync(300);
+    queryParams.next(convertToParamMap({ search: 'trigger-error' }));
 
     expect(fixture.componentInstance.error()).toBe('No pudimos cargar los vehículos.');
 
@@ -103,5 +99,22 @@ describe('VehicleWorkshopListComponent', () => {
       [],
       expect.objectContaining({ queryParamsHandling: 'merge' }),
     );
+  });
+
+  it('debounces live search updates', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.search.setValue('XYZ');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(navigate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'XYZ', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   });
 });

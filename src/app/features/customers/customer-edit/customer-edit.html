@@ -26,7 +26,7 @@
             <app-customer-form
               [customer]="current"
               [pending]="pending()"
-              [cancelHref]="'/customers/' + current.id"
+              (cancelled)="cancel()"
               (submitted)="save($event)"
             />
           }

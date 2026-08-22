@@ -6,6 +6,7 @@
         Placa <span aria-hidden="true" class="text-red-600">*</span>
       </label>
       <input
+        autofocus
         class="field uppercase"
         id="plate"
         type="text"
@@ -16,7 +17,9 @@
         "
       />
       @if (form.controls.plate.invalid && form.controls.plate.touched) {
-        <p class="mt-1 text-xs text-red-700" role="alert">La placa es requerida (máx. 20 caracteres).</p>
+        <p class="mt-1 text-xs text-red-700" role="alert">
+          La placa es requerida (máx. 20 caracteres).
+        </p>
       }
     </div>
 
@@ -36,7 +39,9 @@
           "
         />
         @if (form.controls.brand.invalid && form.controls.brand.touched) {
-          <p class="mt-1 text-xs text-red-700" role="alert">La marca es requerida (máx. 80 caracteres).</p>
+          <p class="mt-1 text-xs text-red-700" role="alert">
+            La marca es requerida (máx. 80 caracteres).
+          </p>
         }
       </div>
       <div>
@@ -53,7 +58,9 @@
           "
         />
         @if (form.controls.model.invalid && form.controls.model.touched) {
-          <p class="mt-1 text-xs text-red-700" role="alert">El modelo es requerido (máx. 80 caracteres).</p>
+          <p class="mt-1 text-xs text-red-700" role="alert">
+            El modelo es requerido (máx. 80 caracteres).
+          </p>
         }
       </div>
     </div>
@@ -74,17 +81,14 @@
           "
         />
         @if (form.controls.year.invalid && form.controls.year.touched) {
-          <p class="mt-1 text-xs text-red-700" role="alert">Año inválido (1900–{{ currentYear + 1 }}).</p>
+          <p class="mt-1 text-xs text-red-700" role="alert">
+            Año inválido (1900–{{ currentYear + 1 }}).
+          </p>
         }
       </div>
       <div>
         <label class="mb-1 block text-sm font-semibold text-slate-700" for="color">Color</label>
-        <input
-          class="field"
-          id="color"
-          type="text"
-          [formControl]="form.controls.color"
-        />
+        <input class="field" id="color" type="text" [formControl]="form.controls.color" />
       </div>
     </div>
 
@@ -100,11 +104,15 @@
           [formControl]="form.controls.vin"
         />
         @if (form.controls.vin.invalid && form.controls.vin.touched) {
-          <p class="mt-1 text-xs text-red-700" role="alert">El VIN no puede superar 17 caracteres.</p>
+          <p class="mt-1 text-xs text-red-700" role="alert">
+            El VIN no puede superar 17 caracteres.
+          </p>
         }
       </div>
       <div>
-        <label class="mb-1 block text-sm font-semibold text-slate-700" for="mileage">Kilometraje</label>
+        <label class="mb-1 block text-sm font-semibold text-slate-700" for="mileage"
+          >Kilometraje</label
+        >
         <input
           class="field"
           id="mileage"
@@ -116,14 +124,18 @@
           "
         />
         @if (form.controls.mileage.invalid && form.controls.mileage.touched) {
-          <p class="mt-1 text-xs text-red-700" role="alert">El kilometraje debe ser un número positivo.</p>
+          <p class="mt-1 text-xs text-red-700" role="alert">
+            El kilometraje debe ser un número positivo.
+          </p>
         }
       </div>
     </div>
 
     <!-- Vehicle Type -->
     <div>
-      <label class="mb-1 block text-sm font-semibold text-slate-700" for="vehicleType">Tipo de vehículo</label>
+      <label class="mb-1 block text-sm font-semibold text-slate-700" for="vehicleType"
+        >Tipo de vehículo</label
+      >
       <input
         class="field"
         id="vehicleType"
@@ -135,7 +147,9 @@
 
     <!-- Notes -->
     <div>
-      <label class="mb-1 block text-sm font-semibold text-slate-700" for="notes">Notas internas</label>
+      <label class="mb-1 block text-sm font-semibold text-slate-700" for="notes"
+        >Notas internas</label
+      >
       <textarea
         class="field min-h-24 resize-y"
         id="notes"
@@ -153,11 +167,13 @@
     >
       {{ pending() ? 'Guardando…' : 'Guardar vehículo' }}
     </button>
-    <a
+    <button
       class="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700"
-      [routerLink]="cancelHref()"
+      [disabled]="pending()"
+      (click)="cancelled.emit()"
+      type="button"
     >
       Cancelar
-    </a>
+    </button>
   </div>
 </form>

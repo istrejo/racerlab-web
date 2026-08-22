@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,17 +8,35 @@ import { Vehicle } from '@core/models/vehicle.interface';
 import { CustomersService } from '@core/services/customers/customers';
 import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { VehiclesService } from '@core/services/vehicles/vehicles';
-import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
+import { CustomerCreateDialogComponent } from '../../customers/customer-create-dialog/customer-create-dialog';
+import { VehicleCreateDialogComponent } from '../../vehicles/vehicle-create-dialog/vehicle-create-dialog';
+import {
+  BehaviorSubject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  map,
+  of,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 type Step = 'customer' | 'vehicle' | 'reception';
+type CustomerQuery = { search: string; page: number };
 
 const FUEL_OPTIONS = ['EMPTY', 'QUARTER', 'HALF', 'THREE_QUARTERS', 'FULL'] as const;
-
 const PRIORITY_OPTIONS = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
 
 @Component({
   selector: 'app-service-order-new',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    CustomerCreateDialogComponent,
+    ReactiveFormsModule,
+    RouterLink,
+    VehicleCreateDialogComponent,
+  ],
   templateUrl: './service-order-new.html',
 })
 export default class ServiceOrderNewComponent {
@@ -27,6 +45,8 @@ export default class ServiceOrderNewComponent {
   private readonly serviceOrders = inject(ServiceOrdersService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly customerQuery = new BehaviorSubject<CustomerQuery>({ search: '', page: 1 });
+  private readonly vehicleCustomerId = new Subject<string | null>();
 
   readonly step = signal<Step>('customer');
   readonly customerSearch = new FormControl('', { nonNullable: true });
@@ -34,10 +54,12 @@ export default class ServiceOrderNewComponent {
   readonly selectedVehicle = signal<Vehicle | null>(null);
   readonly customersPage = signal<CustomerPage | null>(null);
   readonly vehicles = signal<Vehicle[] | null>(null);
-  readonly customerLoading = signal(false);
+  readonly customerLoading = signal(true);
   readonly vehicleLoading = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+  readonly customerDialogOpen = signal(false);
+  readonly vehicleDialogOpen = signal(false);
 
   readonly fuelOptions = FUEL_OPTIONS;
   readonly priorityOptions = PRIORITY_OPTIONS;
@@ -61,54 +83,78 @@ export default class ServiceOrderNewComponent {
     this.customerSearch.valueChanges
       .pipe(
         debounceTime(300),
-        distinctUntilChanged(),
         map((value) => value.trim()),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((search) => this.customerQuery.next({ search, page: 1 }));
+
+    this.customerQuery
+      .pipe(
+        distinctUntilChanged(
+          (left, right) => left.search === right.search && left.page === right.page,
+        ),
         tap(() => {
           this.customerLoading.set(true);
           this.error.set(null);
         }),
-        switchMap((search: string) =>
-          search.length >= 2
-            ? this.customers.list({ search, page: 1, limit: 10 })
-            : of({ items: [], page: 1, limit: 10, total: 0, totalPages: 0 } as CustomerPage),
+        switchMap((query) =>
+          this.customers.list({ ...query, limit: 10 }).pipe(
+            catchError(() => {
+              this.error.set('No pudimos cargar los clientes.');
+              return of(null);
+            }),
+          ),
         ),
-        catchError(() => {
-          this.error.set('No pudimos buscar clientes.');
-          return of(null);
-        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((page) => {
-        this.customersPage.set(page);
+        if (page) this.customersPage.set(page);
         this.customerLoading.set(false);
       });
 
-    effect(() => {
-      const customer = this.selectedCustomer();
-      if (customer) {
-        this.vehicleLoading.set(true);
-        this.vehicles.set(null);
-        this.vehiclesService
-          .list(customer.id, { page: 1, limit: 100 })
-          .pipe(
-            catchError(() => {
-              this.error.set('No pudimos cargar los vehículos.');
-              return of(null);
-            }),
-          )
-          .subscribe((page) => {
-            this.vehicles.set(page?.items ?? []);
-            this.vehicleLoading.set(false);
-          });
-      }
-    });
+    this.vehicleCustomerId
+      .pipe(
+        tap((customerId) => {
+          this.vehicleLoading.set(customerId !== null);
+          this.error.set(null);
+        }),
+        switchMap((customerId) =>
+          customerId
+            ? this.vehiclesService.list(customerId, { page: 1, limit: 100 }).pipe(
+                catchError(() => {
+                  this.error.set('No pudimos cargar los vehículos.');
+                  return of(null);
+                }),
+              )
+            : of(null),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((page) => {
+        if (page) this.vehicles.set(page.items);
+        this.vehicleLoading.set(false);
+      });
   }
 
   selectCustomer(customer: Customer): void {
     this.selectedCustomer.set(customer);
+    this.selectedVehicle.set(null);
+    this.vehicles.set(null);
     this.step.set('vehicle');
-    this.customersPage.set(null);
-    this.customerSearch.setValue('');
+    this.loadVehicles(customer.id);
+  }
+
+  customerCreated(customer: Customer): void {
+    this.customerDialogOpen.set(false);
+    this.selectCustomer(customer);
+    this.vehicleDialogOpen.set(true);
+  }
+
+  vehicleCreated(vehicle: Vehicle): void {
+    this.vehicleDialogOpen.set(false);
+    this.vehicles.update((vehicles) => [vehicle, ...(vehicles ?? [])]);
+    this.selectVehicle(vehicle);
   }
 
   selectVehicle(vehicle: Vehicle): void {
@@ -116,9 +162,21 @@ export default class ServiceOrderNewComponent {
     this.step.set('reception');
   }
 
+  goToCustomerPage(page: number): void {
+    this.customerQuery.next({ search: this.customerSearch.value.trim(), page });
+  }
+
   goBack(): void {
-    if (this.step() === 'vehicle') this.step.set('customer');
-    else if (this.step() === 'reception') this.step.set('vehicle');
+    if (this.step() === 'vehicle') {
+      this.selectedCustomer.set(null);
+      this.selectedVehicle.set(null);
+      this.vehicles.set(null);
+      this.vehicleCustomerId.next(null);
+      this.step.set('customer');
+    } else if (this.step() === 'reception') {
+      this.selectedVehicle.set(null);
+      this.step.set('vehicle');
+    }
   }
 
   submit(): void {
@@ -143,12 +201,16 @@ export default class ServiceOrderNewComponent {
 
     this.saving.set(true);
     this.error.set(null);
-    this.serviceOrders.create(input).subscribe({
-      next: (order) => void this.router.navigate(['/service-orders', order.id]),
-      error: () => {
-        this.saving.set(false);
-        this.error.set('No pudimos crear la orden de servicio.');
-      },
-    });
+    this.serviceOrders
+      .create(input)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (order) => void this.router.navigate(['/service-orders', order.id]),
+        error: () => this.error.set('No pudimos crear la orden de servicio.'),
+      });
+  }
+
+  private loadVehicles(customerId: string): void {
+    this.vehicleCustomerId.next(customerId);
   }
 }

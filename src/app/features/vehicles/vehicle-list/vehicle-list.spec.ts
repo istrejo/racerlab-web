@@ -50,11 +50,7 @@ describe('VehicleListComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('waits 300 ms and loads the page represented in the URL', async () => {
-    await vi.advanceTimersByTimeAsync(299);
-    expect(list).not.toHaveBeenCalled();
-
-    await vi.advanceTimersByTimeAsync(1);
+  it('loads the page represented in the URL immediately', () => {
     expect(list).toHaveBeenCalledWith(customerId, { search: 'Toyota', page: 2, limit: 20 });
     expect(fixture.componentInstance.page()?.page).toBe(2);
   });
@@ -70,12 +66,11 @@ describe('VehicleListComponent', () => {
         }),
     );
 
-    await vi.advanceTimersByTimeAsync(300);
     queryParams.next(convertToParamMap({ search: 'Honda', page: '1' }));
+    queryParams.next(convertToParamMap({ search: 'Mazda', page: '1' }));
     expect(cancelled).toHaveBeenCalledOnce();
-    await vi.advanceTimersByTimeAsync(300);
 
-    expect(list).toHaveBeenLastCalledWith(customerId, { search: 'Honda', page: 1, limit: 20 });
+    expect(list).toHaveBeenLastCalledWith(customerId, { search: 'Mazda', page: 1, limit: 20 });
   });
 
   it('writes a trimmed search and reset page to the URL', () => {
@@ -88,6 +83,25 @@ describe('VehicleListComponent', () => {
     expect(navigate).toHaveBeenCalledWith([], {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { search: 'Corolla', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  });
+
+  it('debounces live search updates', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.search.setValue('Honda');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(navigate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'Honda', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   });
 });

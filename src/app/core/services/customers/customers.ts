@@ -19,6 +19,15 @@ export class CustomersService {
     if (query.search?.trim()) {
       params = params.set('search', query.search.trim());
     }
+    if (query.hasVehicles !== undefined) {
+      params = params.set('hasVehicles', String(query.hasVehicles));
+    }
+    if (query.hasServiceOrders !== undefined) {
+      params = params.set('hasServiceOrders', String(query.hasServiceOrders));
+    }
+    if (query.sort) {
+      params = params.set('sort', query.sort);
+    }
     return this.http.get<CustomerPage>(`${this.apiUrl}/customers`, { params });
   }
 

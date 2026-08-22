@@ -39,6 +39,7 @@ describe('CustomerDetailComponent', () => {
           provide: PermissionsService,
           useValue: {
             canWriteCustomers: () => false,
+            canWriteVehicles: () => false,
             canDeleteCustomers: canDelete,
             canWriteOrders: () => false,
           },

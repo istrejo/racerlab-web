@@ -1,9 +1,6 @@
 <main class="min-h-dvh bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
   <section class="mx-auto max-w-3xl">
-    <a
-      class="text-sm font-semibold text-[#004AC6] hover:underline"
-      routerLink="/service-orders"
-    >
+    <a class="text-sm font-semibold text-[#004AC6] hover:underline" routerLink="/service-orders">
       ← Volver a órdenes
     </a>
 
@@ -18,40 +15,84 @@
     <!-- Step 1: Customer -->
     @if (step() === 'customer') {
       <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="font-semibold">1. Selecciona el cliente</h2>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="font-semibold">1. Selecciona el cliente</h2>
+          <button
+            class="rounded-lg bg-[#004AC6] px-3 py-2 text-sm font-semibold text-white"
+            (click)="customerDialogOpen.set(true)"
+            type="button"
+          >
+            Nuevo cliente
+          </button>
+        </div>
         <label class="sr-only" for="customer-search">Buscar cliente</label>
         <input
           id="customer-search"
           type="search"
           class="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#004AC6] focus:ring-2 focus:ring-[#004AC6]/20"
-          placeholder="Nombre, documento o teléfono…"
+          placeholder="Nombre, documento, teléfono o correo…"
           [formControl]="customerSearch"
         />
 
         <div class="mt-4">
-          @if (customerLoading()) {
+          @if (customerLoading() && !customersPage()) {
             <p class="text-sm text-slate-500">Buscando…</p>
           } @else if (customersPage(); as page) {
-            @if (page.items.length === 0 && customerSearch.value.trim()) {
-              <p class="text-sm text-slate-500">No se encontraron clientes.</p>
-            } @else {
-              <ul class="space-y-2" role="list">
-                @for (customer of page.items; track customer.id) {
-                  <li>
+            <div [attr.aria-busy]="customerLoading()">
+              @if (page.items.length === 0) {
+                <div class="rounded-lg border border-dashed border-slate-300 p-5 text-center">
+                  <p class="text-sm text-slate-500">No se encontraron clientes.</p>
+                  <button
+                    class="mt-3 text-sm font-semibold text-[#004AC6] hover:underline"
+                    (click)="customerDialogOpen.set(true)"
+                    type="button"
+                  >
+                    Crear un cliente nuevo
+                  </button>
+                </div>
+              } @else {
+                <ul class="space-y-2" role="list">
+                  @for (customer of page.items; track customer.id) {
+                    <li>
+                      <button
+                        class="w-full rounded-lg border border-slate-200 p-3 text-left hover:border-[#004AC6] hover:bg-slate-50"
+                        (click)="selectCustomer(customer)"
+                        type="button"
+                      >
+                        <p class="font-semibold">{{ customer.fullName }}</p>
+                        @if (customer.phone) {
+                          <p class="text-sm text-slate-500">{{ customer.phone }}</p>
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+                @if (page.totalPages > 1) {
+                  <nav
+                    class="mt-4 flex items-center justify-between text-sm"
+                    aria-label="Paginación de clientes"
+                  >
                     <button
-                      class="w-full rounded-lg border border-slate-200 p-3 text-left hover:border-[#004AC6] hover:bg-slate-50"
-                      (click)="selectCustomer(customer)"
+                      class="rounded border border-slate-300 px-3 py-1 disabled:opacity-40"
+                      [disabled]="page.page <= 1 || customerLoading()"
+                      (click)="goToCustomerPage(page.page - 1)"
                       type="button"
                     >
-                      <p class="font-semibold">{{ customer.fullName }}</p>
-                      @if (customer.phone) {
-                        <p class="text-sm text-slate-500">{{ customer.phone }}</p>
-                      }
+                      Anterior
                     </button>
-                  </li>
+                    <span>Página {{ page.page }} de {{ page.totalPages }}</span>
+                    <button
+                      class="rounded border border-slate-300 px-3 py-1 disabled:opacity-40"
+                      [disabled]="page.page >= page.totalPages || customerLoading()"
+                      (click)="goToCustomerPage(page.page + 1)"
+                      type="button"
+                    >
+                      Siguiente
+                    </button>
+                  </nav>
                 }
-              </ul>
-            }
+              }
+            </div>
           }
         </div>
       </div>
@@ -62,11 +103,7 @@
       <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <h2 class="font-semibold">2. Selecciona el vehículo</h2>
-          <button
-            class="text-sm text-[#004AC6] hover:underline"
-            (click)="goBack()"
-            type="button"
-          >
+          <button class="text-sm text-[#004AC6] hover:underline" (click)="goBack()" type="button">
             Cambiar cliente
           </button>
         </div>
@@ -74,12 +111,29 @@
           Cliente: <span class="font-semibold">{{ selectedCustomer()?.fullName }}</span>
         </p>
 
+        <button
+          class="mt-4 rounded-lg border border-[#004AC6] px-3 py-2 text-sm font-semibold text-[#004AC6]"
+          (click)="vehicleDialogOpen.set(true)"
+          type="button"
+        >
+          Agregar vehículo
+        </button>
+
         <div class="mt-4">
           @if (vehicleLoading()) {
             <p class="text-sm text-slate-500">Cargando vehículos…</p>
           } @else if (vehicles(); as vehicleList) {
             @if (vehicleList.length === 0) {
-              <p class="text-sm text-slate-500">Este cliente no tiene vehículos registrados.</p>
+              <div class="rounded-lg border border-dashed border-slate-300 p-5 text-center">
+                <p class="text-sm text-slate-500">Este cliente no tiene vehículos registrados.</p>
+                <button
+                  class="mt-3 text-sm font-semibold text-[#004AC6] hover:underline"
+                  (click)="vehicleDialogOpen.set(true)"
+                  type="button"
+                >
+                  Registrar el primer vehículo
+                </button>
+              </div>
             } @else {
               <ul class="space-y-2" role="list">
                 @for (vehicle of vehicleList; track vehicle.id) {
@@ -92,7 +146,9 @@
                       <p class="font-mono font-semibold">{{ vehicle.plate }}</p>
                       <p class="text-sm text-slate-600">
                         {{ vehicle.brand }} {{ vehicle.model }}
-                        @if (vehicle.year) { · {{ vehicle.year }} }
+                        @if (vehicle.year) {
+                          · {{ vehicle.year }}
+                        }
                       </p>
                     </button>
                   </li>
@@ -110,11 +166,7 @@
         <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="flex items-center justify-between">
             <h2 class="font-semibold">3. Datos de recepción</h2>
-            <button
-              class="text-sm text-[#004AC6] hover:underline"
-              (click)="goBack()"
-              type="button"
-            >
+            <button class="text-sm text-[#004AC6] hover:underline" (click)="goBack()" type="button">
               Cambiar vehículo
             </button>
           </div>
@@ -122,13 +174,15 @@
             Cliente: <span class="font-semibold">{{ selectedCustomer()?.fullName }}</span>
           </p>
           <p class="text-sm text-slate-600">
-            Vehículo: <span class="font-semibold">{{ selectedVehicle()?.plate }}</span>
-            · {{ selectedVehicle()?.brand }} {{ selectedVehicle()?.model }}
+            Vehículo: <span class="font-semibold">{{ selectedVehicle()?.plate }}</span> ·
+            {{ selectedVehicle()?.brand }} {{ selectedVehicle()?.model }}
           </p>
 
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="priority">Prioridad</label>
+              <label class="block text-sm font-medium text-slate-700" for="priority"
+                >Prioridad</label
+              >
               <select
                 id="priority"
                 class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
@@ -141,7 +195,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="fuelLevel">Nivel de combustible</label>
+              <label class="block text-sm font-medium text-slate-700" for="fuelLevel"
+                >Nivel de combustible</label
+              >
               <select
                 id="fuelLevel"
                 class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
@@ -155,7 +211,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="mileageIn">Kilometraje de entrada</label>
+              <label class="block text-sm font-medium text-slate-700" for="mileageIn"
+                >Kilometraje de entrada</label
+              >
               <input
                 id="mileageIn"
                 type="number"
@@ -165,7 +223,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="estimatedDeliveryDate">Fecha estimada de entrega</label>
+              <label class="block text-sm font-medium text-slate-700" for="estimatedDeliveryDate"
+                >Fecha estimada de entrega</label
+              >
               <input
                 id="estimatedDeliveryDate"
                 type="date"
@@ -175,7 +235,9 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-slate-700" for="reportedIssues">Problemas reportados</label>
+              <label class="block text-sm font-medium text-slate-700" for="reportedIssues"
+                >Problemas reportados</label
+              >
               <textarea
                 id="reportedIssues"
                 rows="3"
@@ -185,7 +247,9 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-slate-700" for="receptionNotes">Notas de recepción</label>
+              <label class="block text-sm font-medium text-slate-700" for="receptionNotes"
+                >Notas de recepción</label
+              >
               <textarea
                 id="receptionNotes"
                 rows="2"
@@ -217,3 +281,19 @@
     }
   </section>
 </main>
+
+@if (customerDialogOpen()) {
+  <app-customer-create-dialog
+    (closed)="customerDialogOpen.set(false)"
+    (created)="customerCreated($event)"
+  />
+}
+
+@if (vehicleDialogOpen() && selectedCustomer(); as customer) {
+  <app-vehicle-create-dialog
+    [customerId]="customer.id"
+    [customerName]="customer.fullName"
+    (closed)="vehicleDialogOpen.set(false)"
+    (created)="vehicleCreated($event)"
+  />
+}

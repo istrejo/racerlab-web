@@ -45,12 +45,15 @@ describe('CustomerListComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('waits 300 ms and loads the page represented in the URL', async () => {
-    await vi.advanceTimersByTimeAsync(299);
-    expect(list).not.toHaveBeenCalled();
-
-    await vi.advanceTimersByTimeAsync(1);
-    expect(list).toHaveBeenCalledWith({ search: 'Ada', page: 2, limit: 20 });
+  it('loads and normalizes the page and filters represented in the URL', () => {
+    expect(list).toHaveBeenCalledWith({
+      search: 'Ada',
+      hasVehicles: undefined,
+      hasServiceOrders: undefined,
+      sort: 'NAME_ASC',
+      page: 2,
+      limit: 20,
+    });
     expect(fixture.componentInstance.page()?.page).toBe(2);
   });
 
@@ -65,12 +68,18 @@ describe('CustomerListComponent', () => {
         }),
     );
 
-    await vi.advanceTimersByTimeAsync(300);
     queryParams.next(convertToParamMap({ search: 'Grace', page: '1' }));
+    queryParams.next(convertToParamMap({ search: 'Katherine', page: '1' }));
     expect(cancelled).toHaveBeenCalledOnce();
-    await vi.advanceTimersByTimeAsync(300);
 
-    expect(list).toHaveBeenLastCalledWith({ search: 'Grace', page: 1, limit: 20 });
+    expect(list).toHaveBeenLastCalledWith({
+      search: 'Katherine',
+      hasVehicles: undefined,
+      hasServiceOrders: undefined,
+      sort: 'NAME_ASC',
+      page: 1,
+      limit: 20,
+    });
   });
 
   it('writes a trimmed search and reset page to the URL', () => {
@@ -83,6 +92,45 @@ describe('CustomerListComponent', () => {
     expect(navigate).toHaveBeenCalledWith([], {
       relativeTo: TestBed.inject(ActivatedRoute),
       queryParams: { search: 'Grace Hopper', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  });
+
+  it('debounces live search updates and keeps the URL shareable', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    fixture.componentInstance.search.setValue('Grace');
+    await vi.advanceTimersByTimeAsync(299);
+    expect(navigate).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(navigate).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: { search: 'Grace', page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  });
+
+  it('normalizes invalid filters before calling the API', () => {
+    queryParams.next(
+      convertToParamMap({
+        hasVehicles: 'sometimes',
+        hasServiceOrders: 'yes',
+        sort: 'RANDOM',
+        page: '-2',
+      }),
+    );
+
+    expect(list).toHaveBeenLastCalledWith({
+      search: '',
+      hasVehicles: undefined,
+      hasServiceOrders: undefined,
+      sort: 'NAME_ASC',
+      page: 1,
+      limit: 20,
     });
   });
 });

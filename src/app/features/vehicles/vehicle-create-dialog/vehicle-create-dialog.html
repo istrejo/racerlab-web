@@ -1,0 +1,17 @@
+<app-modal
+  [description]="customerName() ? 'Cliente: ' + customerName() : 'Se asociará al cliente actual.'"
+  title="Nuevo vehículo"
+  [busy]="pending()"
+  [open]="true"
+  (dismissed)="closed.emit()"
+>
+  @if (error()) {
+    <p
+      class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+      role="alert"
+    >
+      {{ error() }}
+    </p>
+  }
+  <app-vehicle-form [pending]="pending()" (cancelled)="closed.emit()" (submitted)="save($event)" />
+</app-modal>

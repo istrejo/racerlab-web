@@ -7,7 +7,6 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Vehicle, VehicleInput } from '@core/models/vehicle.interface';
 
 function trimmedRequired(control: AbstractControl): ValidationErrors | null {
@@ -28,7 +27,7 @@ function integerInRange(min: number, max: number) {
 
 @Component({
   selector: 'app-vehicle-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './vehicle-form.html',
   styles: `
     .field {
@@ -47,8 +46,8 @@ function integerInRange(min: number, max: number) {
 export class VehicleFormComponent {
   readonly vehicle = input<Vehicle | null>(null);
   readonly pending = input(false);
-  readonly cancelHref = input('/customers');
   readonly submitted = output<VehicleInput>();
+  readonly cancelled = output<void>();
 
   readonly currentYear = new Date().getFullYear();
 

@@ -5,7 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VehicleWithCustomerPage } from '@core/models/vehicle.interface';
 import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
-import { catchError, distinctUntilChanged, map, of, switchMap, tap, timer } from 'rxjs';
+import { parsePositivePage } from '@shared/utils/route-query';
+import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-vehicle-workshop-list',
@@ -21,14 +22,24 @@ export default class VehicleWorkshopListComponent {
   readonly search = new FormControl('', { nonNullable: true });
   readonly page = signal<VehicleWithCustomerPage | null>(null);
   readonly loading = signal(true);
+  readonly refreshing = signal(false);
   readonly error = signal<string | null>(null);
 
   constructor() {
+    this.search.valueChanges
+      .pipe(
+        debounceTime(300),
+        map((value) => value.trim()),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((search) => this.updateQuery({ search: search || null, page: 1 }));
+
     this.route.queryParamMap
       .pipe(
         map((params) => ({
           search: params.get('search')?.trim() ?? '',
-          page: Math.max(1, Number(params.get('page')) || 1),
+          page: parsePositivePage(params.get('page')),
           refresh: params.get('refresh') ?? '',
         })),
         distinctUntilChanged(
@@ -39,12 +50,12 @@ export default class VehicleWorkshopListComponent {
         ),
         tap((query) => {
           this.search.setValue(query.search, { emitEvent: false });
-          this.loading.set(true);
+          if (this.page()) this.refreshing.set(true);
+          else this.loading.set(true);
           this.error.set(null);
         }),
         switchMap(({ search, page }) =>
-          timer(300).pipe(
-            switchMap(() => this.vehicles.listForWorkshop({ search, page, limit: 20 })),
+          this.vehicles.listForWorkshop({ search, page, limit: 20 }).pipe(
             catchError(() => {
               this.error.set('No pudimos cargar los vehículos.');
               return of(null);
@@ -54,34 +65,31 @@ export default class VehicleWorkshopListComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((page) => {
-        this.page.set(page);
+        if (page) this.page.set(page);
         this.loading.set(false);
+        this.refreshing.set(false);
       });
   }
 
   applySearch(): void {
     const search = this.search.value.trim();
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { search: search || null, page: 1 },
-      queryParamsHandling: 'merge',
-    });
+    this.updateQuery({ search: search || null, page: 1 });
   }
 
   goToPage(page: number): void {
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { page },
-      queryParamsHandling: 'merge',
-    });
+    this.updateQuery({ page });
   }
 
   retry(): void {
-    const current = this.route.snapshot.queryParamMap;
+    this.updateQuery({ refresh: Date.now() });
+  }
+
+  private updateQuery(queryParams: Record<string, unknown>): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { refresh: Date.now(), page: current.get('page') ?? 1 },
+      queryParams,
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 }

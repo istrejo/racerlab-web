@@ -33,6 +33,11 @@ export type CustomerPage = {
 
 export type CustomerSearch = {
   search?: string;
+  hasVehicles?: boolean;
+  hasServiceOrders?: boolean;
+  sort?: CustomerSort;
   page?: number;
   limit?: number;
 };
+
+export type CustomerSort = 'NAME_ASC' | 'NAME_DESC' | 'NEWEST' | 'OLDEST';

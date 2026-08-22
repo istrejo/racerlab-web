@@ -24,6 +24,10 @@ export default class VehicleEditComponent {
   readonly pending = signal(false);
   readonly saveError = signal<string | null>(null);
 
+  cancel(): void {
+    void this.router.navigate(['/customers', this.customerId, 'vehicles', this.vehicleId]);
+  }
+
   constructor() {
     this.vehicles.get(this.customerId, this.vehicleId).subscribe({
       next: (vehicle) => this.vehicle.set(vehicle),

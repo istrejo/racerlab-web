@@ -15,11 +15,7 @@
     }
 
     <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <app-vehicle-form
-        [pending]="pending()"
-        [cancelHref]="'/customers/' + customerId + '/vehicles'"
-        (submitted)="save($event)"
-      />
+      <app-vehicle-form [pending]="pending()" (cancelled)="cancel()" (submitted)="save($event)" />
     </div>
   </section>
 </main>

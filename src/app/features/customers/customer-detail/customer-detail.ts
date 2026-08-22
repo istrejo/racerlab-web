@@ -5,10 +5,12 @@ import { PermissionsService } from '@core/services/permissions/permissions';
 import { CustomersService } from '@core/services/customers/customers';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { Customer } from '@core/models/customer.interface';
+import { Vehicle } from '@core/models/vehicle.interface';
+import { VehicleCreateDialogComponent } from '../../vehicles/vehicle-create-dialog/vehicle-create-dialog';
 
 @Component({
   selector: 'app-customer-detail',
-  imports: [DatePipe, LoadingSkeletonComponent, RouterLink],
+  imports: [DatePipe, LoadingSkeletonComponent, RouterLink, VehicleCreateDialogComponent],
   templateUrl: './customer-detail.html',
 })
 export default class CustomerDetailComponent {
@@ -22,6 +24,7 @@ export default class CustomerDetailComponent {
   readonly deleteOpen = signal(false);
   readonly deleting = signal(false);
   readonly deleteError = signal<string | null>(null);
+  readonly vehicleDialogOpen = signal(false);
 
   constructor() {
     this.load();
@@ -55,5 +58,12 @@ export default class CustomerDetailComponent {
       },
       complete: () => this.deleting.set(false),
     });
+  }
+
+  vehicleCreated(_vehicle: Vehicle): void {
+    this.vehicleDialogOpen.set(false);
+    this.customer.update((customer) =>
+      customer ? { ...customer, vehicleCount: customer.vehicleCount + 1 } : customer,
+    );
   }
 }

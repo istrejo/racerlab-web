@@ -62,12 +62,12 @@
       }
     </nav>
 
-    <div class="mt-6">
+    <div class="mt-6" [attr.aria-busy]="refreshing()">
       <app-loading-skeleton
         label="Cargando órdenes de servicio…"
         name="service-order-list"
         variant="list"
-        [loading]="loading()"
+        [loading]="loading() && !page()"
       >
         @if (error()) {
           <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
@@ -103,8 +103,12 @@
                         [class.text-green-800]="order.status === 'DELIVERED'"
                         [class.bg-red-100]="order.status === 'CANCELLED'"
                         [class.text-red-800]="order.status === 'CANCELLED'"
-                        [class.bg-blue-100]="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'"
-                        [class.text-blue-800]="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'"
+                        [class.bg-blue-100]="
+                          order.status !== 'DELIVERED' && order.status !== 'CANCELLED'
+                        "
+                        [class.text-blue-800]="
+                          order.status !== 'DELIVERED' && order.status !== 'CANCELLED'
+                        "
                       >
                         {{ statusLabels[order.status] }}
                       </span>

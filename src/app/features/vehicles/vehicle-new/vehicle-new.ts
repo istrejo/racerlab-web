@@ -16,6 +16,10 @@ export default class VehicleNewComponent {
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
 
+  cancel(): void {
+    void this.router.navigate(['/customers', this.customerId, 'vehicles']);
+  }
+
   save(input: VehicleInput): void {
     this.pending.set(true);
     this.error.set(null);

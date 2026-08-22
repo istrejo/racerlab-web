@@ -22,12 +22,12 @@
       </button>
     </form>
 
-    <div class="mt-6">
+    <div class="mt-6" [attr.aria-busy]="refreshing()">
       <app-loading-skeleton
         label="Cargando vehículos…"
         name="vehicle-workshop-list"
         variant="list"
-        [loading]="loading()"
+        [loading]="loading() && !page()"
       >
         @if (error()) {
           <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
@@ -46,12 +46,7 @@
                   <div class="flex flex-wrap items-center justify-between gap-3">
                     <a
                       class="hover:opacity-80"
-                      [routerLink]="[
-                        '/customers',
-                        vehicle.customerId,
-                        'vehicles',
-                        vehicle.id,
-                      ]"
+                      [routerLink]="['/customers', vehicle.customerId, 'vehicles', vehicle.id]"
                     >
                       <p class="font-mono font-bold text-[#F97316]">{{ vehicle.plate }}</p>
                       <p class="text-sm text-slate-600">

@@ -5,10 +5,17 @@ import { AuthService } from '@core/services/auth/auth';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { AppIconSpriteComponent } from '@shared/components/app-icon-sprite/app-icon-sprite';
 import { finalize } from 'rxjs';
+import { WorkshopSwitchDialogComponent } from '../features/workshops/workshop-switch-dialog/workshop-switch-dialog';
 
 @Component({
   selector: 'app-layout',
-  imports: [AppIconSpriteComponent, AppNavigationComponent, RouterLink, RouterOutlet],
+  imports: [
+    AppIconSpriteComponent,
+    AppNavigationComponent,
+    RouterLink,
+    RouterOutlet,
+    WorkshopSwitchDialogComponent,
+  ],
   templateUrl: './layout.html',
   host: {
     '(document:click)': 'closeUserMenuFromDocument($event)',
@@ -31,6 +38,7 @@ export default class LayoutComponent {
   readonly mobileNavigationOpen = signal(false);
   readonly userMenuOpen = signal(false);
   readonly logoutPending = signal(false);
+  readonly workshopDialogOpen = signal(false);
 
   toggleMobileNavigation(): void {
     this.mobileNavigationOpen.update((isOpen) => !isOpen);
@@ -88,5 +96,11 @@ export default class LayoutComponent {
         next: () => void this.router.navigateByUrl('/login'),
         error: () => void this.router.navigateByUrl('/login'),
       });
+  }
+
+  workshopSwitched(): void {
+    this.workshopDialogOpen.set(false);
+    this.closeMobileNavigation();
+    void this.router.navigateByUrl('/dashboard');
   }
 }

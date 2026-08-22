@@ -10,12 +10,13 @@
     <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
       <h1 class="text-2xl font-bold">Vehículos</h1>
       @if (permissions.canWriteVehicles()) {
-        <a
+        <button
           class="rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white"
-          [routerLink]="['/customers', customerId, 'vehicles', 'new']"
+          (click)="vehicleDialogOpen.set(true)"
+          type="button"
         >
           Nuevo vehículo
-        </a>
+        </button>
       }
     </div>
 
@@ -37,12 +38,12 @@
       </button>
     </form>
 
-    <div class="mt-6">
+    <div class="mt-6" [attr.aria-busy]="refreshing()">
       <app-loading-skeleton
         label="Cargando vehículos…"
         name="vehicle-list"
         variant="list"
-        [loading]="loading()"
+        [loading]="loading() && !page()"
       >
         @if (error()) {
           <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
@@ -115,3 +116,11 @@
     </div>
   </section>
 </main>
+
+@if (vehicleDialogOpen()) {
+  <app-vehicle-create-dialog
+    [customerId]="customerId"
+    (closed)="vehicleDialogOpen.set(false)"
+    (created)="vehicleCreated($event)"
+  />
+}

@@ -1,0 +1,37 @@
+<dialog
+  #dialog
+  class="m-auto max-h-[calc(100dvh-2rem)] w-[min(44rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border-0 bg-transparent p-0 text-slate-950 shadow-2xl backdrop:bg-slate-950/55"
+  [attr.aria-busy]="busy()"
+  [attr.aria-describedby]="description() ? descriptionId : null"
+  [attr.aria-labelledby]="titleId"
+  (cancel)="handleCancel($event)"
+  (click)="handleBackdrop($event)"
+>
+  <section
+    class="flex max-h-[calc(100dvh-2rem)] flex-col bg-white"
+    (click)="$event.stopPropagation()"
+  >
+    <header
+      class="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6"
+    >
+      <div>
+        <h2 class="text-xl font-bold" [id]="titleId">{{ title() }}</h2>
+        @if (description()) {
+          <p class="mt-1 text-sm text-slate-600" [id]="descriptionId">{{ description() }}</p>
+        }
+      </div>
+      <button
+        aria-label="Cerrar modal"
+        class="flex size-9 shrink-0 items-center justify-center rounded-lg text-2xl text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] disabled:opacity-40"
+        [disabled]="busy()"
+        (click)="requestDismiss()"
+        type="button"
+      >
+        ×
+      </button>
+    </header>
+    <div class="overflow-y-auto p-5 sm:p-6">
+      <ng-content />
+    </div>
+  </section>
+</dialog>

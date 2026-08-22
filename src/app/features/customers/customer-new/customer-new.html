@@ -14,7 +14,13 @@
           {{ error() }}
         </p>
       }
-      <div class="mt-6"><app-customer-form [pending]="pending()" (submitted)="save($event)" /></div>
+      <div class="mt-6">
+        <app-customer-form
+          [pending]="pending()"
+          (cancelled)="cancel()"
+          (submitted)="save($event)"
+        />
+      </div>
     </div>
   </section>
 </main>

@@ -11,4 +11,5 @@ export class AppNavigationComponent {
   readonly permissions = inject(PermissionsService);
   readonly mobileNavigationOpen = input(false);
   readonly mobileNavigationDismissed = output<void>();
+  readonly workshopChangeRequested = output<void>();
 }
