@@ -32,7 +32,14 @@
 </section>
 
 <section class="mt-6 grid gap-6 xl:grid-cols-3" aria-label="Active workshop workflow">
-  <app-dashboard-recent-service-orders [orders]="dashboard().serviceOrders" />
+  @if (permissions.canReadOrders()) {
+    <app-dashboard-recent-service-orders
+      [error]="recentOrdersError()"
+      [loading]="recentOrdersLoading()"
+      [orders]="recentOrders()"
+      (retry)="retryRecentOrders()"
+    />
+  }
   <app-dashboard-technician-workload [technicians]="dashboard().technicians" />
 </section>
 

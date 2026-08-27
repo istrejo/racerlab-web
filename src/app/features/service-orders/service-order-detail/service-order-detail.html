@@ -25,16 +25,16 @@
               <h1 class="mt-1 text-3xl font-bold tracking-wider">{{ current.code }}</h1>
               <span
                 class="mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
-                [class.bg-green-100]="current.status === 'DELIVERED'"
-                [class.text-green-800]="current.status === 'DELIVERED'"
-                [class.bg-red-100]="current.status === 'CANCELLED'"
-                [class.text-red-800]="current.status === 'CANCELLED'"
-                [class.bg-blue-100]="
-                  current.status !== 'DELIVERED' && current.status !== 'CANCELLED'
-                "
-                [class.text-blue-800]="
-                  current.status !== 'DELIVERED' && current.status !== 'CANCELLED'
-                "
+                [class.bg-blue-50]="statusTones[current.status] === 'info'"
+                [class.text-[#004AC6]]="statusTones[current.status] === 'info'"
+                [class.bg-orange-50]="statusTones[current.status] === 'warning'"
+                [class.text-[#C2410C]]="statusTones[current.status] === 'warning'"
+                [class.bg-emerald-50]="statusTones[current.status] === 'success'"
+                [class.text-emerald-700]="statusTones[current.status] === 'success'"
+                [class.bg-slate-100]="statusTones[current.status] === 'neutral'"
+                [class.text-slate-700]="statusTones[current.status] === 'neutral'"
+                [class.bg-red-50]="statusTones[current.status] === 'danger'"
+                [class.text-red-700]="statusTones[current.status] === 'danger'"
               >
                 {{ statusLabels[current.status] }}
               </span>

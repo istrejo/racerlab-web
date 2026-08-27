@@ -6,6 +6,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Diagnosis } from '@core/models/diagnoses.interface';
 import { Quote, QuoteStatus } from '@core/models/quotes.interface';
 import { ServiceOrderDetail, ServiceOrderStatus } from '@core/models/service-order.interface';
+import {
+  SERVICE_ORDER_STATUS_LABELS,
+  SERVICE_ORDER_STATUS_TONES,
+} from '@core/models/service-order-status';
 import { DiagnosesService } from '@core/services/diagnoses/diagnoses';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { QuotesService } from '@core/services/quotes/quotes';
@@ -14,18 +18,6 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 
 type DialogMode = 'status' | 'diagnosis' | null;
-
-const STATUS_LABELS: Record<ServiceOrderStatus, string> = {
-  RECEIVED: 'Recibida',
-  DIAGNOSIS: 'Diagnóstico',
-  QUOTED: 'Cotizada',
-  APPROVED: 'Aprobada',
-  IN_PROGRESS: 'En progreso',
-  QUALITY_CONTROL: 'Control de calidad',
-  READY_FOR_DELIVERY: 'Lista para entrega',
-  DELIVERED: 'Entregada',
-  CANCELLED: 'Cancelada',
-};
 
 const ALLOWED_TRANSITIONS: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
   RECEIVED: ['DIAGNOSIS', 'CANCELLED'],
@@ -87,7 +79,8 @@ export default class ServiceOrderDetailComponent {
   readonly actionError = signal<string | null>(null);
   readonly dialog = signal<DialogMode>(null);
 
-  readonly statusLabels = STATUS_LABELS;
+  readonly statusLabels = SERVICE_ORDER_STATUS_LABELS;
+  readonly statusTones = SERVICE_ORDER_STATUS_TONES;
   readonly fuelLabels = FUEL_LABELS;
   readonly priorityLabels = PRIORITY_LABELS;
   readonly quoteStatusLabels = QUOTE_STATUS_LABELS;

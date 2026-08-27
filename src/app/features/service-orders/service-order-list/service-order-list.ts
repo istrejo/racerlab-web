@@ -3,35 +3,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ServiceOrderPage, ServiceOrderStatus } from '@core/models/service-order.interface';
+import {
+  SERVICE_ORDER_STATUS_LABELS,
+  SERVICE_ORDER_STATUS_ORDER,
+  SERVICE_ORDER_STATUS_TONES,
+} from '@core/models/service-order-status';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { parsePositivePage } from '@shared/utils/route-query';
 import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
-
-const STATUS_LABELS: Record<ServiceOrderStatus, string> = {
-  RECEIVED: 'Recibida',
-  DIAGNOSIS: 'Diagnóstico',
-  QUOTED: 'Cotizada',
-  APPROVED: 'Aprobada',
-  IN_PROGRESS: 'En progreso',
-  QUALITY_CONTROL: 'Control de calidad',
-  READY_FOR_DELIVERY: 'Lista para entrega',
-  DELIVERED: 'Entregada',
-  CANCELLED: 'Cancelada',
-};
-
-const STATUS_ORDER: ServiceOrderStatus[] = [
-  'RECEIVED',
-  'DIAGNOSIS',
-  'QUOTED',
-  'APPROVED',
-  'IN_PROGRESS',
-  'QUALITY_CONTROL',
-  'READY_FOR_DELIVERY',
-  'DELIVERED',
-  'CANCELLED',
-];
 
 @Component({
   selector: 'app-service-order-list',
@@ -45,8 +26,9 @@ export default class ServiceOrderListComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly statuses = STATUS_ORDER;
-  readonly statusLabels = STATUS_LABELS;
+  readonly statuses = SERVICE_ORDER_STATUS_ORDER;
+  readonly statusLabels = SERVICE_ORDER_STATUS_LABELS;
+  readonly statusTones = SERVICE_ORDER_STATUS_TONES;
   readonly selectedStatus = signal<ServiceOrderStatus | null>(null);
   readonly search = new FormControl('', { nonNullable: true });
   readonly page = signal<ServiceOrderPage | null>(null);
@@ -143,7 +125,7 @@ export default class ServiceOrderListComponent {
   }
 
   private parseStatus(value: string | null): ServiceOrderStatus | null {
-    return STATUS_ORDER.includes(value as ServiceOrderStatus)
+    return SERVICE_ORDER_STATUS_ORDER.includes(value as ServiceOrderStatus)
       ? (value as ServiceOrderStatus)
       : null;
   }

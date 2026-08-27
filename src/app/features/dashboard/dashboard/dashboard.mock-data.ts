@@ -10,15 +10,6 @@ export type DashboardMetric = {
   icon: 'orders' | 'vehicle' | 'approval' | 'parts' | 'warning';
 };
 
-export type DashboardServiceOrder = {
-  id: string;
-  customer: string;
-  vehicle: string;
-  service: string;
-  status: 'Reception' | 'In repair' | 'Ready';
-  technician: string;
-};
-
 export type DashboardTechnician = {
   id: string;
   name: string;
@@ -47,7 +38,6 @@ export type DashboardLowStockItem = {
 
 export type DashboardSnapshot = {
   metrics: readonly DashboardMetric[];
-  serviceOrders: readonly DashboardServiceOrder[];
   technicians: readonly DashboardTechnician[];
   pendingQuotes: readonly DashboardQuote[];
   lowStockItems: readonly DashboardLowStockItem[];
@@ -92,48 +82,6 @@ export const DASHBOARD_MOCK_DATA: DashboardSnapshot = {
       detail: 'Action needed',
       tone: 'danger',
       icon: 'warning',
-    },
-  ],
-  serviceOrders: [
-    {
-      id: 'ORD-8901',
-      customer: 'Sarah Jenkins',
-      vehicle: '2019 Toyota Camry',
-      service: 'Full synthetic oil change',
-      status: 'Reception',
-      technician: 'Unassigned',
-    },
-    {
-      id: 'ORD-8900',
-      customer: 'Michael Chang',
-      vehicle: '2021 Ford F-150',
-      service: 'Brake pad replacement',
-      status: 'In repair',
-      technician: 'Dave R.',
-    },
-    {
-      id: 'ORD-8899',
-      customer: 'Elena Rodriguez',
-      vehicle: '2018 Honda CR-V',
-      service: 'Transmission diagnostic',
-      status: 'Ready',
-      technician: 'Sam T.',
-    },
-    {
-      id: 'ORD-8898',
-      customer: 'Robert Smith',
-      vehicle: '2020 Chevy Silverado',
-      service: 'Scheduled maintenance (30k)',
-      status: 'In repair',
-      technician: 'Mike L.',
-    },
-    {
-      id: 'ORD-8897',
-      customer: 'Amanda Lee',
-      vehicle: '2022 Tesla Model 3',
-      service: 'Tire rotation and balance',
-      status: 'Reception',
-      technician: 'Unassigned',
     },
   ],
   technicians: [
@@ -199,7 +147,13 @@ export const DASHBOARD_MOCK_DATA: DashboardSnapshot = {
   ],
   lowStockItems: [
     { id: 'oil-filter-2', name: 'Oil filter 2', available: 2, minimum: 8, unit: 'units' },
-    { id: 'brake-fluid-dot4', name: 'DOT 4 brake fluid', available: 3, minimum: 12, unit: 'bottles' },
+    {
+      id: 'brake-fluid-dot4',
+      name: 'DOT 4 brake fluid',
+      available: 3,
+      minimum: 12,
+      unit: 'bottles',
+    },
     { id: 'wiper-blades-24', name: '24 in. wiper blades', available: 1, minimum: 6, unit: 'pairs' },
   ],
 };

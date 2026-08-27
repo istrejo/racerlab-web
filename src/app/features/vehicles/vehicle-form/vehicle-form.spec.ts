@@ -87,6 +87,40 @@ describe('VehicleFormComponent', () => {
     });
   });
 
+  it('handles the DOM form submit without allowing native navigation', () => {
+    fixture.detectChanges();
+    const submitted = vi.fn();
+    fixture.componentInstance.submitted.subscribe(submitted);
+    fixture.componentInstance.form.setValue({
+      plate: ' xyz 987 ',
+      brand: 'Honda',
+      model: 'Civic',
+      year: null,
+      color: '',
+      vin: '',
+      mileage: null,
+      vehicleType: '',
+      notes: '',
+    });
+
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(submitted).toHaveBeenCalledWith({
+      plate: 'XYZ987',
+      brand: 'Honda',
+      model: 'Civic',
+      year: null,
+      color: null,
+      vin: null,
+      mileage: null,
+      vehicleType: null,
+      notes: null,
+    });
+  });
+
   it('rejects a year outside the valid range', () => {
     fixture.detectChanges();
     fixture.componentInstance.form.controls.year.setValue(1800);

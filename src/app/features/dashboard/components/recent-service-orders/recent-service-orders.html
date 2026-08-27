@@ -1,52 +1,103 @@
-<article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+<article
+  class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+  [attr.aria-busy]="loading()"
+>
   <header class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
     <div>
-      <h2 class="font-[Manrope,ui-sans-serif] text-lg font-bold">Recent service orders</h2>
-      <p class="mt-1 text-sm text-slate-500">Current workflow in the workshop</p>
+      <h2 class="font-[Manrope,ui-sans-serif] text-lg font-bold">Órdenes recientes</h2>
+      <p class="mt-1 text-sm text-slate-500">Última actividad del taller</p>
     </div>
-    <a class="text-sm font-semibold text-[#004AC6]" [routerLink]="'/service-orders'"> View all </a>
+    <a class="text-sm font-semibold text-[#004AC6]" [routerLink]="'/service-orders'">Ver todas</a>
   </header>
-  <div class="overflow-x-auto">
-    <table class="w-full min-w-[720px] text-left text-sm">
-      <caption class="sr-only">
-        Recent service orders and their current workflow status
-      </caption>
-      <thead
-        class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"
-      >
-        <tr>
-          <th class="px-5 py-3" scope="col">Order</th>
-          <th class="px-5 py-3" scope="col">Customer / vehicle</th>
-          <th class="px-5 py-3" scope="col">Service</th>
-          <th class="px-5 py-3" scope="col">Status</th>
-          <th class="px-5 py-3" scope="col">Technician</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        @for (order of orders(); track order.id) {
-          <tr class="hover:bg-slate-50">
-            <td class="px-5 py-4 font-semibold">{{ order.id }}</td>
-            <td class="px-5 py-4">
-              <p class="font-semibold">{{ order.customer }}</p>
-              <p class="mt-0.5 text-xs text-slate-500">{{ order.vehicle }}</p>
-            </td>
-            <td class="px-5 py-4 text-slate-700">{{ order.service }}</td>
-            <td class="px-5 py-4">
-              <span
-                class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                [class.bg-blue-50]="order.status === 'Reception'"
-                [class.text-[#004AC6]]="order.status === 'Reception'"
-                [class.bg-orange-50]="order.status === 'In repair'"
-                [class.text-[#C2410C]]="order.status === 'In repair'"
-                [class.bg-emerald-50]="order.status === 'Ready'"
-                [class.text-emerald-700]="order.status === 'Ready'"
-                >{{ order.status }}</span
-              >
-            </td>
-            <td class="px-5 py-4 text-slate-600">{{ order.technician }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <app-loading-skeleton
+    label="Cargando órdenes recientes…"
+    name="dashboard-recent-service-orders"
+    variant="table"
+    [loading]="loading()"
+  >
+    @if (error()) {
+      <div class="p-6 text-center" role="alert">
+        <p class="text-sm text-red-700">{{ error() }}</p>
+        <button
+          class="mt-3 text-sm font-semibold text-[#004AC6] underline"
+          (click)="retry.emit()"
+          type="button"
+        >
+          Reintentar
+        </button>
+      </div>
+    } @else if (orders().length === 0) {
+      <p class="px-5 py-10 text-center text-sm text-slate-500">
+        No hay órdenes de servicio registradas.
+      </p>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left text-sm">
+          <caption class="sr-only">
+            Las diez órdenes de servicio más recientes y su estado actual
+          </caption>
+          <thead
+            class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          >
+            <tr>
+              <th class="px-5 py-3" scope="col">Orden</th>
+              <th class="px-5 py-3" scope="col">Cliente / vehículo</th>
+              <th class="px-5 py-3" scope="col">Motivo / recepción</th>
+              <th class="px-5 py-3" scope="col">Estado</th>
+              <th class="px-5 py-3" scope="col">Técnico</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (order of orders(); track order.id) {
+              <tr class="hover:bg-slate-50">
+                <td class="px-5 py-4">
+                  <a
+                    class="font-mono font-bold text-[#004AC6] hover:underline"
+                    [routerLink]="['/service-orders', order.id]"
+                  >
+                    {{ order.code }}
+                  </a>
+                  <p class="mt-1 text-xs text-slate-500">
+                    {{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                  </p>
+                </td>
+                <td class="px-5 py-4">
+                  <p class="font-semibold">{{ order.customer.fullName }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">
+                    {{ order.vehicle.brand }} {{ order.vehicle.model }} · {{ order.vehicle.plate }}
+                  </p>
+                </td>
+                <td class="max-w-56 px-5 py-4 text-slate-700">
+                  <p class="line-clamp-2" [title]="reportedIssue(order)">
+                    {{ reportedIssue(order) }}
+                  </p>
+                </td>
+                <td class="px-5 py-4">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                    [attr.data-status]="order.status"
+                    [class.bg-blue-50]="statusTones[order.status] === 'info'"
+                    [class.text-[#004AC6]]="statusTones[order.status] === 'info'"
+                    [class.bg-orange-50]="statusTones[order.status] === 'warning'"
+                    [class.text-[#C2410C]]="statusTones[order.status] === 'warning'"
+                    [class.bg-emerald-50]="statusTones[order.status] === 'success'"
+                    [class.text-emerald-700]="statusTones[order.status] === 'success'"
+                    [class.bg-slate-100]="statusTones[order.status] === 'neutral'"
+                    [class.text-slate-700]="statusTones[order.status] === 'neutral'"
+                    [class.bg-red-50]="statusTones[order.status] === 'danger'"
+                    [class.text-red-700]="statusTones[order.status] === 'danger'"
+                  >
+                    {{ statusLabels[order.status] }}
+                  </span>
+                </td>
+                <td class="px-5 py-4 text-slate-600">
+                  {{ order.assignedTechnician?.displayName ?? 'Sin asignar' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </app-loading-skeleton>
 </article>
