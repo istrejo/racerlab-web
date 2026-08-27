@@ -20,7 +20,7 @@
       }
     </header>
 
-    <form class="mt-6 flex items-center gap-3" (ngSubmit)="applySearch()">
+    <form class="mt-6 flex items-center gap-3" (submit)="applySearch($event)">
       <label class="sr-only" for="customer-search">Buscar clientes</label>
       <div class="relative flex-1">
         <span

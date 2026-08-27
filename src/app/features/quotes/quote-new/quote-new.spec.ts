@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { QuotesService } from '@core/services/quotes/quotes';
 import { Quote } from '@core/models/quotes.interface';
@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 import QuoteNewComponent from './quote-new';
 
 describe('QuoteNewComponent', () => {
+  let fixture: ComponentFixture<QuoteNewComponent>;
   const orderId = 'order-1';
   const quote = { id: 'quote-1' } as Quote;
 
@@ -22,7 +23,8 @@ describe('QuoteNewComponent', () => {
         { provide: QuotesService, useValue: quotes },
       ],
     });
-    return TestBed.createComponent(QuoteNewComponent).componentInstance;
+    fixture = TestBed.createComponent(QuoteNewComponent);
+    return fixture.componentInstance;
   }
 
   it('starts with a single empty item and a zero subtotal/total', () => {
@@ -49,7 +51,13 @@ describe('QuoteNewComponent', () => {
     component.model.update((value) => ({
       ...value,
       items: [
-        { type: 'PART', description: 'Filtro de aceite', quantity: 2, unitPrice: 10, costPrice: null },
+        {
+          type: 'PART',
+          description: 'Filtro de aceite',
+          quantity: 2,
+          unitPrice: 10,
+          costPrice: null,
+        },
       ],
       discount: 5,
       tax: 3,
@@ -70,6 +78,18 @@ describe('QuoteNewComponent', () => {
     expect(component.quoteForm().touched()).toBe(true);
   });
 
+  it('prevents native navigation when the quote form is submitted', () => {
+    const component = createWith({ create: vi.fn() });
+    fixture.detectChanges();
+    const save = vi.spyOn(component, 'save');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(save).toHaveBeenCalledOnce();
+  });
+
   it('saves a valid quote and navigates to the created quote', () => {
     const create = vi.fn(() => of(quote));
     const navigate = vi.fn(() => Promise.resolve(true));
@@ -79,7 +99,13 @@ describe('QuoteNewComponent', () => {
     component.model.update((value) => ({
       ...value,
       items: [
-        { type: 'PART', description: 'Filtro de aceite', quantity: 2, unitPrice: 10, costPrice: null },
+        {
+          type: 'PART',
+          description: 'Filtro de aceite',
+          quantity: 2,
+          unitPrice: 10,
+          costPrice: null,
+        },
       ],
     }));
 
@@ -87,7 +113,13 @@ describe('QuoteNewComponent', () => {
 
     expect(create).toHaveBeenCalledWith(orderId, {
       items: [
-        { type: 'PART', description: 'Filtro de aceite', quantity: 2, unitPrice: 10, costPrice: null },
+        {
+          type: 'PART',
+          description: 'Filtro de aceite',
+          quantity: 2,
+          unitPrice: 10,
+          costPrice: null,
+        },
       ],
       discount: null,
       tax: null,
@@ -104,7 +136,13 @@ describe('QuoteNewComponent', () => {
     component.model.update((value) => ({
       ...value,
       items: [
-        { type: 'PART', description: 'Filtro de aceite', quantity: 1, unitPrice: 10, costPrice: null },
+        {
+          type: 'PART',
+          description: 'Filtro de aceite',
+          quantity: 1,
+          unitPrice: 10,
+          costPrice: null,
+        },
       ],
     }));
 

@@ -81,7 +81,8 @@ export default class VehicleListComponent {
       });
   }
 
-  applySearch(): void {
+  applySearch(event?: Event): void {
+    event?.preventDefault();
     const search = this.search.value.trim();
     this.updateQuery({ search: search || null, page: 1 });
   }

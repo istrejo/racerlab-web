@@ -103,7 +103,8 @@ export default class CustomerListComponent {
       });
   }
 
-  applySearch(): void {
+  applySearch(event?: Event): void {
+    event?.preventDefault();
     this.updateQuery({ search: this.search.value.trim() || null, page: 1 });
   }
 

@@ -244,7 +244,7 @@
       >
         <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
           <h2 id="status-title" class="text-lg font-bold">Cambiar estado</h2>
-          <form class="mt-4 space-y-4" (ngSubmit)="changeStatus()">
+          <form class="mt-4 space-y-4" [formGroup]="statusForm" (ngSubmit)="changeStatus()">
             <div>
               <label class="block text-sm font-medium" for="new-status">Nuevo estado</label>
               <select
@@ -301,7 +301,7 @@
       >
         <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
           <h2 id="diagnosis-title" class="text-lg font-bold">Agregar diagnóstico</h2>
-          <form class="mt-4 space-y-4" (ngSubmit)="addDiagnosis()">
+          <form class="mt-4 space-y-4" [formGroup]="diagnosisForm" (ngSubmit)="addDiagnosis()">
             <div>
               <label class="block text-sm font-medium" for="description">Descripción</label>
               <textarea

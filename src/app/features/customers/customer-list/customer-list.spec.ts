@@ -97,6 +97,17 @@ describe('CustomerListComponent', () => {
     });
   });
 
+  it('prevents native navigation when the search form is submitted', () => {
+    fixture.detectChanges();
+    const applySearch = vi.spyOn(fixture.componentInstance, 'applySearch');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(applySearch).toHaveBeenCalledOnce();
+  });
+
   it('debounces live search updates and keeps the URL shareable', async () => {
     const router = TestBed.inject(Router);
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);

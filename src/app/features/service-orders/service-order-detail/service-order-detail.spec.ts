@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { DiagnosesService } from '@core/services/diagnoses/diagnoses';
@@ -11,8 +11,31 @@ import { vi } from 'vitest';
 import ServiceOrderDetailComponent from './service-order-detail';
 
 describe('ServiceOrderDetailComponent', () => {
+  let fixture: ComponentFixture<ServiceOrderDetailComponent>;
   const orderId = 'order-1';
-  const order = { id: orderId, diagnosisCount: 0 } as ServiceOrderDetail;
+  const order: ServiceOrderDetail = {
+    id: orderId,
+    code: 'SO-0001',
+    workshopId: 'workshop-1',
+    customerId: 'customer-1',
+    customer: { id: 'customer-1', fullName: 'Ana Pérez' },
+    vehicleId: 'vehicle-1',
+    vehicle: { id: 'vehicle-1', brand: 'Toyota', model: 'Corolla', plate: '1234-ABC' },
+    assignedTechnicianId: null,
+    assignedTechnician: null,
+    status: 'RECEIVED',
+    priority: 'NORMAL',
+    reportedIssues: 'Ruido al frenar',
+    receptionNotes: null,
+    mileageIn: 42_000,
+    fuelLevel: 'HALF',
+    estimatedDeliveryDate: null,
+    diagnosisCount: 0,
+    createdAt: '2026-08-27T10:15:00.000Z',
+    updatedAt: '2026-08-27T10:15:00.000Z',
+    createdBy: { userId: 'advisor-1', displayName: 'Laura Gómez' },
+    statusHistory: [],
+  };
   const diagnosis: Diagnosis = {
     id: 'diagnosis-1',
     serviceOrderId: orderId,
@@ -37,7 +60,14 @@ describe('ServiceOrderDetailComponent', () => {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: convertToParamMap({ orderId }) } },
         },
-        { provide: PermissionsService, useValue: { canWriteOrders: () => true } },
+        {
+          provide: PermissionsService,
+          useValue: {
+            canManageOrders: () => true,
+            canWriteOrders: () => true,
+            canWriteQuotes: () => true,
+          },
+        },
         {
           provide: ServiceOrdersService,
           useValue: overrides.serviceOrders ?? { get: () => of(order) },
@@ -49,7 +79,8 @@ describe('ServiceOrderDetailComponent', () => {
         { provide: QuotesService, useValue: overrides.quotes ?? { list: () => of([]) } },
       ],
     });
-    return TestBed.createComponent(ServiceOrderDetailComponent).componentInstance;
+    fixture = TestBed.createComponent(ServiceOrderDetailComponent);
+    return fixture.componentInstance;
   }
 
   it('loads the order together with its diagnoses and quotes', () => {
@@ -84,6 +115,28 @@ describe('ServiceOrderDetailComponent', () => {
 
     expect(component.allowedNextStatuses('RECEIVED')).toEqual(['DIAGNOSIS', 'CANCELLED']);
     expect(component.allowedNextStatuses('DELIVERED')).toEqual([]);
+  });
+
+  it('prevents native navigation from both order action forms', () => {
+    const component = createWith({});
+
+    component.openStatusDialog();
+    fixture.detectChanges();
+    const changeStatus = vi.spyOn(component, 'changeStatus');
+    const statusSubmit = new Event('submit', { bubbles: true, cancelable: true });
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).dispatchEvent(statusSubmit);
+
+    expect(statusSubmit.defaultPrevented).toBe(true);
+    expect(changeStatus).toHaveBeenCalledOnce();
+
+    component.openDiagnosisDialog();
+    fixture.detectChanges();
+    const addDiagnosis = vi.spyOn(component, 'addDiagnosis');
+    const diagnosisSubmit = new Event('submit', { bubbles: true, cancelable: true });
+    (fixture.nativeElement.querySelector('form') as HTMLFormElement).dispatchEvent(diagnosisSubmit);
+
+    expect(diagnosisSubmit.defaultPrevented).toBe(true);
+    expect(addDiagnosis).toHaveBeenCalledOnce();
   });
 
   it('changes the status and reloads the order on success', () => {

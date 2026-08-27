@@ -111,7 +111,8 @@ export default class QuoteNewComponent {
     }));
   }
 
-  save(): void {
+  save(event?: Event): void {
+    event?.preventDefault();
     this.quoteForm().markAsTouched();
     if (this.quoteForm().invalid() || this.pending()) {
       return;
