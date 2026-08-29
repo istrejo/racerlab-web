@@ -21,7 +21,11 @@ describe('RecentServiceOrdersComponent', () => {
     vehicleId: 'vehicle-1',
     vehicle: { id: 'vehicle-1', brand: 'Toyota', model: 'Corolla', plate: '1234-ABC' },
     assignedTechnicianId: 'technician-1',
-    assignedTechnician: { userId: 'technician-1', displayName: 'Carlos Ruiz' },
+    assignedTechnician: {
+      membershipId: 'membership-1',
+      userId: 'technician-1',
+      displayName: 'Carlos Ruiz',
+    },
     status: 'RECEIVED',
     priority: 'NORMAL',
     reportedIssues: 'Ruido al frenar',

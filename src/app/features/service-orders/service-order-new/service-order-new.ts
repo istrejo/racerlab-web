@@ -3,13 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Customer, CustomerPage } from '@core/models/customer.interface';
-import { ServiceOrderInput } from '@core/models/service-order.interface';
+import { ServiceOrderInput, TechnicianSummary } from '@core/models/service-order.interface';
 import { Vehicle } from '@core/models/vehicle.interface';
 import { CustomersService } from '@core/services/customers/customers';
 import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { VehiclesService } from '@core/services/vehicles/vehicles';
 import { CustomerCreateDialogComponent } from '../../customers/customer-create-dialog/customer-create-dialog';
 import { VehicleCreateDialogComponent } from '../../vehicles/vehicle-create-dialog/vehicle-create-dialog';
+import { TechnicianSelectComponent } from '../technician-select/technician-select';
 import {
   BehaviorSubject,
   catchError,
@@ -35,6 +36,7 @@ const PRIORITY_OPTIONS = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
     CustomerCreateDialogComponent,
     ReactiveFormsModule,
     RouterLink,
+    TechnicianSelectComponent,
     VehicleCreateDialogComponent,
   ],
   templateUrl: './service-order-new.html',
@@ -47,6 +49,7 @@ export default class ServiceOrderNewComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly customerQuery = new BehaviorSubject<CustomerQuery>({ search: '', page: 1 });
   private readonly vehicleCustomerId = new Subject<string | null>();
+  private readonly technicianReload = new BehaviorSubject<void>(undefined);
 
   readonly step = signal<Step>('customer');
   readonly customerSearch = new FormControl('', { nonNullable: true });
@@ -60,6 +63,10 @@ export default class ServiceOrderNewComponent {
   readonly error = signal<string | null>(null);
   readonly customerDialogOpen = signal(false);
   readonly vehicleDialogOpen = signal(false);
+  readonly technicians = signal<TechnicianSummary[]>([]);
+  readonly techniciansLoading = signal(true);
+  readonly techniciansError = signal<string | null>(null);
+  readonly selectedTechnicianId = signal<string | null>(null);
 
   readonly fuelOptions = FUEL_OPTIONS;
   readonly priorityOptions = PRIORITY_OPTIONS;
@@ -135,6 +142,27 @@ export default class ServiceOrderNewComponent {
         if (page) this.vehicles.set(page.items);
         this.vehicleLoading.set(false);
       });
+
+    this.technicianReload
+      .pipe(
+        tap(() => {
+          this.techniciansLoading.set(true);
+          this.techniciansError.set(null);
+        }),
+        switchMap(() =>
+          this.serviceOrders.listAssignableTechnicians().pipe(
+            catchError(() => {
+              this.techniciansError.set('No pudimos cargar los técnicos.');
+              return of(null);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((technicians) => {
+        if (technicians) this.technicians.set(technicians);
+        this.techniciansLoading.set(false);
+      });
   }
 
   selectCustomer(customer: Customer): void {
@@ -160,6 +188,14 @@ export default class ServiceOrderNewComponent {
   selectVehicle(vehicle: Vehicle): void {
     this.selectedVehicle.set(vehicle);
     this.step.set('reception');
+  }
+
+  selectTechnician(membershipId: string | null): void {
+    this.selectedTechnicianId.set(membershipId);
+  }
+
+  retryTechnicians(): void {
+    this.technicianReload.next();
   }
 
   goToCustomerPage(page: number): void {
@@ -191,6 +227,7 @@ export default class ServiceOrderNewComponent {
     const input: ServiceOrderInput = {
       customerId: customer.id,
       vehicleId: vehicle.id,
+      technicianId: this.selectedTechnicianId(),
       priority: (value.priority as ServiceOrderInput['priority']) ?? null,
       reportedIssues: value.reportedIssues.trim() || null,
       receptionNotes: value.receptionNotes.trim() || null,

@@ -1,11 +1,15 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Diagnosis } from '@core/models/diagnoses.interface';
 import { Quote, QuoteStatus } from '@core/models/quotes.interface';
-import { ServiceOrderDetail, ServiceOrderStatus } from '@core/models/service-order.interface';
+import {
+  ServiceOrderDetail,
+  ServiceOrderStatus,
+  TechnicianSummary,
+} from '@core/models/service-order.interface';
 import {
   SERVICE_ORDER_STATUS_LABELS,
   SERVICE_ORDER_STATUS_TONES,
@@ -15,9 +19,11 @@ import { PermissionsService } from '@core/services/permissions/permissions';
 import { QuotesService } from '@core/services/quotes/quotes';
 import { ServiceOrdersService } from '@core/services/service-orders/service-orders';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
-import { catchError, forkJoin, of, switchMap } from 'rxjs';
+import { AppModalComponent } from '@shared/components/app-modal/app-modal';
+import { catchError, forkJoin, of, Subject, switchMap, tap } from 'rxjs';
+import { TechnicianSelectComponent } from '../technician-select/technician-select';
 
-type DialogMode = 'status' | 'diagnosis' | null;
+type DialogMode = 'status' | 'diagnosis' | 'technician' | null;
 
 const ALLOWED_TRANSITIONS: Record<ServiceOrderStatus, ServiceOrderStatus[]> = {
   RECEIVED: ['DIAGNOSIS', 'CANCELLED'],
@@ -57,7 +63,15 @@ const PRIORITY_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-service-order-detail',
-  imports: [DatePipe, DecimalPipe, LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
+  imports: [
+    AppModalComponent,
+    DatePipe,
+    DecimalPipe,
+    LoadingSkeletonComponent,
+    ReactiveFormsModule,
+    RouterLink,
+    TechnicianSelectComponent,
+  ],
   templateUrl: './service-order-detail.html',
 })
 export default class ServiceOrderDetailComponent {
@@ -68,6 +82,7 @@ export default class ServiceOrderDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly technicianReload = new Subject<void>();
 
   readonly orderId = this.route.snapshot.paramMap.get('orderId') ?? '';
   readonly order = signal<ServiceOrderDetail | null>(null);
@@ -78,6 +93,22 @@ export default class ServiceOrderDetailComponent {
   readonly actionPending = signal(false);
   readonly actionError = signal<string | null>(null);
   readonly dialog = signal<DialogMode>(null);
+  readonly technicians = signal<TechnicianSummary[]>([]);
+  readonly techniciansLoading = signal(false);
+  readonly techniciansError = signal<string | null>(null);
+  readonly selectedTechnicianId = signal<string | null>(null);
+  readonly currentUnavailableTechnician = signal<TechnicianSummary | null>(null);
+  readonly technicianSelectionExplicit = signal(true);
+  readonly technicianActionLabel = computed(() =>
+    this.order()?.assignedTechnician ? 'Cambiar técnico' : 'Asignar técnico',
+  );
+  readonly technicianSaveDisabled = computed(
+    () => this.actionPending() || this.techniciansLoading() || !this.technicianSelectionExplicit(),
+  );
+  readonly nextStatuses = computed(() => {
+    const current = this.order()?.status;
+    return current ? ALLOWED_TRANSITIONS[current] : [];
+  });
 
   readonly statusLabels = SERVICE_ORDER_STATUS_LABELS;
   readonly statusTones = SERVICE_ORDER_STATUS_TONES;
@@ -106,6 +137,29 @@ export default class ServiceOrderDetailComponent {
   });
 
   constructor() {
+    this.technicianReload
+      .pipe(
+        tap(() => {
+          this.techniciansLoading.set(true);
+          this.techniciansError.set(null);
+        }),
+        switchMap(() =>
+          this.serviceOrders.listAssignableTechnicians().pipe(
+            catchError(() => {
+              this.techniciansError.set('No pudimos cargar los técnicos.');
+              const current = this.order()?.assignedTechnician ?? null;
+              this.currentUnavailableTechnician.set(current);
+              this.technicianSelectionExplicit.set(current === null);
+              return of(null);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((technicians) => {
+        if (technicians) this.applyTechnicianAvailability(technicians);
+        this.techniciansLoading.set(false);
+      });
     this.load();
   }
 
@@ -150,6 +204,25 @@ export default class ServiceOrderDetailComponent {
     this.dialog.set('diagnosis');
     this.diagnosisForm.reset({ description: '', requiredPartsNotes: '', suggestedLabor: '' });
     this.actionError.set(null);
+  }
+
+  openTechnicianDialog(): void {
+    const technician = this.order()?.assignedTechnician ?? null;
+    this.selectedTechnicianId.set(technician?.membershipId ?? null);
+    this.currentUnavailableTechnician.set(null);
+    this.technicianSelectionExplicit.set(technician === null);
+    this.actionError.set(null);
+    this.dialog.set('technician');
+    this.technicianReload.next();
+  }
+
+  retryTechnicians(): void {
+    this.technicianReload.next();
+  }
+
+  selectTechnician(membershipId: string | null): void {
+    this.selectedTechnicianId.set(membershipId);
+    this.technicianSelectionExplicit.set(true);
   }
 
   closeDialog(): void {
@@ -211,7 +284,34 @@ export default class ServiceOrderDetailComponent {
       });
   }
 
-  allowedNextStatuses(current: ServiceOrderStatus): ServiceOrderStatus[] {
-    return ALLOWED_TRANSITIONS[current] ?? [];
+  saveTechnician(): void {
+    if (this.technicianSaveDisabled()) return;
+    this.actionPending.set(true);
+    this.actionError.set(null);
+
+    this.serviceOrders
+      .assignTechnician(this.orderId, { technicianId: this.selectedTechnicianId() })
+      .subscribe({
+        next: (order) => {
+          this.order.set(order);
+          this.actionPending.set(false);
+          this.closeDialog();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.actionPending.set(false);
+          this.actionError.set(err?.error?.message ?? 'No pudimos actualizar el técnico.');
+        },
+      });
+  }
+
+  private applyTechnicianAvailability(technicians: TechnicianSummary[]): void {
+    this.technicians.set(technicians);
+    const current = this.order()?.assignedTechnician ?? null;
+    const unavailable =
+      current && !technicians.some(({ membershipId }) => membershipId === current.membershipId)
+        ? current
+        : null;
+    this.currentUnavailableTechnician.set(unavailable);
+    this.technicianSelectionExplicit.set(unavailable === null);
   }
 }

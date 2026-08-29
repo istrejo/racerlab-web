@@ -70,7 +70,11 @@ describe('ServiceOrderDetailComponent', () => {
         },
         {
           provide: ServiceOrdersService,
-          useValue: overrides.serviceOrders ?? { get: () => of(order) },
+          useValue: {
+            get: () => of(order),
+            listAssignableTechnicians: () => of([]),
+            ...(overrides.serviceOrders ?? {}),
+          },
         },
         {
           provide: DiagnosesService,
@@ -110,11 +114,10 @@ describe('ServiceOrderDetailComponent', () => {
     expect(component.error()).toBe('No pudimos cargar la orden de servicio.');
   });
 
-  it('lists the allowed next statuses for the current status', () => {
+  it('derives the allowed next statuses for the current order', () => {
     const component = createWith({});
 
-    expect(component.allowedNextStatuses('RECEIVED')).toEqual(['DIAGNOSIS', 'CANCELLED']);
-    expect(component.allowedNextStatuses('DELIVERED')).toEqual([]);
+    expect(component.nextStatuses()).toEqual(['DIAGNOSIS', 'CANCELLED']);
   });
 
   it('prevents native navigation from both order action forms', () => {
@@ -206,5 +209,44 @@ describe('ServiceOrderDetailComponent', () => {
 
     expect(component.actionError()).toBe('No pudimos guardar el diagnóstico.');
     expect(component.actionPending()).toBe(false);
+  });
+
+  it('assigns available technicians and requires a choice for inactive assignments', () => {
+    const technician = {
+      membershipId: 'membership-1',
+      userId: 'user-1',
+      displayName: 'Ada',
+    };
+    const assignTechnician = vi.fn(() =>
+      of({ ...order, assignedTechnicianId: technician.userId, assignedTechnician: technician }),
+    );
+    const component = createWith({
+      serviceOrders: {
+        listAssignableTechnicians: () => of([technician]),
+        assignTechnician,
+      },
+    });
+
+    component.openTechnicianDialog();
+    component.selectTechnician(technician.membershipId);
+    component.saveTechnician();
+
+    expect(assignTechnician).toHaveBeenCalledWith(orderId, {
+      technicianId: technician.membershipId,
+    });
+    expect(component.order()?.assignedTechnician).toEqual(technician);
+    expect(component.dialog()).toBeNull();
+
+    const inactive = {
+      membershipId: 'inactive-membership',
+      userId: 'inactive-user',
+      displayName: 'Técnico anterior',
+    };
+    component.order.set({ ...order, assignedTechnician: inactive });
+    component.openTechnicianDialog();
+    expect(component.currentUnavailableTechnician()).toEqual(inactive);
+    expect(component.technicianSaveDisabled()).toBe(true);
+    component.selectTechnician(null);
+    expect(component.technicianSaveDisabled()).toBe(false);
   });
 });

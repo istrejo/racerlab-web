@@ -1,0 +1,28 @@
+<label class="block text-sm font-medium text-slate-700" for="technician">Técnico</label>
+<select
+  id="technician"
+  class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+  [disabled]="disabled() || loading()"
+  [value]="selectedMembershipId() ?? ''"
+  (change)="handleSelection($event)"
+>
+  <option value="">Sin asignar</option>
+  @if (currentUnavailable(); as unavailable) {
+    <option [value]="unavailable.membershipId" disabled>
+      {{ unavailable.displayName }} (asignación actual no disponible)
+    </option>
+  }
+  @for (technician of technicians(); track technician.membershipId) {
+    <option [value]="technician.membershipId">{{ technician.displayName }}</option>
+  }
+</select>
+@if (loading()) {
+  <p class="mt-2 text-sm text-slate-500" role="status">Cargando técnicos…</p>
+} @else if (error()) {
+  <p class="mt-2 text-sm text-red-700" role="alert">
+    {{ error() }}
+    <button class="font-semibold underline" type="button" (click)="retry.emit()">Reintentar</button>
+  </p>
+} @else if (technicians().length === 0 && !currentUnavailable()) {
+  <p class="mt-2 text-sm text-slate-500">No hay técnicos activos disponibles.</p>
+}

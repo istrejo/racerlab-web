@@ -8,6 +8,7 @@ import {
   ServiceOrderPage,
   ServiceOrderSearch,
   ServiceOrderUpdate,
+  TechnicianSummary,
 } from '@core/models/service-order.interface';
 import { API_URL } from '@shared/utils/api-url.token';
 import { Observable } from 'rxjs';
@@ -28,6 +29,12 @@ export class ServiceOrdersService {
 
   get(serviceOrderId: string): Observable<ServiceOrderDetail> {
     return this.http.get<ServiceOrderDetail>(`${this.apiUrl}/service-orders/${serviceOrderId}`);
+  }
+
+  listAssignableTechnicians(): Observable<TechnicianSummary[]> {
+    return this.http.get<TechnicianSummary[]>(
+      `${this.apiUrl}/service-orders/assignable-technicians`,
+    );
   }
 
   create(input: ServiceOrderInput): Observable<ServiceOrderDetail> {

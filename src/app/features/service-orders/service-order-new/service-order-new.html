@@ -178,6 +178,19 @@
             {{ selectedVehicle()?.brand }} {{ selectedVehicle()?.model }}
           </p>
 
+          <div class="mt-5">
+            <app-technician-select
+              [disabled]="saving()"
+              [error]="techniciansError()"
+              [loading]="techniciansLoading()"
+              [selectedMembershipId]="selectedTechnicianId()"
+              [technicians]="technicians()"
+              (retry)="retryTechnicians()"
+              (selectionChanged)="selectTechnician($event)"
+            />
+            <p class="mt-1 text-xs text-slate-500">La asignación es opcional.</p>
+          </div>
+
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <label class="block text-sm font-medium text-slate-700" for="priority"

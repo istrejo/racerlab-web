@@ -59,7 +59,13 @@ describe('ServiceOrderNewComponent', () => {
             list: () => of({ items: [], page: 1, limit: 100, total: 0, totalPages: 0 }),
           },
         },
-        { provide: ServiceOrdersService, useValue: overrides.serviceOrders ?? {} },
+        {
+          provide: ServiceOrdersService,
+          useValue: {
+            listAssignableTechnicians: () => of([]),
+            ...(overrides.serviceOrders ?? {}),
+          },
+        },
       ],
     });
     return TestBed.createComponent(ServiceOrderNewComponent).componentInstance;
@@ -176,18 +182,32 @@ describe('ServiceOrderNewComponent', () => {
     const created = { id: 'order-1' } as ServiceOrderDetail;
     const create = vi.fn(() => of(created));
     const navigate = vi.fn(() => Promise.resolve(true));
-    const component = createWith({ serviceOrders: { create } });
+    const component = createWith({
+      serviceOrders: {
+        create,
+        listAssignableTechnicians: () => throwError(() => new Error('fail')),
+      },
+    });
     vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
 
     component.selectCustomer(customer);
     TestBed.flushEffects();
     component.selectVehicle(vehicle);
+    component.selectTechnician('membership-1');
     component.submit();
 
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ customerId: customer.id, vehicleId: vehicle.id }),
+      expect.objectContaining({
+        customerId: customer.id,
+        vehicleId: vehicle.id,
+        technicianId: 'membership-1',
+      }),
     );
     expect(navigate).toHaveBeenCalledWith(['/service-orders', created.id]);
+    component.selectTechnician(null);
+    component.submit();
+    expect(component.techniciansError()).toBe('No pudimos cargar los técnicos.');
+    expect(create).toHaveBeenLastCalledWith(expect.objectContaining({ technicianId: null }));
   });
 
   it('shows an error message when creation fails', () => {

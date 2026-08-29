@@ -30,7 +30,13 @@ describe('ServiceOrdersService', () => {
 
   it('sends trimmed search, pagination and filters', () => {
     service
-      .list({ search: '  ABC1234  ', page: 2, status: 'DIAGNOSIS', customerId: 'cust-1', vehicleId: 'veh-1' })
+      .list({
+        search: '  ABC1234  ',
+        page: 2,
+        status: 'DIAGNOSIS',
+        customerId: 'cust-1',
+        vehicleId: 'veh-1',
+      })
       .subscribe();
 
     const request = http.expectOne(
@@ -65,6 +71,16 @@ describe('ServiceOrdersService', () => {
     const request = http.expectOne('https://api.racerlab.test/api/service-orders/order-1');
     expect(request.request.method).toBe('GET');
     request.flush({});
+  });
+
+  it('lists technicians assignable to service orders', () => {
+    service.listAssignableTechnicians().subscribe();
+
+    const request = http.expectOne(
+      'https://api.racerlab.test/api/service-orders/assignable-technicians',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
   });
 
   it('creates a service order', () => {

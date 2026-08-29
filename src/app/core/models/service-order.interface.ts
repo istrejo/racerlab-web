@@ -30,6 +30,8 @@ export type MemberSummary = {
   displayName: string;
 };
 
+export type TechnicianSummary = MemberSummary & { membershipId: string };
+
 export type StatusHistoryEntry = {
   id: string;
   previousStatus: ServiceOrderStatus | null;
@@ -48,7 +50,7 @@ export type ServiceOrder = {
   vehicleId: string;
   vehicle: VehicleSummary;
   assignedTechnicianId: string | null;
-  assignedTechnician: MemberSummary | null;
+  assignedTechnician: TechnicianSummary | null;
   status: ServiceOrderStatus;
   priority: ServiceOrderPriority | null;
   reportedIssues: string | null;
