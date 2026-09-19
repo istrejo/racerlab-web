@@ -16,7 +16,9 @@ describe('QuoteEditorComponent', () => {
     expect(component.model().currencyCode).toBe('EUR');
     component.model.set({
       currencyCode: 'EUR',
-      items: [{ type: 'LABOR', description: 'Ajuste', quantity: 2, unitPrice: 30, costPrice: null }],
+      items: [
+        { type: 'LABOR', description: 'Ajuste', quantity: 2, unitPrice: 30, costPrice: null },
+      ],
       discount: 5,
       tax: 3,
     });
@@ -54,7 +56,9 @@ describe('QuoteEditorComponent', () => {
 
     component.model.set({
       currencyCode: ' usd ',
-      items: [{ type: 'PART', description: ' Filtro ', quantity: 2, unitPrice: 10, costPrice: null }],
+      items: [
+        { type: 'PART', description: ' Filtro ', quantity: 2, unitPrice: 10, costPrice: null },
+      ],
       discount: null,
       tax: null,
     });

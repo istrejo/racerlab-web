@@ -3,6 +3,8 @@ import { customerReadGuard } from '@core/guards/customer-read/customer-read-guar
 import { customerWriteGuard } from '@core/guards/customer-write/customer-write-guard';
 import { guestGuard } from '@core/guards/guest/guest-guard';
 import { passwordChangeGuard } from '@core/guards/password-change/password-change-guard';
+import { quoteReadGuard } from '@core/guards/quote-read/quote-read-guard';
+import { quoteWriteGuard } from '@core/guards/quote-write/quote-write-guard';
 import { workshopGuard } from '@core/guards/workshop/workshop-guard';
 import { routes } from './app.routes';
 import { LAYOUT_ROUTES } from './layout/layout.routes';
@@ -57,5 +59,21 @@ describe('application routes', () => {
     expect(customers.find((route) => route.path === 'customers/:id/edit')?.canActivate).toContain(
       customerWriteGuard,
     );
+  });
+
+  it('guards the quote editor route and matches it before the quote detail route', () => {
+    const applicationRoute = LAYOUT_ROUTES.find((route) => route.path === '' && route.children);
+    const children = applicationRoute?.children ?? [];
+    const paths = children.map((route) => route.path);
+    const editIndex = paths.indexOf('service-orders/:orderId/quotes/:quoteId/edit');
+    const detailIndex = paths.indexOf('service-orders/:orderId/quotes/:quoteId');
+
+    expect(editIndex).toBeGreaterThanOrEqual(0);
+    expect(editIndex).toBeLessThan(detailIndex);
+    expect(children[editIndex]?.canActivate).toContain(quoteWriteGuard);
+    expect(children[detailIndex]?.canActivate).toContain(quoteReadGuard);
+    expect(
+      children.find((route) => route.path === 'service-orders/:orderId/quotes/new')?.canActivate,
+    ).toContain(quoteWriteGuard);
   });
 });

@@ -25,11 +25,11 @@ Chain strategy: stacked-to-main
 
 ## Phase 1: Contract and Draft Editor (PR 1)
 
-- [ ] 1.1 RED: Extend `quotes.spec.ts` for version/currency/decision DTO bodies and exact bodyless `createVersion()` route; add `quote-editor.spec.ts` for EUR default, hydration, validation, reactive totals, add/remove, retained input, and duplicate-submit prevention.
-- [ ] 1.2 RED: Add `quote-new.spec.ts`, `quote-edit.spec.ts`, and route tests for create/update navigation, draft-only loading, 409/error preservation, cancellation, and the guarded edit route preceding detail.
-- [ ] 1.3 GREEN: Extend `quotes.interface.ts` and `QuotesService`; create shared quote metadata/policy and a presentation-only Signal Form `QuoteEditorComponent` with prepared line totals.
-- [ ] 1.4 GREEN: Refactor `QuoteNewComponent`, add `QuoteEditComponent`, and wire `layout.routes.ts`; keep API/navigation in containers and currency display in `CurrencyPipe`.
-- [ ] 1.5 REFACTOR: Remove duplicated form/policy code and run Unit 1 focused tests before committing its autonomous slice.
+- [x] 1.1 RED: Extend `quotes.spec.ts` for version/currency/decision DTO bodies and exact bodyless `createVersion()` route; add `quote-editor.spec.ts` for EUR default, hydration, validation, reactive totals, add/remove, retained input, and duplicate-submit prevention.
+- [x] 1.2 RED: Add `quote-new.spec.ts`, `quote-edit.spec.ts`, and route tests for create/update navigation, draft-only loading, 409/error preservation, cancellation, and the guarded edit route preceding detail.
+- [x] 1.3 GREEN: Extend `quotes.interface.ts` and `QuotesService`; create shared quote metadata/policy and a presentation-only Signal Form `QuoteEditorComponent` with prepared line totals.
+- [x] 1.4 GREEN: Refactor `QuoteNewComponent`, add `QuoteEditComponent`, and wire `layout.routes.ts`; keep API/navigation in containers and currency display in `CurrencyPipe`.
+- [x] 1.5 REFACTOR: Remove duplicated form/policy code and run Unit 1 focused tests before committing its autonomous slice.
 
 ## Phase 2: Lifecycle, Versions, and Order Integration (PR 2)
 

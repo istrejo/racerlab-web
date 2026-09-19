@@ -87,6 +87,11 @@ export const LAYOUT_ROUTES: Routes = [
         loadComponent: () => import('../features/quotes/quote-new/quote-new'),
       },
       {
+        path: 'service-orders/:orderId/quotes/:quoteId/edit',
+        canActivate: [quoteWriteGuard],
+        loadComponent: () => import('../features/quotes/quote-edit/quote-edit'),
+      },
+      {
         path: 'service-orders/:orderId/quotes/:quoteId',
         canActivate: [quoteReadGuard],
         loadComponent: () => import('../features/quotes/quote-detail/quote-detail'),

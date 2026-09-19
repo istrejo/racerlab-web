@@ -15,7 +15,11 @@ import { DEFAULT_QUOTE_CURRENCY, QuoteInput, QuoteItemInput } from '@core/models
 import { QUOTE_ITEM_TYPE_LABELS, QUOTE_ITEM_TYPES } from './quote-metadata';
 
 type EditorItem = QuoteItemInput & { costPrice: number | null };
-type EditorModel = Omit<QuoteInput, 'items'> & { items: EditorItem[]; discount: number | null; tax: number | null };
+type EditorModel = Omit<QuoteInput, 'items'> & {
+  items: EditorItem[];
+  discount: number | null;
+  tax: number | null;
+};
 
 const emptyItem = (): EditorItem => ({
   type: 'PART',
@@ -65,12 +69,23 @@ export class QuoteEditorComponent {
   readonly cancelled = output<void>();
   readonly itemTypes = QUOTE_ITEM_TYPES;
   readonly itemTypeLabels = QUOTE_ITEM_TYPE_LABELS;
-  readonly model = signal<EditorModel>({ currencyCode: DEFAULT_QUOTE_CURRENCY, items: [emptyItem()], discount: null, tax: null });
+  readonly model = signal<EditorModel>({
+    currencyCode: DEFAULT_QUOTE_CURRENCY,
+    items: [emptyItem()],
+    discount: null,
+    tax: null,
+  });
   readonly quoteForm = form(this.model, editorSchema);
-  readonly lineTotals = computed(() => this.model().items.map((item) => round2(item.quantity * item.unitPrice)));
+  readonly lineTotals = computed(() =>
+    this.model().items.map((item) => round2(item.quantity * item.unitPrice)),
+  );
   readonly subtotal = computed(() => subtotalOf(this.model().items));
-  readonly total = computed(() => round2(this.subtotal() - (this.model().discount ?? 0) + (this.model().tax ?? 0)));
-  readonly displayCurrency = computed(() => this.model().currencyCode.trim().toUpperCase() || DEFAULT_QUOTE_CURRENCY);
+  readonly total = computed(() =>
+    round2(this.subtotal() - (this.model().discount ?? 0) + (this.model().tax ?? 0)),
+  );
+  readonly displayCurrency = computed(
+    () => this.model().currencyCode.trim().toUpperCase() || DEFAULT_QUOTE_CURRENCY,
+  );
   private hydrated = false;
 
   constructor() {
