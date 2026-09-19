@@ -106,7 +106,10 @@
 
         @if (currentQuote.approvalMethod) {
           <p class="mt-4 text-sm text-slate-600">
-            Método: <span class="font-semibold">{{ currentQuote.approvalMethod }}</span>
+            Método:
+            <span class="font-semibold">
+              {{ approvalMethodLabels[currentQuote.approvalMethod] }}
+            </span>
             @if (currentQuote.approvedAt) {
               · Aprobada el {{ currentQuote.approvedAt | date: 'short' }}
             }
@@ -140,11 +143,25 @@
               @if (requiresMethod(statusForm.controls.status.value)) {
                 <label class="block text-sm">
                   <span class="font-medium text-slate-700">Método de aprobación / rechazo</span>
+                  <select
+                    class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    formControlName="approvalMethod"
+                  >
+                    <option value="">Selecciona un método</option>
+                    @for (method of approvalMethods; track method) {
+                      <option [value]="method">{{ approvalMethodLabels[method] }}</option>
+                    }
+                  </select>
+                </label>
+
+                <label class="block text-sm">
+                  <span class="font-medium text-slate-700">Detalle (opcional)</span>
                   <input
                     class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     type="text"
-                    placeholder="WhatsApp, llamada, firma…"
-                    formControlName="approvalMethod"
+                    maxlength="200"
+                    placeholder="Número de referencia, nombre de quien aprueba…"
+                    formControlName="approvalMethodDetail"
                   />
                 </label>
               }

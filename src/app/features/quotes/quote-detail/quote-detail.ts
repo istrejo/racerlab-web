@@ -3,7 +3,12 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Quote, QuoteItemType, QuoteStatus } from '@core/models/quotes.interface';
+import {
+  Quote,
+  QuoteApprovalMethod,
+  QuoteItemType,
+  QuoteStatus,
+} from '@core/models/quotes.interface';
 import { PermissionsService } from '@core/services/permissions/permissions';
 import { QuotesService } from '@core/services/quotes/quotes';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
@@ -16,6 +21,23 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
   REJECTED: 'Rechazada',
   EXPIRED: 'Vencida',
   CANCELLED: 'Cancelada',
+  SUPERSEDED: 'Reemplazada',
+};
+
+const APPROVAL_METHODS: readonly QuoteApprovalMethod[] = [
+  'WHATSAPP',
+  'PHONE',
+  'IN_PERSON',
+  'EMAIL',
+  'OTHER',
+];
+
+const APPROVAL_METHOD_LABELS: Record<QuoteApprovalMethod, string> = {
+  WHATSAPP: 'WhatsApp',
+  PHONE: 'Llamada',
+  IN_PERSON: 'En persona',
+  EMAIL: 'Correo',
+  OTHER: 'Otro',
 };
 
 const ITEM_TYPE_LABELS: Record<QuoteItemType, string> = {
@@ -32,6 +54,7 @@ const ALLOWED_TRANSITIONS: Record<QuoteStatus, QuoteStatus[]> = {
   REJECTED: [],
   EXPIRED: [],
   CANCELLED: [],
+  SUPERSEDED: [],
 };
 
 const METHOD_REQUIRED: QuoteStatus[] = ['APPROVED', 'REJECTED'];
@@ -59,12 +82,15 @@ export default class QuoteDetailComponent {
 
   readonly statusLabels = STATUS_LABELS;
   readonly itemTypeLabels = ITEM_TYPE_LABELS;
+  readonly approvalMethods = APPROVAL_METHODS;
+  readonly approvalMethodLabels = APPROVAL_METHOD_LABELS;
 
   readonly statusForm = new FormGroup({
     status: new FormControl<QuoteStatus | null>(null, { validators: Validators.required }),
-    approvalMethod: new FormControl('', {
+    approvalMethod: new FormControl<QuoteApprovalMethod | ''>('', { nonNullable: true }),
+    approvalMethodDetail: new FormControl('', {
       nonNullable: true,
-      validators: Validators.maxLength(120),
+      validators: Validators.maxLength(200),
     }),
   });
 
@@ -101,7 +127,7 @@ export default class QuoteDetailComponent {
 
   openStatusDialog(): void {
     this.dialogOpen.set(true);
-    this.statusForm.reset({ status: null, approvalMethod: '' });
+    this.statusForm.reset({ status: null, approvalMethod: '', approvalMethodDetail: '' });
     this.actionError.set(null);
   }
 
@@ -119,7 +145,8 @@ export default class QuoteDetailComponent {
       return;
     }
 
-    const approvalMethod = value.approvalMethod.trim();
+    const approvalMethod = value.approvalMethod;
+    const approvalMethodDetail = value.approvalMethodDetail.trim();
     if (this.requiresMethod(status) && !approvalMethod) {
       this.actionError.set('Indica el método de aprobación o rechazo.');
       return;
@@ -132,6 +159,7 @@ export default class QuoteDetailComponent {
       .changeStatus(this.orderId, this.quoteId, {
         status,
         approvalMethod: approvalMethod || null,
+        approvalMethodDetail: approvalMethodDetail || null,
       })
       .subscribe({
         next: (quote) => {

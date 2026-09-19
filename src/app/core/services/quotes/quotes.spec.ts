@@ -57,20 +57,36 @@ describe('QuotesService', () => {
     service.get('order-1', 'quote-1').subscribe();
     http.expectOne(`${base}/quote-1`).flush({});
 
-    service.create('order-1', { items: [] }).subscribe();
+    service.create('order-1', { currencyCode: 'EUR', items: [] }).subscribe();
     const create = http.expectOne(base);
     expect(create.request.method).toBe('POST');
+    expect(create.request.body).toEqual({ currencyCode: 'EUR', items: [] });
     create.flush({});
 
-    service.update('order-1', 'quote-1', { discount: 5 }).subscribe();
+    service.update('order-1', 'quote-1', { currencyCode: 'USD', discount: 5 }).subscribe();
     const update = http.expectOne(`${base}/quote-1`);
     expect(update.request.method).toBe('PATCH');
+    expect(update.request.body).toEqual({ currencyCode: 'USD', discount: 5 });
     update.flush({});
 
-    service.changeStatus('order-1', 'quote-1', { status: 'ACTIVE' }).subscribe();
+    service.changeStatus('order-1', 'quote-1', {
+      status: 'APPROVED',
+      approvalMethod: 'OTHER',
+      approvalMethodDetail: 'Portal del proveedor',
+    }).subscribe();
     const status = http.expectOne(`${base}/quote-1/status`);
     expect(status.request.method).toBe('PATCH');
-    expect(status.request.body).toEqual({ status: 'ACTIVE' });
+    expect(status.request.body).toEqual({
+      status: 'APPROVED',
+      approvalMethod: 'OTHER',
+      approvalMethodDetail: 'Portal del proveedor',
+    });
     status.flush({});
+
+    service.createVersion('order-1', 'quote-1').subscribe();
+    const version = http.expectOne(`${base}/quote-1/versions`);
+    expect(version.request.method).toBe('POST');
+    expect(version.request.body).toBeNull();
+    version.flush({});
   });
 });

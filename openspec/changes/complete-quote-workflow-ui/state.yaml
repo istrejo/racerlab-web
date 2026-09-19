@@ -1,0 +1,17 @@
+schema: spec-driven
+change: complete-quote-workflow-ui
+planning_home: openspec/changes/complete-quote-workflow-ui
+artifact_store: openspec
+delivery_strategy: auto-chain
+chain_strategy: stacked-to-main
+depends_on:
+  - repository: racerlab-api
+    change: complete-quote-workflow
+phases:
+  proposal: complete
+  spec: complete
+  design: complete
+  tasks: complete
+  apply: ready
+  verify: pending
+  archive: pending

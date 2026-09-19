@@ -52,6 +52,7 @@ const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
   REJECTED: 'Rechazada',
   EXPIRED: 'Vencida',
   CANCELLED: 'Cancelada',
+  SUPERSEDED: 'Reemplazada',
 };
 
 const PRIORITY_LABELS: Record<string, string> = {

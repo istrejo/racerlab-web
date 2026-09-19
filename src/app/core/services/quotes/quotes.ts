@@ -38,6 +38,13 @@ export class QuotesService {
     return this.http.post<Quote>(`${this.apiUrl}/service-orders/${serviceOrderId}/quotes`, input);
   }
 
+  createVersion(serviceOrderId: string, quoteId: string): Observable<Quote> {
+    return this.http.post<Quote>(
+      `${this.apiUrl}/service-orders/${serviceOrderId}/quotes/${quoteId}/versions`,
+      null,
+    );
+  }
+
   update(serviceOrderId: string, quoteId: string, input: QuoteUpdate): Observable<Quote> {
     return this.http.patch<Quote>(
       `${this.apiUrl}/service-orders/${serviceOrderId}/quotes/${quoteId}`,

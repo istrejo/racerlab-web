@@ -13,12 +13,16 @@ describe('QuoteDetailComponent', () => {
   const quote: Quote = {
     id: quoteId,
     serviceOrderId: orderId,
+    version: 1,
+    sourceQuoteId: null,
+    currencyCode: 'EUR',
     status: 'ACTIVE',
     subtotal: 100,
     discount: null,
     tax: null,
     total: 100,
     approvalMethod: null,
+    approvalMethodDetail: null,
     approvedAt: null,
     rejectedAt: null,
     createdBy: { userId: 'user-1', displayName: 'Ada' },
@@ -84,7 +88,11 @@ describe('QuoteDetailComponent', () => {
     const component = createWith({ get: () => of(quote), changeStatus });
 
     component.openStatusDialog();
-    component.statusForm.setValue({ status: 'APPROVED', approvalMethod: '' });
+    component.statusForm.setValue({
+      status: 'APPROVED',
+      approvalMethod: '',
+      approvalMethodDetail: '',
+    });
     component.changeStatus();
 
     expect(changeStatus).not.toHaveBeenCalled();
@@ -97,12 +105,17 @@ describe('QuoteDetailComponent', () => {
     const component = createWith({ get: () => of(quote), changeStatus });
 
     component.openStatusDialog();
-    component.statusForm.setValue({ status: 'APPROVED', approvalMethod: 'Firma digital' });
+    component.statusForm.setValue({
+      status: 'APPROVED',
+      approvalMethod: 'IN_PERSON',
+      approvalMethodDetail: 'Firma digital',
+    });
     component.changeStatus();
 
     expect(changeStatus).toHaveBeenCalledWith(orderId, quoteId, {
       status: 'APPROVED',
-      approvalMethod: 'Firma digital',
+      approvalMethod: 'IN_PERSON',
+      approvalMethodDetail: 'Firma digital',
     });
     expect(component.quote()).toEqual(updatedQuote);
     expect(component.dialogOpen()).toBe(false);
@@ -115,7 +128,11 @@ describe('QuoteDetailComponent', () => {
     });
 
     component.openStatusDialog();
-    component.statusForm.setValue({ status: 'CANCELLED', approvalMethod: '' });
+    component.statusForm.setValue({
+      status: 'CANCELLED',
+      approvalMethod: '',
+      approvalMethodDetail: '',
+    });
     component.changeStatus();
 
     expect(component.actionError()).toBe('Transición inválida.');

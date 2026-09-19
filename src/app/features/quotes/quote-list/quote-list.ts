@@ -15,6 +15,7 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
   REJECTED: 'Rechazada',
   EXPIRED: 'Vencida',
   CANCELLED: 'Cancelada',
+  SUPERSEDED: 'Reemplazada',
 };
 
 const STATUS_ORDER: QuoteStatus[] = [

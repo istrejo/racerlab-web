@@ -112,6 +112,7 @@ describe('QuoteNewComponent', () => {
     component.save();
 
     expect(create).toHaveBeenCalledWith(orderId, {
+      currencyCode: 'EUR',
       items: [
         {
           type: 'PART',

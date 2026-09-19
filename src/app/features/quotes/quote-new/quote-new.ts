@@ -11,7 +11,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { QuoteItemType } from '@core/models/quotes.interface';
+import { DEFAULT_QUOTE_CURRENCY, QuoteItemType } from '@core/models/quotes.interface';
 import { QuotesService } from '@core/services/quotes/quotes';
 
 type QuoteItemModel = {
@@ -124,6 +124,7 @@ export default class QuoteNewComponent {
 
     this.quotes
       .create(this.orderId, {
+        currencyCode: DEFAULT_QUOTE_CURRENCY,
         items: value.items.map((item) => ({
           type: item.type,
           description: item.description.trim(),
