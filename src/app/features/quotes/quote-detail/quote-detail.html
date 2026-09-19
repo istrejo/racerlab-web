@@ -11,10 +11,7 @@
       [loading]="loading()"
     >
       @if (error()) {
-        <div
-          class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
-          role="alert"
-        >
+        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
           {{ error() }}
           <button class="font-semibold underline" (click)="load()" type="button">Reintentar</button>
         </div>
@@ -31,10 +28,18 @@
             class="inline-block rounded-full px-3 py-1 text-xs font-semibold"
             [class.bg-green-100]="currentQuote.status === 'APPROVED'"
             [class.text-green-800]="currentQuote.status === 'APPROVED'"
-            [class.bg-red-100]="currentQuote.status === 'REJECTED' || currentQuote.status === 'CANCELLED'"
-            [class.text-red-800]="currentQuote.status === 'REJECTED' || currentQuote.status === 'CANCELLED'"
-            [class.bg-slate-100]="currentQuote.status === 'DRAFT' || currentQuote.status === 'EXPIRED'"
-            [class.text-slate-700]="currentQuote.status === 'DRAFT' || currentQuote.status === 'EXPIRED'"
+            [class.bg-red-100]="
+              currentQuote.status === 'REJECTED' || currentQuote.status === 'CANCELLED'
+            "
+            [class.text-red-800]="
+              currentQuote.status === 'REJECTED' || currentQuote.status === 'CANCELLED'
+            "
+            [class.bg-slate-100]="
+              currentQuote.status === 'DRAFT' || currentQuote.status === 'EXPIRED'
+            "
+            [class.text-slate-700]="
+              currentQuote.status === 'DRAFT' || currentQuote.status === 'EXPIRED'
+            "
             [class.bg-blue-100]="currentQuote.status === 'ACTIVE'"
             [class.text-blue-800]="currentQuote.status === 'ACTIVE'"
             data-testid="quote-status"
@@ -43,9 +48,7 @@
           </span>
         </div>
 
-        @if (
-          permissions.canWriteQuotes() && allowedNextStatuses(currentQuote.status).length > 0
-        ) {
+        @if (permissions.canWriteQuotes() && allowedNextStatuses(currentQuote.status).length > 0) {
           <button
             class="mt-4 rounded-lg bg-[#004AC6] px-4 py-3 text-sm font-semibold text-white"
             (click)="openStatusDialog()"
@@ -55,8 +58,12 @@
           </button>
         }
 
-        <table class="mt-6 w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-sm shadow-sm">
-          <caption class="sr-only">Ítems de la cotización</caption>
+        <table
+          class="mt-6 w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-sm shadow-sm"
+        >
+          <caption class="sr-only">
+            Ítems de la cotización
+          </caption>
           <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th class="px-4 py-3" scope="col">Tipo</th>
@@ -106,7 +113,10 @@
 
         @if (currentQuote.approvalMethod) {
           <p class="mt-4 text-sm text-slate-600">
-            Método: <span class="font-semibold">{{ currentQuote.approvalMethod }}</span>
+            Método:
+            <span class="font-semibold">
+              {{ approvalMethodLabels[currentQuote.approvalMethod] }}
+            </span>
             @if (currentQuote.approvedAt) {
               · Aprobada el {{ currentQuote.approvedAt | date: 'short' }}
             }
@@ -140,11 +150,25 @@
               @if (requiresMethod(statusForm.controls.status.value)) {
                 <label class="block text-sm">
                   <span class="font-medium text-slate-700">Método de aprobación / rechazo</span>
+                  <select
+                    class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    formControlName="approvalMethod"
+                  >
+                    <option value="">Selecciona un método</option>
+                    @for (method of approvalMethods; track method) {
+                      <option [value]="method">{{ approvalMethodLabels[method] }}</option>
+                    }
+                  </select>
+                </label>
+
+                <label class="block text-sm">
+                  <span class="font-medium text-slate-700">Detalle (opcional)</span>
                   <input
                     class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     type="text"
-                    placeholder="WhatsApp, llamada, firma…"
-                    formControlName="approvalMethod"
+                    maxlength="200"
+                    placeholder="Número de referencia, nombre de quien aprueba…"
+                    formControlName="approvalMethodDetail"
                   />
                 </label>
               }

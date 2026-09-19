@@ -5,7 +5,12 @@ import {
   VehicleSummary,
 } from './service-order.interface';
 
-export type QuoteStatus = 'DRAFT' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+export type QuoteStatus =
+  'DRAFT' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED' | 'SUPERSEDED';
+
+export const DEFAULT_QUOTE_CURRENCY = 'EUR';
+
+export type QuoteApprovalMethod = 'WHATSAPP' | 'PHONE' | 'IN_PERSON' | 'EMAIL' | 'OTHER';
 
 export type QuoteItemType = 'PART' | 'LABOR' | 'SERVICE' | 'OTHER';
 
@@ -26,12 +31,16 @@ export type QuoteItem = {
 export type Quote = {
   id: string;
   serviceOrderId: string;
+  version: number;
+  sourceQuoteId: string | null;
+  currencyCode: string;
   status: QuoteStatus;
   subtotal: number;
   discount: number | null;
   tax: number | null;
   total: number;
-  approvalMethod: string | null;
+  approvalMethod: QuoteApprovalMethod | null;
+  approvalMethodDetail: string | null;
   approvedAt: string | null;
   rejectedAt: string | null;
   createdBy: MemberSummary;
@@ -48,6 +57,8 @@ export type QuoteServiceOrderSummary = {
 
 export type QuoteSummary = {
   id: string;
+  version: number;
+  currencyCode: string;
   status: QuoteStatus;
   total: number;
   itemCount: number;
@@ -83,6 +94,7 @@ export type QuoteItemInput = {
 };
 
 export type QuoteInput = {
+  currencyCode: string;
   items: QuoteItemInput[];
   discount?: number | null;
   tax?: number | null;
@@ -92,5 +104,6 @@ export type QuoteUpdate = Partial<QuoteInput>;
 
 export type ChangeQuoteStatusInput = {
   status: QuoteStatus;
-  approvalMethod?: string | null;
+  approvalMethod?: QuoteApprovalMethod | null;
+  approvalMethodDetail?: string | null;
 };

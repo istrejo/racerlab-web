@@ -1,15 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
+import { Quote, QuoteInput } from '@core/models/quotes.interface';
 import { QuotesService } from '@core/services/quotes/quotes';
-import { Quote } from '@core/models/quotes.interface';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { QuoteEditorComponent } from '../quote-editor/quote-editor';
 import QuoteNewComponent from './quote-new';
 
 describe('QuoteNewComponent', () => {
   let fixture: ComponentFixture<QuoteNewComponent>;
   const orderId = 'order-1';
   const quote = { id: 'quote-1' } as Quote;
+
+  const validInput: QuoteInput = {
+    currencyCode: 'EUR',
+    items: [
+      {
+        type: 'PART',
+        description: 'Filtro de aceite',
+        quantity: 2,
+        unitPrice: 10,
+        costPrice: null,
+      },
+    ],
+    discount: null,
+    tax: null,
+  };
 
   function createWith(quotes: Partial<QuotesService>) {
     TestBed.configureTestingModule({
@@ -27,128 +43,57 @@ describe('QuoteNewComponent', () => {
     return fixture.componentInstance;
   }
 
-  it('starts with a single empty item and a zero subtotal/total', () => {
-    const component = createWith({});
-
-    expect(component.model().items).toHaveLength(1);
-    expect(component.subtotal()).toBe(0);
-    expect(component.total()).toBe(0);
-  });
-
-  it('adds and removes items', () => {
-    const component = createWith({});
-
-    component.addItem();
-    expect(component.model().items).toHaveLength(2);
-
-    component.removeItem(0);
-    expect(component.model().items).toHaveLength(1);
-  });
-
-  it('computes the line and quote totals including discount and tax', () => {
-    const component = createWith({});
-
-    component.model.update((value) => ({
-      ...value,
-      items: [
-        {
-          type: 'PART',
-          description: 'Filtro de aceite',
-          quantity: 2,
-          unitPrice: 10,
-          costPrice: null,
-        },
-      ],
-      discount: 5,
-      tax: 3,
-    }));
-
-    expect(component.lineTotal(component.model().items[0])).toBe(20);
-    expect(component.subtotal()).toBe(20);
-    expect(component.total()).toBe(18);
-  });
-
-  it('does not save while the form is invalid', () => {
-    const create = vi.fn();
-    const component = createWith({ create });
-
-    component.save();
-
-    expect(create).not.toHaveBeenCalled();
-    expect(component.quoteForm().touched()).toBe(true);
-  });
-
-  it('prevents native navigation when the quote form is submitted', () => {
-    const component = createWith({ create: vi.fn() });
+  it('renders the shared quote editor instead of its own form', () => {
+    createWith({});
     fixture.detectChanges();
-    const save = vi.spyOn(component, 'save');
-    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
 
-    (fixture.nativeElement.querySelector('form') as HTMLFormElement).dispatchEvent(submitEvent);
-
-    expect(submitEvent.defaultPrevented).toBe(true);
-    expect(save).toHaveBeenCalledOnce();
+    expect(fixture.debugElement.children.length).toBeGreaterThan(0);
+    expect(fixture.nativeElement.querySelector('app-quote-editor')).not.toBeNull();
   });
 
-  it('saves a valid quote and navigates to the created quote', () => {
+  it('creates the quote and navigates to the created draft', () => {
     const create = vi.fn(() => of(quote));
     const navigate = vi.fn(() => Promise.resolve(true));
     const component = createWith({ create });
     vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
 
-    component.model.update((value) => ({
-      ...value,
-      items: [
-        {
-          type: 'PART',
-          description: 'Filtro de aceite',
-          quantity: 2,
-          unitPrice: 10,
-          costPrice: null,
-        },
-      ],
-    }));
+    component.save(validInput);
 
-    component.save();
-
-    expect(create).toHaveBeenCalledWith(orderId, {
-      items: [
-        {
-          type: 'PART',
-          description: 'Filtro de aceite',
-          quantity: 2,
-          unitPrice: 10,
-          costPrice: null,
-        },
-      ],
-      discount: null,
-      tax: null,
-    });
+    expect(create).toHaveBeenCalledWith(orderId, validInput);
     expect(navigate).toHaveBeenCalledWith(['/service-orders', orderId, 'quotes', quote.id]);
     expect(component.pending()).toBe(false);
   });
 
-  it('shows the server error message when saving fails', () => {
+  it('keeps the editor mounted and shows the server error when saving fails', () => {
     const component = createWith({
       create: () => throwError(() => ({ error: { message: 'No hay stock suficiente.' } })),
     });
 
-    component.model.update((value) => ({
-      ...value,
-      items: [
-        {
-          type: 'PART',
-          description: 'Filtro de aceite',
-          quantity: 1,
-          unitPrice: 10,
-          costPrice: null,
-        },
-      ],
-    }));
-
-    component.save();
+    component.save(validInput);
+    fixture.detectChanges();
 
     expect(component.error()).toBe('No hay stock suficiente.');
     expect(component.pending()).toBe(false);
+    expect(
+      fixture.debugElement.query((node) => node.componentInstance instanceof QuoteEditorComponent),
+    ).not.toBeNull();
+  });
+
+  it('falls back to a generic message when the server sends no detail', () => {
+    const component = createWith({ create: () => throwError(() => ({ status: 500 })) });
+
+    component.save(validInput);
+
+    expect(component.error()).toBe('No pudimos guardar la cotización.');
+  });
+
+  it('returns to the service order when creation is cancelled', () => {
+    const navigate = vi.fn(() => Promise.resolve(true));
+    const component = createWith({ create: vi.fn() });
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockImplementation(navigate);
+
+    component.cancel();
+
+    expect(navigate).toHaveBeenCalledWith(['/service-orders', orderId]);
   });
 });
