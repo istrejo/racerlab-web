@@ -6,13 +6,7 @@ import {
 } from './service-order.interface';
 
 export type QuoteStatus =
-  | 'DRAFT'
-  | 'ACTIVE'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'EXPIRED'
-  | 'CANCELLED'
-  | 'SUPERSEDED';
+  'DRAFT' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED' | 'SUPERSEDED';
 
 export const DEFAULT_QUOTE_CURRENCY = 'EUR';
 

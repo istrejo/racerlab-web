@@ -69,11 +69,13 @@ describe('QuotesService', () => {
     expect(update.request.body).toEqual({ currencyCode: 'USD', discount: 5 });
     update.flush({});
 
-    service.changeStatus('order-1', 'quote-1', {
-      status: 'APPROVED',
-      approvalMethod: 'OTHER',
-      approvalMethodDetail: 'Portal del proveedor',
-    }).subscribe();
+    service
+      .changeStatus('order-1', 'quote-1', {
+        status: 'APPROVED',
+        approvalMethod: 'OTHER',
+        approvalMethodDetail: 'Portal del proveedor',
+      })
+      .subscribe();
     const status = http.expectOne(`${base}/quote-1/status`);
     expect(status.request.method).toBe('PATCH');
     expect(status.request.body).toEqual({
