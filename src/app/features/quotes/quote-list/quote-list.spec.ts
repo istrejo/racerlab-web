@@ -137,4 +137,50 @@ describe('QuoteListComponent', () => {
       limit: 20,
     });
   });
+
+  it('accepts SUPERSEDED as a filterable status', () => {
+    queryParams.next(convertToParamMap({ status: 'SUPERSEDED' }));
+
+    expect(fixture.componentInstance.selectedStatus()).toBe('SUPERSEDED');
+    expect(listForWorkshop).toHaveBeenLastCalledWith({
+      search: '',
+      status: 'SUPERSEDED',
+      page: 1,
+      limit: 20,
+    });
+  });
+
+  it('renders the version label and the amount in the quote currency', () => {
+    listForWorkshop.mockReturnValue(
+      of({
+        items: [
+          {
+            id: 'quote-1',
+            version: 4,
+            currencyCode: 'EUR',
+            status: 'SUPERSEDED' as const,
+            total: 1234.5,
+            itemCount: 2,
+            serviceOrder: { id: 'order-1', code: 'OT-001', status: 'QUOTED' as const },
+            customer: { id: 'customer-1', fullName: 'Ada Lovelace' },
+            vehicle: { id: 'vehicle-1', plate: '1234-ABC', brand: 'Seat', model: 'Ibiza' },
+            createdBy: { userId: 'user-1', displayName: 'Ada' },
+            createdAt: '2026-08-13T00:00:00.000Z',
+          },
+        ],
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+      }),
+    );
+    queryParams.next(convertToParamMap({ search: 'render' }));
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Cotización v4');
+    expect(text).toContain('Reemplazada');
+    expect(text).toMatch(/1[.,]234[.,]5/);
+    expect(text).toContain('€');
+  });
 });

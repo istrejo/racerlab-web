@@ -1,4 +1,5 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,30 +7,17 @@ import { QuotePage, QuoteStatus } from '@core/models/quotes.interface';
 import { QuotesService } from '@core/services/quotes/quotes';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton';
 import { parsePositivePage } from '@shared/utils/route-query';
+import {
+  QUOTE_STATUS_FILTERS,
+  QUOTE_STATUS_LABELS,
+  QUOTE_STATUS_TONES,
+  quoteVersionLabel,
+} from '../quote-policy';
 import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  DRAFT: 'Borrador',
-  ACTIVE: 'Activa',
-  APPROVED: 'Aprobada',
-  REJECTED: 'Rechazada',
-  EXPIRED: 'Vencida',
-  CANCELLED: 'Cancelada',
-  SUPERSEDED: 'Reemplazada',
-};
-
-const STATUS_ORDER: QuoteStatus[] = [
-  'DRAFT',
-  'ACTIVE',
-  'APPROVED',
-  'REJECTED',
-  'EXPIRED',
-  'CANCELLED',
-];
 
 @Component({
   selector: 'app-quote-list',
-  imports: [LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
+  imports: [CurrencyPipe, LoadingSkeletonComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './quote-list.html',
 })
 export default class QuoteListComponent {
@@ -38,14 +26,24 @@ export default class QuoteListComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly statuses = STATUS_ORDER;
-  readonly statusLabels = STATUS_LABELS;
+  readonly statuses = QUOTE_STATUS_FILTERS;
+  readonly statusLabels = QUOTE_STATUS_LABELS;
+  readonly statusTones = QUOTE_STATUS_TONES;
   readonly selectedStatus = signal<QuoteStatus | null>(null);
   readonly search = new FormControl('', { nonNullable: true });
   readonly page = signal<QuotePage | null>(null);
   readonly loading = signal(true);
   readonly refreshing = signal(false);
   readonly error = signal<string | null>(null);
+
+  readonly rows = computed(() =>
+    (this.page()?.items ?? []).map((quote) => ({
+      quote,
+      versionLabel: quoteVersionLabel(quote.version),
+      statusLabel: QUOTE_STATUS_LABELS[quote.status],
+      statusTone: QUOTE_STATUS_TONES[quote.status],
+    })),
+  );
 
   constructor() {
     this.search.valueChanges
@@ -131,6 +129,6 @@ export default class QuoteListComponent {
   }
 
   private parseStatus(value: string | null): QuoteStatus | null {
-    return STATUS_ORDER.includes(value as QuoteStatus) ? (value as QuoteStatus) : null;
+    return QUOTE_STATUS_FILTERS.includes(value as QuoteStatus) ? (value as QuoteStatus) : null;
   }
 }

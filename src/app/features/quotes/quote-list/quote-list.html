@@ -72,46 +72,39 @@
             <p class="py-10 text-center text-slate-500">No hay cotizaciones registradas.</p>
           } @else {
             <ul class="space-y-3" role="list">
-              @for (quote of currentPage.items; track quote.id) {
+              @for (row of rows(); track row.quote.id) {
                 <li class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <a
                     class="flex flex-wrap items-center justify-between gap-3 hover:opacity-80"
-                    [routerLink]="['/service-orders', quote.serviceOrder.id, 'quotes', quote.id]"
+                    [routerLink]="[
+                      '/service-orders',
+                      row.quote.serviceOrder.id,
+                      'quotes',
+                      row.quote.id,
+                    ]"
                   >
                     <div>
                       <p class="font-mono font-bold text-[#F97316]">
-                        {{ quote.serviceOrder.code }}
+                        {{ row.quote.serviceOrder.code }}
+                      </p>
+                      <p class="text-sm font-semibold text-slate-700">{{ row.versionLabel }}</p>
+                      <p class="text-sm text-slate-600">
+                        {{ row.quote.customer.fullName }} · {{ row.quote.vehicle.plate }}
                       </p>
                       <p class="text-sm text-slate-600">
-                        {{ quote.customer.fullName }} · {{ quote.vehicle.plate }}
-                      </p>
-                      <p class="text-sm text-slate-600">
-                        {{ quote.itemCount }} {{ quote.itemCount === 1 ? 'ítem' : 'ítems' }}
+                        {{ row.quote.itemCount }} {{ row.quote.itemCount === 1 ? 'ítem' : 'ítems' }}
                       </p>
                     </div>
                     <div class="text-right">
                       <span
                         class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold"
-                        [class.bg-green-100]="quote.status === 'APPROVED'"
-                        [class.text-green-800]="quote.status === 'APPROVED'"
-                        [class.bg-red-100]="
-                          quote.status === 'REJECTED' || quote.status === 'CANCELLED'
-                        "
-                        [class.text-red-800]="
-                          quote.status === 'REJECTED' || quote.status === 'CANCELLED'
-                        "
-                        [class.bg-slate-100]="
-                          quote.status === 'DRAFT' || quote.status === 'EXPIRED'
-                        "
-                        [class.text-slate-700]="
-                          quote.status === 'DRAFT' || quote.status === 'EXPIRED'
-                        "
-                        [class.bg-blue-100]="quote.status === 'ACTIVE'"
-                        [class.text-blue-800]="quote.status === 'ACTIVE'"
+                        [class]="row.statusTone"
                       >
-                        {{ statusLabels[quote.status] }}
+                        {{ row.statusLabel }}
                       </span>
-                      <p class="mt-1 text-lg font-bold text-slate-900">{{ quote.total }}</p>
+                      <p class="mt-1 text-lg font-bold text-slate-900">
+                        {{ row.quote.total | currency: row.quote.currencyCode }}
+                      </p>
                     </div>
                   </a>
                 </li>

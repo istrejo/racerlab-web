@@ -12,7 +12,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { DEFAULT_QUOTE_CURRENCY, QuoteInput, QuoteItemInput } from '@core/models/quotes.interface';
-import { QUOTE_ITEM_TYPE_LABELS, QUOTE_ITEM_TYPES } from './quote-metadata';
+import { QUOTE_ITEM_TYPE_LABELS, QUOTE_ITEM_TYPES } from '../quote-policy';
 
 type EditorItem = QuoteItemInput & { costPrice: number | null };
 type EditorModel = Omit<QuoteInput, 'items'> & {
