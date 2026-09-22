@@ -33,11 +33,11 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: Lifecycle, Versions, and Order Integration (PR 2)
 
-- [ ] 2.1 RED: Expand detail/list/order specs for every status/permission action, newest-first versions, `Cotización vN`, currency, `OTHER` validation, omitted named-method detail, version navigation, and unchanged state after failures.
-- [ ] 2.2 RED: Add modal tests for initial/restored focus, Escape, pending dismissal lock, retry, and single mutation submission.
-- [ ] 2.3 GREEN: Replace the status dropdown with action-specific `AppModalComponent` flows using computed action state; implement activate/approve/reject/expire/cancel/version and navigate new drafts to edit.
-- [ ] 2.4 GREEN: Update quote list/detail and service-order detail to show shared labels/tones, formatted amounts, versions descending, and initial-versus-version actions.
-- [ ] 2.5 REFACTOR: Remove derived template calls and run Unit 2 focused tests before committing the dependent slice.
+- [x] 2.1 RED: Expand detail/list/order specs for every status/permission action, newest-first versions, `Cotización vN`, currency, `OTHER` validation, omitted named-method detail, version navigation, and unchanged state after failures.
+- [x] 2.2 RED: Add modal tests for initial/restored focus, Escape, pending dismissal lock, retry, and single mutation submission.
+- [x] 2.3 GREEN: Replace the status dropdown with action-specific `AppModalComponent` flows using computed action state; implement activate/approve/reject/expire/cancel/version and navigate new drafts to edit.
+- [x] 2.4 GREEN: Update quote list/detail and service-order detail to show shared labels/tones, formatted amounts, versions descending, and initial-versus-version actions.
+- [x] 2.5 REFACTOR: Remove derived template calls and run Unit 2 focused tests before committing the dependent slice.
 
 ## Phase 3: Verification and Documentation
 

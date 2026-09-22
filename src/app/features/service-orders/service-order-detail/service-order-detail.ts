@@ -1,10 +1,10 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Diagnosis } from '@core/models/diagnoses.interface';
-import { Quote, QuoteStatus } from '@core/models/quotes.interface';
+import { Quote } from '@core/models/quotes.interface';
 import {
   ServiceOrderDetail,
   ServiceOrderStatus,
@@ -22,6 +22,12 @@ import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/lo
 import { AppModalComponent } from '@shared/components/app-modal/app-modal';
 import { catchError, forkJoin, of, Subject, switchMap, tap } from 'rxjs';
 import { TechnicianSelectComponent } from '../technician-select/technician-select';
+import {
+  QUOTE_STATUS_LABELS,
+  QUOTE_STATUS_TONES,
+  quoteVersionLabel,
+  sortByVersionDesc,
+} from '../../quotes/quote-policy';
 
 type DialogMode = 'status' | 'diagnosis' | 'technician' | null;
 
@@ -45,16 +51,6 @@ const FUEL_LABELS: Record<string, string> = {
   FULL: 'Lleno',
 };
 
-const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
-  DRAFT: 'Borrador',
-  ACTIVE: 'Activa',
-  APPROVED: 'Aprobada',
-  REJECTED: 'Rechazada',
-  EXPIRED: 'Vencida',
-  CANCELLED: 'Cancelada',
-  SUPERSEDED: 'Reemplazada',
-};
-
 const PRIORITY_LABELS: Record<string, string> = {
   LOW: 'Baja',
   NORMAL: 'Normal',
@@ -66,6 +62,7 @@ const PRIORITY_LABELS: Record<string, string> = {
   selector: 'app-service-order-detail',
   imports: [
     AppModalComponent,
+    CurrencyPipe,
     DatePipe,
     DecimalPipe,
     LoadingSkeletonComponent,
@@ -116,6 +113,17 @@ export default class ServiceOrderDetailComponent {
   readonly fuelLabels = FUEL_LABELS;
   readonly priorityLabels = PRIORITY_LABELS;
   readonly quoteStatusLabels = QUOTE_STATUS_LABELS;
+  readonly quoteRows = computed(() =>
+    sortByVersionDesc(this.quotes()).map((quote) => ({
+      quote,
+      versionLabel: quoteVersionLabel(quote.version),
+      statusLabel: QUOTE_STATUS_LABELS[quote.status],
+      statusTone: QUOTE_STATUS_TONES[quote.status],
+    })),
+  );
+  readonly canCreateInitialQuote = computed(
+    () => this.permissions.canWriteQuotes() && this.quotes().length === 0,
+  );
 
   readonly statusForm = new FormGroup({
     status: new FormControl<ServiceOrderStatus | null>(null, { validators: Validators.required }),

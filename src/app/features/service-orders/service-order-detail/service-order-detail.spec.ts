@@ -249,4 +249,81 @@ describe('ServiceOrderDetailComponent', () => {
     component.selectTechnician(null);
     expect(component.technicianSaveDisabled()).toBe(false);
   });
+
+  it('presents the order quotes newest version first with labels and currency', () => {
+    const baseQuote = {
+      serviceOrderId: orderId,
+      sourceQuoteId: null,
+      currencyCode: 'EUR',
+      subtotal: 100,
+      discount: null,
+      tax: null,
+      approvalMethod: null,
+      approvalMethodDetail: null,
+      approvedAt: null,
+      rejectedAt: null,
+      createdBy: { userId: 'user-1', displayName: 'Ada' },
+      items: [],
+      createdAt: '2026-08-13T00:00:00.000Z',
+      updatedAt: '2026-08-13T00:00:00.000Z',
+    };
+    const component = createWith({
+      quotes: {
+        list: () =>
+          of([
+            { ...baseQuote, id: 'quote-1', version: 1, status: 'SUPERSEDED' as const, total: 100 },
+            { ...baseQuote, id: 'quote-2', version: 2, status: 'ACTIVE' as const, total: 250 },
+          ]),
+      },
+    });
+    fixture.detectChanges();
+
+    expect(component.quoteRows().map((row) => row.versionLabel)).toEqual([
+      'Cotización v2',
+      'Cotización v1',
+    ]);
+    expect(component.quoteRows()[0].statusLabel).toBe('Activa');
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Cotización v2');
+    expect(text).toContain('€');
+  });
+
+  it('offers the initial quote action while the order has no quote', () => {
+    const component = createWith({});
+
+    expect(component.canCreateInitialQuote()).toBe(true);
+  });
+
+  it('hides the initial quote action once the order has a quote', () => {
+    const component = createWith({
+      quotes: {
+        list: () =>
+          of([
+            {
+              id: 'quote-1',
+              serviceOrderId: orderId,
+              version: 1,
+              sourceQuoteId: null,
+              currencyCode: 'EUR',
+              status: 'ACTIVE' as const,
+              subtotal: 100,
+              discount: null,
+              tax: null,
+              total: 100,
+              approvalMethod: null,
+              approvalMethodDetail: null,
+              approvedAt: null,
+              rejectedAt: null,
+              createdBy: { userId: 'user-1', displayName: 'Ada' },
+              items: [],
+              createdAt: '2026-08-13T00:00:00.000Z',
+              updatedAt: '2026-08-13T00:00:00.000Z',
+            },
+          ]),
+      },
+    });
+
+    expect(component.canCreateInitialQuote()).toBe(false);
+  });
 });
